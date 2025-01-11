@@ -36,13 +36,13 @@ function loadSettings() {
     }
 }
 
-// Unified function to save settings to a file
 function saveSettings() {
-    if (!Array.isArray(appSettings.checklist)) {
-        appSettings.checklist = []; // Ensure checklist is an array
-    }
+    if (!Array.isArray(appSettings.checklist)) appSettings.checklist = [];
+    if (!Array.isArray(appSettings.sessionCountdowns)) appSettings.sessionCountdowns = [];
+
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
 }
+
 
 // IPC Handlers
 
