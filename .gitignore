@@ -6,7 +6,7 @@ logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
+pnpm-debug.log*
 
 # Runtime data
 *.pid
@@ -43,6 +43,7 @@ tmp/
 # Lock files
 package-lock.json
 yarn.lock
+pnpm-lock.yaml
 
 # Coverage directories
 coverage/
@@ -51,7 +52,7 @@ coverage/
 *.stackdump
 *.core
 
-# Electron specific cache
+# Electron-specific cache
 .cache/
 electron-packager/
 electron-builder-output/
@@ -75,3 +76,10 @@ reports/
 
 # Git-specific
 .git/
+
+# Ensure src folder is tracked
+!src/
+!src/**/*.js
+!src/**/*.html
+!src/**/*.css
+!src/**/*.json
