@@ -17,7 +17,24 @@
                 margin: 0;
                 font-size: 2rem;
                 color: #ffffff;
-                /* background-color: #f4f4f4; */
+            }
+
+            .clock-container {
+                text-align: center;
+            }
+
+            #session-countdown-display {
+                margin-top: 10px;
+                font-size: 1.2rem;
+            }
+
+            #session-title {
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            #session-timer {
+                color: #ff6666;
             }
         </style>
     </head>
@@ -25,12 +42,14 @@
         <div class="clock-container">
             <div class="dragable" id="clock"></div>
             <section id="session-countdown-display">
-                <div id="session-title"></div>
+                <div id="session-title">No Active Sessions</div>
                 <div id="session-timer"></div>
             </section>
         </div>
 
         <script>
+            const sessionCountdowns = [];
+
             function updateClock() {
                 const now = new Date();
                 const options = {
@@ -58,7 +77,54 @@
                 }, millisecondsToNextSecond); // Sync with the next second
             }
 
-            syncClock();
+            function displayNextSessionCountdown() {
+                if (sessionCountdowns.length === 0) {
+                    document.getElementById("session-title").textContent = "No Active Sessions";
+                    document.getElementById("session-timer").textContent = "";
+                    return;
+                }
+
+                const nextSession = sessionCountdowns[0];
+                document.getElementById("session-title").textContent = nextSession.title;
+
+                const sessionTime = new Date();
+                const [hours, minutes] = nextSession.time.split(":").map(Number);
+                sessionTime.setHours(hours, minutes, 0, 0);
+
+                function updateTimer() {
+                    const now = new Date();
+                    const remainingTime = Math.max(0, sessionTime - now);
+                    const minutes = Math.floor(remainingTime / 60000);
+                    const seconds = Math.floor((remainingTime % 60000) / 1000);
+
+                    if (remainingTime <= 0) {
+                        triggerAlarm(nextSession.title);
+                        sessionCountdowns.shift(); // Remove the triggered session
+                        displayNextSessionCountdown(); // Display the next session
+                        return;
+                    }
+
+                    document.getElementById("session-timer").textContent = `${minutes}m ${seconds}s remaining`;
+                }
+
+                updateTimer();
+                setInterval(updateTimer, 1000); // Update the timer every second
+            }
+
+            function triggerAlarm(title) {
+                alert(`Time's up for session: ${title}`);
+                // Optional: Play a sound or show a notification here
+            }
+
+            document.addEventListener("DOMContentLoaded", () => {
+                window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
+                    sessionCountdowns.length = 0;
+                    sessionCountdowns.push(...updatedSessions);
+                    displayNextSessionCountdown();
+                });
+
+                syncClock();
+            });
         </script>
     </body>
 </html>
