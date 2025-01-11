@@ -1,0 +1,57 @@
+<!-- ./src/renderer/reminder/reminder.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Reminder</title>
+        <link rel="stylesheet" href="../../styles/styles.css" />
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: rgba(0, 0, 0, 0.05); /* Uniform border */
+            }
+
+            #reminder {
+                border-radius: 1px;
+                height: 100%;
+                width: 100%;
+                box-sizing: border-box; /* Include border in height/width calculation */
+                background-color: rgba(0, 0, 0, 0); /* Fully transparent */
+                padding: 6px; /* Ensure no padding affects layout */
+            }
+            @keyframes pulseColor {
+                0% {
+                    color: rgba(0, 0, 0, 0);
+                }
+                50% {
+                    color: salmon; 
+                }
+                100% {
+                    color: rgba(0, 0, 0, 0); 
+                }
+            }
+
+            #text {
+                font-size: 16px; /* Adjust as needed */
+                font-weight: bold; /* Optional for better visibility */
+                animation: pulseColor 3s infinite; /* 3s for a slow pulse, runs infinitely */
+            }
+        </style>
+    </head>
+    <body>
+        <div id="reminder" class="dragable">
+            <span id="text"></span>
+        </div>
+    </body>
+    <script>
+        window.electronAPI.onUpdateReminderText((newText) => {
+            const textElement = document.getElementById("text");
+            textElement.textContent = newText || "REMINDER";
+        });
+
+        window.electronAPI.sendReminderReady();
+    </script>
+</html>

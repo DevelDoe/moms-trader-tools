@@ -1,0 +1,113 @@
+<!-- ./src/renderer/checklist/checklist.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Checklist</title>
+        <link rel="stylesheet" href="checklist.css" />
+    </head>
+    <body>
+        <div id="container">
+            <ul id="checklist"></ul>
+            <button id="reset-btn">Reset</button>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", async () => {
+                try {
+                    // Load initial checklist state
+                    const checklistItems = await window.electronAPI.loadChecklistState();
+                    renderChecklist(checklistItems);
+
+                    // Listen for checklist updates dynamically
+                    window.electronAPI.onChecklistUpdated((updatedItems) => {
+                        console.log("Checklist updated in checklist window:", updatedItems);
+                        renderChecklist(updatedItems);
+                    });
+
+                    const checklist = document.getElementById("checklist");
+                    const resetButton = document.getElementById("reset-btn");
+
+                    // State definitions
+                    const STATES = [
+                        { class: "state-red", borderColor: "red" },
+                        { class: "state-yellow", borderColor: "yellow" },
+                        { class: "state-green", borderColor: "green" },
+                    ];
+
+                    // Helper function to cycle states
+                    const cycleState = (item) => {
+                        const currentState = STATES.find((state) => item.classList.contains(state.class));
+                        const currentIndex = STATES.indexOf(currentState);
+                        const nextState = STATES[(currentIndex + 1) % STATES.length]; // Cycle to next state
+
+                        item.classList.remove(...STATES.map((state) => state.class)); // Remove all states
+                        item.classList.add(nextState.class); // Add new state
+                        item.style.borderLeftColor = nextState.borderColor; // Update border color
+                    };
+
+                    // Add event listener for checklist items
+                    checklist.addEventListener("click", (e) => {
+                        if (e.target.tagName === "LI") {
+                            const item = e.target;
+
+                            if (item.dataset.type === "optional") {
+                                cycleState(item); // Cycle states for optional items
+                            } else if (item.dataset.type === "critical") {
+                                if (item.classList.toggle("completed")) {
+                                    item.style.borderLeftColor = "green"; // Completed items get green border
+                                } else {
+                                    item.style.borderLeftColor = "rgb(85, 1, 1)"; // Default critical border color
+                                }
+                            }
+                        }
+                    });
+
+                    // Reset button functionality
+                    resetButton.addEventListener("click", () => {
+                        const items = checklist.getElementsByTagName("li");
+                        for (const item of items) {
+                            if (item.dataset.type === "optional") {
+                                item.classList.remove(...STATES.map((state) => state.class)); // Remove all states
+                                item.classList.add("state-yellow"); // Reset to yellow
+                                item.style.borderLeftColor = "rgb(255, 152, 0)"; // Yellow border
+                            } else if (item.dataset.type === "critical") {
+                                item.classList.remove("completed"); // Remove 'completed' class
+                                item.style.borderLeftColor = "rgb(85, 1, 1)"; // Default critical border
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error loading checklist items:", error);
+                }
+            });
+
+            function renderChecklist(items) {
+                const checklistContainer = document.getElementById("checklist");
+                checklistContainer.innerHTML = ""; // Clear existing items
+
+                items.forEach((item) => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = item.text;
+                    listItem.dataset.type = item.type;
+
+                    // Initialize default states based on type
+                    if (item.type === "critical") {
+                        listItem.style.borderLeftColor = item.borderColor || "rgb(85, 1, 1)"; // Red for critical
+                    } else if (item.type === "optional") {
+                        listItem.classList.add("state-yellow"); // Default to yellow for optional
+                        listItem.style.borderLeftColor = item.borderColor || "rgb(255, 152, 0)"; // Yellow border
+                    } else if (item.type === "reminder") {
+                        // Reminders are static and non-interactive
+                        listItem.classList.add("reminder");
+                    }
+
+                    // Apply any additional classes from the item
+                    listItem.classList.add(...(item.classList || []));
+                    checklistContainer.appendChild(listItem);
+                });
+            }
+        </script>
+    </body>
+</html>

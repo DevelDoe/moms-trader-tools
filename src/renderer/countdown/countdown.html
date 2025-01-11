@@ -1,0 +1,139 @@
+<!-- ./src/renderer/countdown/countdown.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Countdown</title>
+        <style>
+            body {
+                margin: 0;
+                background-color: transparent;
+                overflow: hidden;
+                padding: 0;
+            }
+            #countdown {
+                font-size: 24px;
+                color: white;
+                margin: 3px;
+                font-family: sans-serif;
+                -webkit-app-region: drag; /* Makes the window draggable */
+            }
+            .countdown-part {
+                font-weight: bold;
+                display: inline-block; /* Makes the two parts stay next to each other */
+                margin: 0;
+                padding: 0;
+            }
+            span {
+                margin-left: -4px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="countdown">
+            <span id="five-minute-part" class="countdown-part"></span>
+            <span id="one-minute-part" class="countdown-part"></span>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", async () => {
+                console.log("Countdown script loaded");
+
+                let tickSound = null;
+
+                // Initialize the tick sound and handle Electron API integration
+                try {
+                    const tickSoundPath = await window.electronAPI.getTickSoundPath();
+                    tickSound = new Audio(tickSoundPath);
+                    tickSound.volume = 0;
+
+                    // Listen for volume updates from Electron main process
+                    window.electronAPI.onVolumeUpdate((volume) => {
+                        console.log("Volume updated:", volume);
+                        tickSound.volume = volume;
+                    });
+                } catch (error) {
+                    console.error("Error loading tick sound:", error);
+                }
+
+                function startRealTimeCountdown() {
+                    let isLockTickActive = false;
+
+                    function updateDisplay() {
+                        const now = new Date();
+                        const seconds = now.getSeconds();
+                        const minutes = now.getMinutes();
+
+                        const secondsSinceLastFiveMinutes = (minutes % 5) * 60 + seconds;
+                        const totalSecondsFiveMinute = 300 - secondsSinceLastFiveMinutes - 1;
+
+                        const oneMinuteRemaining = 60 - seconds;
+                        const fiveMinuteRemaining = Math.floor(totalSecondsFiveMinute / 60);
+
+                        const tensDigit = Math.floor(oneMinuteRemaining / 10);
+
+                        document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
+                        document.getElementById("one-minute-part").textContent = tensDigit;
+
+                        applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part"));
+                        applyColors(tensDigit, document.getElementById("one-minute-part"));
+
+                        if (oneMinuteRemaining <= 10) {
+                            if (!isLockTickActive) {
+                                isLockTickActive = true;
+                                activateLockTickEffect();
+                            }
+                            playTickSound();
+                        } else if (isLockTickActive) {
+                            isLockTickActive = false;
+                            deactivateLockTickEffect();
+                        }
+                    }
+
+                    setInterval(updateDisplay, 1000);
+                    updateDisplay();
+                }
+
+                function applyColors(remaining, element) {
+                    const colorMap = {
+                        6: "green",
+                        5: "green",
+                        4: "yellow",
+                        3: "red",
+                        2: "yellow",
+                        1: "green",
+                        0: "red",
+                    };
+                    element.style.color = colorMap[remaining] || "white";
+                }
+
+                function playTickSound() {
+                    if (!tickSound) return;
+                    tickSound.currentTime = 0;
+                    tickSound.play().catch((error) => {
+                        console.warn("Tick sound playback failed:", error);
+                    });
+                }
+
+                function activateLockTickEffect() {
+                    document.getElementById("five-minute-part").style.fontWeight = "bold";
+                    document.getElementById("one-minute-part").style.fontWeight = "bold";
+                    document.getElementById("five-minute-part").style.color = "orange";
+                    document.getElementById("one-minute-part").style.color = "orange";
+                }
+
+                function deactivateLockTickEffect() {
+                    document.getElementById("five-minute-part").style.fontWeight = "normal";
+                    document.getElementById("one-minute-part").style.fontWeight = "normal";
+                    document.getElementById("five-minute-part").style.color = "white";
+                    document.getElementById("one-minute-part").style.color = "white";
+                }
+
+                console.log("Countdown started");
+                startRealTimeCountdown();
+            });
+        </script>
+    </body>
+</html>

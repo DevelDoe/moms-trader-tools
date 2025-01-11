@@ -1,0 +1,37 @@
+/* ./styles/styles.css  */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #202020;
+    color: #fff;
+}
+
+.menu {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    background-color: #444;
+}
+
+.menu-item {
+    padding: 5px 15px;
+    background-color: #555;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background-color: #777;
+}
+
+.dragable {
+    -webkit-app-region: drag; /* Makes this area draggable */
+    width: 100%;
+    height: 100%; /* Adjust to cover the window */
+}
+
+.nodrag {
+    -webkit-app-region: no-drag; /* Prevent drag on interactive elements */
+}
