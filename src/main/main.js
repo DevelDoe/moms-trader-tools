@@ -62,11 +62,10 @@ ipcMain.on("update-settings", (event, newSettings) => {
     appSettings = { ...appSettings, ...newSettings };
     saveSettings();
 
-    if (windows.reminder) {
-        windows.reminder.webContents.send("update-reminder-text", newSettings.text);
+    if (windows.clock) {
+        windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
     }
 });
-
 
 // reminder
 
