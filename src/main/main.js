@@ -275,6 +275,3 @@ ipcMain.on("exit-app", () => {
     console.log("Exiting the app...");
     app.quit();
 });
-
-
-test
