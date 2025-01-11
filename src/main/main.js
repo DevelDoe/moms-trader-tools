@@ -22,16 +22,16 @@ function loadSettings() {
         const data = fs.readFileSync(SETTINGS_FILE, "utf-8");
         const settings = JSON.parse(data);
 
-        // Ensure checklist property exists and is an array
-        if (!Array.isArray(settings.checklist)) {
-            settings.checklist = [];
-        }
+        // Ensure all settings properties exist
+        if (!Array.isArray(settings.checklist)) settings.checklist = [];
+        if (!Array.isArray(settings.sessionCountdowns)) settings.sessionCountdowns = [];
 
         return settings;
     } catch {
         return {
             text: "REMINDER", // Default reminder text
             checklist: [], // Initialize with an empty checklist
+            sessionCountdowns: [], // Initialize with no session countdowns
         };
     }
 }
