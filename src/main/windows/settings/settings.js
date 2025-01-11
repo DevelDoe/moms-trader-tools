@@ -1,3 +1,5 @@
+// ./src/main/windows/settings/settings.js
+
 const { BrowserWindow } = require("electron");
 const path = require("path");
 

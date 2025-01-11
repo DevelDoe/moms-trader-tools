@@ -6,6 +6,8 @@ const { createSettingsWindow } = require("./windows/settings/settings");
 const { createTaskbarWindow } = require("./windows/taskbar/taskbar");
 const { createChecklistWindow } = require("./windows/checklist/checklist");
 const { createCountdownWindow } = require("./windows/countdown/countdown");
+const { createClockWindow } = require("./windows/clock/clock");
+
 const path = require("path");
 const fs = require("fs");
 
@@ -20,16 +22,16 @@ function loadSettings() {
         const data = fs.readFileSync(SETTINGS_FILE, "utf-8");
         const settings = JSON.parse(data);
 
-        // Ensure checklist property exists and is an array
-        if (!Array.isArray(settings.checklist)) {
-            settings.checklist = [];
-        }
+        // Ensure all settings properties exist
+        if (!Array.isArray(settings.checklist)) settings.checklist = [];
+        if (!Array.isArray(settings.sessionCountdowns)) settings.sessionCountdowns = [];
 
         return settings;
     } catch {
         return {
             text: "REMINDER", // Default reminder text
             checklist: [], // Initialize with an empty checklist
+            sessionCountdowns: [], // Initialize with no session countdowns
         };
     }
 }
@@ -226,6 +228,15 @@ ipcMain.on("volume-change", (event, volume) => {
     });
 });
 
+// Clock 
+
+ipcMain.on("toggle-clock", () => {
+    const clockWindow = windows.clock;
+    if (clockWindow) {
+        clockWindow.isVisible() ? clockWindow.hide() : clockWindow.show();
+    }
+});
+
 
 // App Ready Event
 app.on("ready", () => {
@@ -235,6 +246,7 @@ app.on("ready", () => {
         () => ipcMain.emit("toggle-settings"),
         () => ipcMain.emit("toggle-checklist"),
         () => ipcMain.emit("toggle-countdown"),
+        () => ipcMain.emit("toggle-clock")
     );
 
     // Ensure the taskbar window is created before passing
@@ -248,6 +260,8 @@ app.on("ready", () => {
     windows.settings = createSettingsWindow(windows.taskbar);
     windows.checklist = createChecklistWindow(windows.taskbar);
     windows.countdown = createCountdownWindow(windows.taskbar);
+    windows.clock = createClockWindow(windows.taskbar);
+
 
     windows.reminder.webContents.once("dom-ready", () => {
         windows.reminder.webContents.send("update-reminder-text", appSettings.text);

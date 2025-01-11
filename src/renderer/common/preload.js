@@ -78,6 +78,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
         });
     },
 
+    // Clock 
+    toggleClock: () => {
+        console.log("Preload: toggleClock called");
+        ipcRenderer.send("toggle-clock");
+    },
+
     // Exit the application
     exitApp: () => ipcRenderer.send("exit-app"),
 });

@@ -1,3 +1,5 @@
+// ./src/main/windows/reminder/reminder.js
+
 const { BrowserWindow } = require("electron");
 const path = require("path");
 

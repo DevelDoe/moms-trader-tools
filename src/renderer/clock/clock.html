@@ -1,0 +1,64 @@
+<!-- ./src/renderer/clock/clock.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Clock</title>
+        <link rel="stylesheet" href="../../styles/styles.css" />
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                font-size: 2rem;
+                color: #ffffff;
+                /* background-color: #f4f4f4; */
+            }
+        </style>
+    </head>
+    <body>
+        <div class="clock-container">
+            <div class="dragable" id="clock"></div>
+            <section id="alarm">
+                <div class="dragable" id="title"></div>
+                <div class="dragable" id="countdown"></div>
+            </section>
+        </div>
+
+        <script>
+            function updateClock() {
+                const now = new Date();
+                const options = {
+                    timeZone: "America/New_York",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false, // Use 24-hour format
+                };
+
+                const formatter = new Intl.DateTimeFormat("en-US", options);
+                const formattedTime = formatter.format(now);
+
+                document.getElementById("clock").textContent = formattedTime;
+            }
+
+            function syncClock() {
+                // Align the first update to the next full second
+                const now = new Date();
+                const millisecondsToNextSecond = 1000 - now.getMilliseconds();
+
+                setTimeout(() => {
+                    updateClock();
+                    setInterval(updateClock, 1000); // Update the clock every second
+                }, millisecondsToNextSecond); // Sync with the next second
+            }
+
+            syncClock();
+        </script>
+    </body>
+</html>

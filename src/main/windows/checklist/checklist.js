@@ -1,3 +1,5 @@
+// ./src/main/windows/checklist/checklist.js
+
 const { BrowserWindow } = require("electron");
 const path = require("path");
 

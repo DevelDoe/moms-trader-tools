@@ -1,3 +1,5 @@
+// ./src/main/windows/countdown/countdown.js
+
 const { BrowserWindow } = require("electron");
 const path = require("path");
 
