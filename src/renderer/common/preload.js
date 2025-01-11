@@ -84,6 +84,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.send("toggle-clock");
     },
 
+    onUpdateSessionCountdowns: (callback) => {
+        ipcRenderer.on("update-session-countdowns", (event, updatedSessions) => {
+            callback(updatedSessions);
+        });
+    },
+
     // Exit the application
     exitApp: () => ipcRenderer.send("exit-app"),
 });
