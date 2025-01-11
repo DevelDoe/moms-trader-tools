@@ -40,6 +40,3 @@ function createChecklistWindow(taskbarWindow) {
 }
 
 module.exports = { createChecklistWindow };
-
-
-test
