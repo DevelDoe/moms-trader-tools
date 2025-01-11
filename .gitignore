@@ -51,10 +51,6 @@ coverage/
 *.stackdump
 *.core
 
-# Compiled JavaScript files
-src/**/*.js.map
-src/**/*.js
-
 # Electron specific cache
 .cache/
 electron-packager/
