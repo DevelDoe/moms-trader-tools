@@ -85,30 +85,55 @@
                 }
 
                 const nextSession = sessionCountdowns[0];
+                const countdownDuration = nextSession.countdown * 60 * 1000; // Convert minutes to milliseconds
                 document.getElementById("session-title").textContent = nextSession.title;
 
+                // Trigger alarm and countdown at the specified session time
+                const now = new Date();
                 const sessionTime = new Date();
                 const [hours, minutes] = nextSession.time.split(":").map(Number);
                 sessionTime.setHours(hours, minutes, 0, 0);
 
-                function updateTimer() {
-                    const now = new Date();
-                    const remainingTime = Math.max(0, sessionTime - now);
+                const remainingTime = sessionTime - now;
+
+                if (remainingTime > 0) {
+                    // Display the countdown to the session time
+                    const interval = setInterval(() => {
+                        const currentTime = new Date();
+                        const timeLeft = Math.max(0, sessionTime - currentTime);
+                        const minutes = Math.floor(timeLeft / 60000);
+                        const seconds = Math.floor((timeLeft % 60000) / 1000);
+
+                        document.getElementById("session-timer").textContent = `${minutes}m ${seconds}s remaining`;
+
+                        if (timeLeft <= 0) {
+                            clearInterval(interval); // Stop the session timer
+                            triggerAlarm(nextSession.title, countdownDuration);
+                        }
+                    }, 1000);
+                } else {
+                    // Session time already passed; trigger immediately
+                    triggerAlarm(nextSession.title, countdownDuration);
+                }
+            }
+
+            function triggerAlarm(title, countdownDuration) {
+                alert(`Alarm triggered for session: ${title}`);
+                console.log(`Countdown started for ${countdownDuration / 60000} minutes.`);
+
+                let remainingTime = countdownDuration;
+                const countdownInterval = setInterval(() => {
+                    remainingTime -= 1000; // Reduce by 1 second
                     const minutes = Math.floor(remainingTime / 60000);
                     const seconds = Math.floor((remainingTime % 60000) / 1000);
 
                     if (remainingTime <= 0) {
-                        triggerAlarm(nextSession.title);
-                        sessionCountdowns.shift(); // Remove the triggered session
-                        displayNextSessionCountdown(); // Display the next session
-                        return;
+                        clearInterval(countdownInterval); // Stop countdown
+                        document.getElementById("session-timer").textContent = "Countdown complete";
+                    } else {
+                        document.getElementById("session-timer").textContent = `${minutes}m ${seconds}s remaining`;
                     }
-
-                    document.getElementById("session-timer").textContent = `${minutes}m ${seconds}s remaining`;
-                }
-
-                updateTimer();
-                setInterval(updateTimer, 1000); // Update the timer every second
+                }, 1000);
             }
 
             function triggerAlarm(title) {
