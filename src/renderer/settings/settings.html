@@ -24,7 +24,7 @@
             <section id="reminder">
                 <h2>Reminder</h2>
                 <label for="reminder-text">Reminder Text:</label>
-                <textarea rows="4" cols="40" id="reminder-text"></textarea><br>
+                <textarea rows="4" cols="40" id="reminder-text"></textarea><br />
                 <button onclick="saveSettings()">Save</button>
             </section>
 
@@ -69,7 +69,7 @@
                 <ul id="session-list"></ul>
             </section>
 
-            <br>
+            <br />
             <button onclick="window.electronAPI.toggleSettings()">Close</button>
         </div>
     </body>
@@ -109,21 +109,44 @@
         // Render checklist items
         function renderChecklist(items) {
             const checklistContainer = document.getElementById("checklist-items");
-            checklistContainer.innerHTML = ""; // Clear existing items
+            checklistContainer.innerHTML = ""; // Clear previous items
             items.forEach((item, index) => {
                 const listItem = document.createElement("li");
                 listItem.textContent = `${item.text} (${item.type})`;
 
                 const removeButton = document.createElement("button");
                 removeButton.textContent = "Remove";
-                removeButton.addEventListener("click", () => {
-                    window.electronAPI.removeChecklistItem(index);
+                removeButton.addEventListener("click", async () => {
+                    try {
+                        await window.electronAPI.removeChecklistItem(index);
+                    } catch (error) {
+                        console.error("Error removing checklist item:", error);
+                        alert("Failed to remove checklist item.");
+                    }
                 });
 
                 listItem.appendChild(removeButton);
                 checklistContainer.appendChild(listItem);
             });
         }
+
+        document.getElementById("add-item-btn").addEventListener("click", async () => {
+            const itemText = document.getElementById("new-item-text").value.trim();
+            const itemType = document.getElementById("new-item-type").value;
+
+            if (itemText) {
+                const newItem = { text: itemText, type: itemType };
+                try {
+                    await window.electronAPI.addChecklistItem(newItem); // Save to backend
+                    document.getElementById("new-item-text").value = ""; // Clear input
+                } catch (error) {
+                    console.error("Error adding checklist item:", error);
+                    alert("Failed to add checklist item. Please try again.");
+                }
+            } else {
+                alert("Please enter the item text.");
+            }
+        });
 
         // Render session countdowns
         function renderSessionCountdowns(sessionCountdowns) {
