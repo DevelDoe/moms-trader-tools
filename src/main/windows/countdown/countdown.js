@@ -5,8 +5,8 @@ const path = require("path");
 
 function createCountdownWindow(taskbarWindow) {
     const countdownWindow = new BrowserWindow({
-        width: 15,
-        height: 55,
+        width: 20,
+        height: 110,
         transparent: true,
         frame: false,
         resizable: false,
@@ -31,8 +31,8 @@ function createCountdownWindow(taskbarWindow) {
         countdownWindow.setBounds({
             x: countdownX,
             y: countdownY,
-            width: 15,
-            height: 55,
+            width: 40,
+            height: 110,
         });
     } else {
         console.warn("Taskbar window is undefined or does not support getBounds. Positioning skipped.");
