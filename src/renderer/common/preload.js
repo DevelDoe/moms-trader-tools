@@ -7,6 +7,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getSettings: () => ipcRenderer.invoke("get-settings"),
     updateSettings: (settings) => ipcRenderer.send("update-settings", settings),
 
+    onSettingsUpdated: (callback) => {
+        ipcRenderer.on("settings-updated", (event, updatedSettings) => {
+            console.log("Settings updated:", updatedSettings);
+            callback(updatedSettings);
+        });
+    },
+
     // Toggling windows
     toggleSettings: () => {
         console.log("Preload: toggleSettings called");
@@ -85,11 +92,29 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
 
     onUpdateSessionCountdowns: (callback) => {
+        ipcRenderer.removeAllListeners("update-session-countdowns");
         ipcRenderer.on("update-session-countdowns", (event, updatedSessions) => {
+            console.log("Preload: Received updated session countdowns:", updatedSessions);
+    
+            // Update the sessionCountdowns array directly in the renderer
             callback(updatedSessions);
+    
+            // Notify the renderer to refresh the session display
+            if (window.displayNextSessionCountdown) {
+                window.displayNextSessionCountdown(); // Ensure this function is globally accessible
+            }
         });
     },
 
+    updateSettings: (settings) => ipcRenderer.send("update-settings", settings),
+
     // Exit the application
     exitApp: () => ipcRenderer.send("exit-app"),
+    restartApp: () => ipcRenderer.send('restart-app'),
+
+    // Resize window to fit content
+    resizeWindowToContent: (width, height) => {
+        console.log("Preload: Sending resize request to main process with dimensions:", width, height);
+        ipcRenderer.send("resize-window-to-content", { width, height });
+    },
 });

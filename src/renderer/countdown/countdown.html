@@ -6,28 +6,41 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Countdown</title>
+        <link rel="stylesheet" href="../../styles/styles.css" />
         <style>
             body {
                 margin: 0;
                 background-color: transparent;
                 overflow: hidden;
                 padding: 0;
+                color: transparent !important;
             }
             #countdown {
                 font-size: 32px;
-                color: white;
                 margin: 3px;
-                font-family: sans-serif;
                 -webkit-app-region: drag; /* Makes the window draggable */
+                color: transparent !important;
             }
             .countdown-part {
-                font-weight: bold;
                 display: inline-block; /* Makes the two parts stay next to each other */
                 margin: 0;
                 padding: 0;
             }
             span {
                 margin-left: -4px;
+            }
+            @keyframes blink {
+                0%,
+                100% {
+                    opacity: 0;
+                }
+                60% {
+                    opacity: 1;
+                }
+            }
+
+            .blinking {
+                animation: blink 1s infinite;
             }
         </style>
     </head>
@@ -98,15 +111,14 @@
 
                 function applyColors(remaining, element) {
                     const colorMap = {
-                        6: "green",
                         5: "green",
                         4: "green",
-                        3: "green",
-                        2: "red",
-                        1: "green",
+                        3: "yellow",
+                        2: "yellow",
+                        1: "red",
                         0: "red",
                     };
-                    element.style.color = colorMap[remaining] || "white";
+                    element.style.color = colorMap[remaining] || "transparent";
                 }
 
                 function playTickSound() {
@@ -120,15 +132,17 @@
                 function activateLockTickEffect() {
                     document.getElementById("five-minute-part").style.fontWeight = "bold";
                     document.getElementById("one-minute-part").style.fontWeight = "bold";
-                    document.getElementById("five-minute-part").style.color = "orange";
-                    document.getElementById("one-minute-part").style.color = "orange";
+
+                    // Add blinking effect to the one-minute part
+                    document.getElementById("one-minute-part").classList.add("blinking");
                 }
 
                 function deactivateLockTickEffect() {
                     document.getElementById("five-minute-part").style.fontWeight = "normal";
                     document.getElementById("one-minute-part").style.fontWeight = "normal";
-                    document.getElementById("five-minute-part").style.color = "white";
-                    document.getElementById("one-minute-part").style.color = "white";
+
+                    // Remove blinking effect from the one-minute part
+                    document.getElementById("one-minute-part").classList.remove("blinking");
                 }
 
                 console.log("Countdown started");

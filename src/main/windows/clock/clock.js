@@ -5,8 +5,8 @@ const path = require("path");
 
 function createClockWindow(taskbarWindow) {
     const clockWindow = new BrowserWindow({
-        width: 200,
-        height: 37,
+        width: 320,
+        height: 39,
         show: false,
         frame: false,
         transparent: true,
@@ -23,6 +23,7 @@ function createClockWindow(taskbarWindow) {
     clockWindow.loadFile(path.join(__dirname, "../../../renderer/clock/clock.html"));
 
     // clockWindow.webContents.openDevTools({ mode: "detach" }); // Opens DevTools in a separate window
+    // clockWindow.webContents.openDevTools(); // Opens DevTools in a separate window
 
 
     // Dynamically position the clock window relative to the taskbar
@@ -34,8 +35,8 @@ function createClockWindow(taskbarWindow) {
         clockWindow.setBounds({
             x: clockX,
             y: clockY,
-            width: 200,
-            height: 37,
+            width: 320,
+            height: 39,
         });
     }
 

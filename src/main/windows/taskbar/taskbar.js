@@ -5,10 +5,11 @@ const path = require("path");
 
 function createTaskbarWindow(toggleReminder, toggleSettings) {
     const taskbarWindow = new BrowserWindow({
-        width: 600,
-        height: 48,
+        width: 610,
+        height: 58,
         frame: false,
         alwaysOnTop: true,
+        transparent: true,
         webPreferences: {
             preload: path.join(__dirname, "../../../renderer/common/preload.js"),
             contextIsolation: true, // Required for contextBridge

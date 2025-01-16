@@ -1,5 +1,3 @@
-<!-- ./src/renderer/clock/clock.html -->
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -19,36 +17,39 @@
                 color: #ffffff;
             }
 
-            .clock-container {
-                text-align: center;
+            #clock {
+                margin: 0 auto;
+                padding: 0;
+                margin-bottom: -15px;
+                font-size: 12px;
+                color: red;
             }
 
             #session-countdown-display {
                 margin-top: 10px;
-                font-size: 1.2rem;
+                font-size: 24px;
+                display: inline-block;
             }
 
             #session-title {
                 font-weight: bold;
-                margin-bottom: 5px;
+                text-transform: uppercase;
+                float: left;
             }
 
             #session-timer {
-                color: #ff6666;
+                /* color: #ff6666; */
             }
         </style>
     </head>
     <body>
-        <div class="clock-container">
-            <div class="dragable" id="clock"></div>
-            <section id="session-countdown-display">
-                <div id="session-title">No Active Sessions</div>
-                <div id="session-timer"></div>
-            </section>
+        <div class="clock-container dragable">
+            <div id="clock"></div>
+            <section id="session-countdown-display"><span id="session-title">No Active Sessions</span>:&nbsp;<span id="session-timer"></span></section>
         </div>
-
         <script>
             const sessionCountdowns = [];
+            let activeInterval = null;
 
             function updateClock() {
                 const now = new Date();
@@ -57,97 +58,133 @@
                     hour: "2-digit",
                     minute: "2-digit",
                     second: "2-digit",
-                    hour12: false, // Use 24-hour format
+                    hour12: false,
                 };
-
                 const formatter = new Intl.DateTimeFormat("en-US", options);
-                const formattedTime = formatter.format(now);
-
-                document.getElementById("clock").textContent = formattedTime;
+                document.getElementById("clock").textContent = formatter.format(now);
             }
 
             function syncClock() {
-                // Align the first update to the next full second
                 const now = new Date();
                 const millisecondsToNextSecond = 1000 - now.getMilliseconds();
 
                 setTimeout(() => {
                     updateClock();
-                    setInterval(updateClock, 1000); // Update the clock every second
-                }, millisecondsToNextSecond); // Sync with the next second
+                    setInterval(updateClock, 1000);
+                }, millisecondsToNextSecond);
             }
 
             function displayNextSessionCountdown() {
-                if (sessionCountdowns.length === 0) {
-                    document.getElementById("session-title").textContent = "No Active Sessions";
-                    document.getElementById("session-timer").textContent = "";
-                    return;
-                }
+    // Clear the previous interval if it exists
+    if (activeInterval) {
+        clearInterval(activeInterval);
+        activeInterval = null;
+    }
 
-                const nextSession = sessionCountdowns[0];
-                const countdownDuration = nextSession.countdown * 60 * 1000; // Convert minutes to milliseconds
-                document.getElementById("session-title").textContent = nextSession.title;
+    // Fetch the latest sessionCountdowns and current time
+    const now = new Date(
+        new Intl.DateTimeFormat("en-US", {
+            timeZone: "America/New_York",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+        }).format(new Date())
+    );
 
-                // Trigger alarm and countdown at the specified session time
-                const now = new Date();
-                const sessionTime = new Date();
-                const [hours, minutes] = nextSession.time.split(":").map(Number);
-                sessionTime.setHours(hours, minutes, 0, 0);
+    console.log("Current Time (NY):", now);
+    console.log("Active SessionCountdowns:", sessionCountdowns);
 
-                const remainingTime = sessionTime - now;
+    // Determine the active session
+    const activeSession = sessionCountdowns
+        .map((session) => {
+            const [hours, minutes] = session.time.split(":").map(Number);
 
-                if (remainingTime > 0) {
-                    // Display the countdown to the session time
-                    const interval = setInterval(() => {
-                        const currentTime = new Date();
-                        const timeLeft = Math.max(0, sessionTime - currentTime);
-                        const minutes = Math.floor(timeLeft / 60000);
-                        const seconds = Math.floor((timeLeft % 60000) / 1000);
+            // Create session start and end times
+            const sessionStartTime = new Date(now);
+            sessionStartTime.setHours(hours, minutes, 0, 0);
 
-                        document.getElementById("session-timer").textContent = `${minutes}m ${seconds}s remaining`;
+            const sessionEndTime = new Date(sessionStartTime.getTime() + session.countdown * 60 * 1000);
 
-                        if (timeLeft <= 0) {
-                            clearInterval(interval); // Stop the session timer
-                            triggerAlarm(nextSession.title, countdownDuration);
-                        }
-                    }, 1000);
-                } else {
-                    // Session time already passed; trigger immediately
-                    triggerAlarm(nextSession.title, countdownDuration);
-                }
-            }
+            return { session, sessionStartTime, sessionEndTime };
+        })
+        .filter(({ sessionStartTime, sessionEndTime }) => sessionStartTime <= now && now <= sessionEndTime)
+        .sort((a, b) => b.sessionStartTime - a.sessionStartTime)[0];
 
-            function triggerAlarm(title, countdownDuration) {
-                alert(`Alarm triggered for session: ${title}`);
-                console.log(`Countdown started for ${countdownDuration / 60000} minutes.`);
+    if (!activeSession) {
+        // No active session
+        document.getElementById("session-title").textContent = "No Active Sessions";
+        document.getElementById("session-timer").textContent = "";
+        return;
+    }
 
-                let remainingTime = countdownDuration;
-                const countdownInterval = setInterval(() => {
-                    remainingTime -= 1000; // Reduce by 1 second
-                    const minutes = Math.floor(remainingTime / 60000);
-                    const seconds = Math.floor((remainingTime % 60000) / 1000);
+    const { session, sessionEndTime } = activeSession;
 
-                    if (remainingTime <= 0) {
-                        clearInterval(countdownInterval); // Stop countdown
-                        document.getElementById("session-timer").textContent = "Countdown complete";
-                    } else {
-                        document.getElementById("session-timer").textContent = `${minutes}m ${seconds}s remaining`;
-                    }
-                }, 1000);
-            }
+    // Display the active session
+    document.getElementById("session-title").textContent = session.title;
 
-            function triggerAlarm(title) {
-                alert(`Time's up for session: ${title}`);
-                // Optional: Play a sound or show a notification here
-            }
+    // Set a new interval for the active session
+    activeInterval = setInterval(() => {
+    const now = new Date(
+        new Intl.DateTimeFormat("en-US", {
+            timeZone: "America/New_York",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+        }).format(new Date())
+    );
+
+    const timeLeft = Math.max(0, sessionEndTime - now);
+    const remainingHours = Math.floor(timeLeft / 3600000);
+    const remainingMinutes = Math.floor((timeLeft % 3600000) / 60000);
+    const remainingSeconds = Math.floor((timeLeft % 60000) / 1000);
+
+    if (timeLeft <= 0) {
+        // Session has ended, clear the interval and check for the next session
+        clearInterval(activeInterval);
+        activeInterval = null;
+        displayNextSessionCountdown(); // Recursively check for the next session
+    } else {
+        // Dynamically build the display string
+        const timeString = [
+            remainingHours > 0 ? `${remainingHours}h` : "",
+            remainingMinutes > 0 ? `${remainingMinutes}m` : "",
+            remainingSeconds > 0 ? `${remainingSeconds}s` : "",
+        ]
+            .filter(Boolean) // Remove empty parts
+            .join(" "); // Join the remaining parts with a space
+
+        // Update the session timer
+        document.getElementById("session-timer").textContent = timeString;
+    }
+}, 1000);
+
+}
+
 
             document.addEventListener("DOMContentLoaded", () => {
+                // Listen for session countdown updates
                 window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
+                    console.log("Renderer received updated session countdowns:", updatedSessions);
+
+                    // Clear and replace sessionCountdowns
                     sessionCountdowns.length = 0;
                     sessionCountdowns.push(...updatedSessions);
+
+                    console.log("Updated sessionCountdowns array in listener:", sessionCountdowns);
+
+                    // Refresh the display
                     displayNextSessionCountdown();
                 });
 
+                // Sync the clock when the page loads
                 syncClock();
             });
         </script>

@@ -8,24 +8,6 @@ body {
     color: #fff;
 }
 
-.menu {
-    display: flex;
-    justify-content: space-around;
-    padding: 10px;
-    background-color: #444;
-}
-
-.menu-item {
-    padding: 5px 15px;
-    background-color: #555;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.menu-item:hover {
-    background-color: #777;
-}
-
 .dragable {
     -webkit-app-region: drag; /* Makes this area draggable */
     width: 100%;

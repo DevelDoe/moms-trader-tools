@@ -5,18 +5,18 @@ const path = require("path");
 
 function createChecklistWindow(taskbarWindow) {
     const checklistWindow = new BrowserWindow({
-        width: 70,
-        height: 260,
+        width: 80, // Initial size
+        height: 350, // Initial size
         show: false,
         frame: false,
         transparent: true,
         alwaysOnTop: true,
-        resizable: false,
+        resizable: true,
         webPreferences: {
             preload: path.join(__dirname, "../../../renderer/common/preload.js"),
-            contextIsolation: true, // Required for contextBridge
-            enableRemoteModule: false, // Keep this disabled unless necessary
-            nodeIntegration: false, // Should be false for security
+            contextIsolation: true,
+            enableRemoteModule: false,
+            nodeIntegration: false,
         },
     });
 
@@ -25,20 +25,30 @@ function createChecklistWindow(taskbarWindow) {
     // Dynamically position the checklist window relative to the taskbar
     if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {
         const taskbarBounds = taskbarWindow.getBounds();
-        const checklistX = taskbarBounds.x; // Align horizontally with the taskbar
-        const checklistY = taskbarBounds.y + taskbarBounds.height + 10; // Position below the taskbar
+        const checklistX = taskbarBounds.x;
+        const checklistY = taskbarBounds.y + taskbarBounds.height + 10;
 
         checklistWindow.setBounds({
             x: checklistX,
             y: checklistY,
-            width: 70,
-            height: 260,
+            width: 80,
+            height: 350,
         });
     } else {
         console.warn("Taskbar window is undefined or does not support getBounds. Positioning skipped.");
     }
 
+    // Listen for resize requests from the renderer
+    const { ipcMain } = require("electron");
+    ipcMain.on("resize-checklist-window", (event, { width, height }) => {
+        checklistWindow.setBounds({
+            x: checklistWindow.getBounds().x,
+            y: checklistWindow.getBounds().y,
+            width: Math.max(width, 80), // Minimum width
+            height: Math.max(height, 50), // Minimum height
+        });
+    });
+
     return checklistWindow;
 }
-
 module.exports = { createChecklistWindow };

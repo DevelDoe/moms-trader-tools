@@ -1,7 +1,7 @@
 <!-- ./src/renderer/settings/settings.html -->
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-G">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,7 +13,8 @@
                 max-width: 400px;
                 margin: 0 auto;
                 color: #fff;
-                background-color: black;
+                background-color: rgba(0, 0, 0, 1);
+                /* border: 1px solid gray; */
             }
         </style>
     </head>
@@ -53,6 +54,8 @@
 
             <section id="session-countdowns">
                 <h2>Session Countdowns</h2>
+                <p>Note: New alarms will require an app restart to take effect.</p>
+                <button id="restart-app-button">Restart App</button>
                 <div>
                     <label for="session-time">Session Time:</label>
                     <input type="time" id="session-time" />
@@ -62,8 +65,84 @@
                     <input type="text" id="session-title" placeholder="Countdown Title" />
                 </div>
                 <div>
-                    <label for="session-countdown">Countdown (minutes):</label>
-                    <input type="number" id="session-countdown" min="1" placeholder="Countdown" />
+                    <label for="session-countdown">Countdown:</label>
+                    <select id="countdown-hours">
+                        <option value="0">0 Hours</option>
+                        <option value="1">1 Hour</option>
+                        <option value="2">2 Hours</option>
+                        <option value="3">3 Hours</option>
+                        <option value="4">4 Hours</option>
+                        <option value="5">5 Hours</option>
+                        <option value="6">6 Hours</option>
+                        <option value="7">7 Hours</option>
+                        <option value="8">8 Hours</option>
+                        <option value="9">9 Hours</option>
+                        <option value="10">10 Hours</option>
+                        <option value="11">11 Hours</option>
+                        <option value="12">12 Hours</option>
+                    </select>
+                    <select id="countdown-minutes">
+                        <option value="0">0 Minutes</option>
+                        <option value="1">1 Minute</option>
+                        <option value="2">2 Minutes</option>
+                        <option value="3">3 Minutes</option>
+                        <option value="4">4 Minutes</option>
+                        <option value="5">5 Minutes</option>
+                        <option value="6">6 Minutes</option>
+                        <option value="7">7 Minutes</option>
+                        <option value="8">8 Minutes</option>
+                        <option value="9">9 Minutes</option>
+                        <option value="10">10 Minutes</option>
+                        <option value="11">11 Minutes</option>
+                        <option value="12">12 Minutes</option>
+                        <option value="13">13 Minutes</option>
+                        <option value="14">14 Minutes</option>
+                        <option value="15">15 Minutes</option>
+                        <option value="16">16 Minutes</option>
+                        <option value="17">17 Minutes</option>
+                        <option value="18">18 Minutes</option>
+                        <option value="19">19 Minutes</option>
+                        <option value="20">20 Minutes</option>
+                        <option value="21">21 Minutes</option>
+                        <option value="22">22 Minutes</option>
+                        <option value="23">23 Minutes</option>
+                        <option value="24">24 Minutes</option>
+                        <option value="25">25 Minutes</option>
+                        <option value="26">26 Minutes</option>
+                        <option value="27">27 Minutes</option>
+                        <option value="28">28 Minutes</option>
+                        <option value="29">29 Minutes</option>
+                        <option value="30">30 Minutes</option>
+                        <option value="31">31 Minutes</option>
+                        <option value="32">32 Minutes</option>
+                        <option value="33">33 Minutes</option>
+                        <option value="34">34 Minutes</option>
+                        <option value="35">35 Minutes</option>
+                        <option value="36">36 Minutes</option>
+                        <option value="37">37 Minutes</option>
+                        <option value="38">38 Minutes</option>
+                        <option value="39">39 Minutes</option>
+                        <option value="40">40 Minutes</option>
+                        <option value="41">41 Minutes</option>
+                        <option value="42">42 Minutes</option>
+                        <option value="43">43 Minutes</option>
+                        <option value="44">44 Minutes</option>
+                        <option value="45">45 Minutes</option>
+                        <option value="46">46 Minutes</option>
+                        <option value="47">47 Minutes</option>
+                        <option value="48">48 Minutes</option>
+                        <option value="49">49 Minutes</option>
+                        <option value="50">50 Minutes</option>
+                        <option value="51">51 Minutes</option>
+                        <option value="52">52 Minutes</option>
+                        <option value="53">53 Minutes</option>
+                        <option value="54">54 Minutes</option>
+                        <option value="55">55 Minutes</option>
+                        <option value="56">56 Minutes</option>
+                        <option value="57">57 Minutes</option>
+                        <option value="58">58 Minutes</option>
+                        <option value="59">59 Minutes</option>
+                    </select>
                 </div>
                 <button id="add-session-btn">Add Session Countdown</button>
                 <ul id="session-list"></ul>
@@ -130,6 +209,11 @@
             });
         }
 
+        document.getElementById("reset-legacy-checklist-btn").addEventListener("click", () => {
+            console.log("Reset to legacy checklist button clicked");
+            window.electronAPI.resetToLegacyChecklist();
+        });
+
         document.getElementById("add-item-btn").addEventListener("click", async () => {
             const itemText = document.getElementById("new-item-text").value.trim();
             const itemType = document.getElementById("new-item-type").value;
@@ -176,21 +260,27 @@
         document.getElementById("add-session-btn").addEventListener("click", () => {
             const sessionTime = document.getElementById("session-time").value;
             const sessionTitle = document.getElementById("session-title").value.trim();
-            const sessionCountdown = parseInt(document.getElementById("session-countdown").value, 10);
+            const countdownHours = parseInt(document.getElementById("countdown-hours").value, 10);
+            const countdownMinutes = parseInt(document.getElementById("countdown-minutes").value, 10);
 
-            if (sessionTime && sessionTitle && sessionCountdown > 0) {
-                const newSession = { time: sessionTime, title: sessionTitle, countdown: sessionCountdown };
-                const sessionCountdowns = JSON.parse(localStorage.getItem("sessionCountdowns") || "[]");
+            const totalCountdownMinutes = countdownHours * 60 + countdownMinutes;
 
-                sessionCountdowns.push(newSession);
-                localStorage.setItem("sessionCountdowns", JSON.stringify(sessionCountdowns));
-                renderSessionCountdowns(sessionCountdowns);
+            if (sessionTime && sessionTitle && totalCountdownMinutes > 0) {
+                const newSession = { time: sessionTime, title: sessionTitle, countdown: totalCountdownMinutes };
 
-                // Save session countdowns via Electron API
-                window.electronAPI.updateSettings({ sessionCountdowns });
+                // Fetch current sessionCountdowns and update
+                window.electronAPI.getSettings().then((settings) => {
+                    const updatedSessions = [...(settings.sessionCountdowns || []), newSession];
+                    window.electronAPI.updateSettings({ sessionCountdowns: updatedSessions });
+                    renderSessionCountdowns(updatedSessions);
+                });
             } else {
                 alert("Please fill out all fields correctly.");
             }
+        });
+
+        document.getElementById("restart-app-button").addEventListener("click", () => {
+            window.electronAPI.restartApp();
         });
 
         function saveSettings() {

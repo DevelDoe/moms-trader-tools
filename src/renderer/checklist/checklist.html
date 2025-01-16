@@ -6,7 +6,135 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Checklist</title>
-        <link rel="stylesheet" href="checklist.css" />
+        <link rel="stylesheet" href="../../styles/styles.css" />
+        <style>
+            /* ./src/renderer/checklist/checklist.css  */
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: rgba(59, 59, 59, 0.2); /* Transparent background */
+                color: white;
+                text-align: center;
+                overflow: hidden;
+                -webkit-app-region: drag; /* Makes the window draggable */
+                text-transform: uppercase;
+                height: 100%;
+                font-size: 12px;
+
+                /* border: 1px solid rgba(128, 128, 128, 0.342); */
+            }
+
+            #container {
+                /* position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%); */
+                -webkit-app-region: drag; /* Make the entire container draggable */
+                background-color: transparent;
+                padding-top: 15px;
+                height: 100%;
+            }
+
+            #checklist {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                -webkit-app-region: no-drag; /* Prevent drag on interactive items */
+            }
+
+            #checklist li {
+                cursor: pointer;
+                color: white;
+                text-align: center;
+                user-select: none;
+                -webkit-app-region: no-drag;
+                padding: 6px 0;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.253);
+            }
+
+            /* Critical items style */
+            #checklist li[data-type="critical"] {
+                background-color: red;
+            }
+
+            /* Optional items styles for states */
+            #checklist li[data-type="optional"] {
+                color: white;
+            }
+
+            #checklist li.state-red {
+                background-color: red;
+                color: white;
+            }
+
+            #checklist li.state-yellow {
+                background-color: yellow;
+                color: black;
+            }
+
+            #checklist li.state-green {
+                background-color: green;
+                color: white;
+            }
+
+            #checklist li.reminder {
+                cursor: default; /* No pointer cursor for reminders */
+            }
+
+            /* Completed style for other items */
+            #checklist li.completed {
+                background-color: green !important;
+                color: white;
+            }
+
+            #reset-btn {
+                width: 100%;
+                border: none;
+            }
+
+            #reset-btn {
+                background-color: #444;
+                color: white;
+                cursor: pointer;
+                -webkit-app-region: no-drag;
+                width: 100%;
+                padding: 4px;
+            }
+
+            #reset-btn:hover {
+                background-color: #666;
+            }
+            /* Shared Styles for Critical and Important */
+            .critical,
+            .important {
+                font-weight: bold;
+                color: #fff;
+            }
+
+            /* Critical Items */
+            .critical {
+                background-color: #007bff; /* Blue */
+                border-left: 5px solid rgb(85, 1, 1);
+            }
+
+            /* Important Optional Items */
+            .important {
+                background-color: #ffc107; /* Yellow */
+                border-left: 5px solid #ff9800;
+            }
+
+            .reminder {
+                background-color: white;
+                border-left: 5px solid #9e9e9e;
+                color: black !important;
+            }
+
+            /* Optional Items */
+            .state-yellow {
+                background-color: #fdf4e3; /* Light Yellow */
+                border-left: 5px solid #ffc107;
+            }
+        </style>
     </head>
     <body>
         <div id="container">
@@ -16,6 +144,10 @@
         <script>
             document.addEventListener("DOMContentLoaded", async () => {
                 try {
+                    const observer = new MutationObserver(() => {
+                        resizeChecklistWindowToContent();
+                    });
+                    observer.observe(document.body, { childList: true, subtree: true });
                     // Load initial checklist state
                     const checklistItems = await window.electronAPI.loadChecklistState();
                     renderChecklist(checklistItems);
@@ -107,6 +239,14 @@
                     listItem.classList.add(...(item.classList || []));
                     checklistContainer.appendChild(listItem);
                 });
+            }
+
+            function resizeChecklistWindowToContent() {
+                const bodyWidth = document.body.scrollWidth;
+                const bodyHeight = document.body.scrollHeight;
+
+                // Send the calculated dimensions to the main process
+                window.electronAPI.resizeWindowToContent(bodyWidth, bodyHeight);
             }
         </script>
     </body>

@@ -1,6 +1,6 @@
 // ./src/main/main.js
 
-const { app, ipcMain } = require("electron");
+const { app, ipcMain, BrowserWindow  } = require("electron");
 const { createReminderWindow } = require("./windows/reminder/reminder");
 const { createSettingsWindow } = require("./windows/settings/settings");
 const { createTaskbarWindow } = require("./windows/taskbar/taskbar");
@@ -22,6 +22,9 @@ function loadSettings() {
         const data = fs.readFileSync(SETTINGS_FILE, "utf-8");
         const settings = JSON.parse(data);
 
+        // Log the settings to inspect their content
+        console.log("Loaded settings on boot:", settings);
+
         // Ensure all settings properties exist
         if (!Array.isArray(settings.checklist)) settings.checklist = [];
         if (!Array.isArray(settings.sessionCountdowns)) settings.sessionCountdowns = [];
@@ -40,14 +43,27 @@ function saveSettings() {
     if (!Array.isArray(appSettings.checklist)) appSettings.checklist = [];
     if (!Array.isArray(appSettings.sessionCountdowns)) appSettings.sessionCountdowns = [];
 
+    console.log("Saving updated settings:", appSettings);
+
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
 }
 
-
-
 // IPC Handlers
 
-// Settings// Settings// Settings// Settings// Settings
+ipcMain.on("resize-window-to-content", (event, { width, height }) => {
+    const senderWindow = BrowserWindow.fromWebContents(event.sender);
+    if (senderWindow) {
+        console.log(`Resizing window to: ${width}x${height}`);
+        senderWindow.setBounds({
+            x: senderWindow.getBounds().x,
+            y: senderWindow.getBounds().y,
+            width: Math.max(width, 80), // Minimum width
+            height: Math.max(height, 100), // Minimum height
+        });
+    }
+});
+
+// Settings
 
 ipcMain.on("toggle-settings", () => {
     const settingsWindow = windows.settings;
@@ -68,6 +84,13 @@ ipcMain.on("update-settings", (event, newSettings) => {
     if (windows.reminder) {
         windows.reminder.webContents.send("update-reminder-text", newSettings.text);
     }
+
+    // Force a refresh in all relevant windows
+    Object.values(windows).forEach((window) => {
+        if (window && window.webContents) {
+            window.webContents.send("settings-updated", appSettings);
+        }
+    });
 });
 
 // reminder
@@ -90,7 +113,7 @@ ipcMain.on("toggle-checklist", () => {
 
 function getLegacyChecklistItems() {
     return [
-        { text: "hijacked", type: "critical", state: "default" },
+        { text: "Hijacked", type: "critical", state: "default" },
         { text: "MACD", type: "critical", state: "default" },
         { text: "Volume", type: "critical", state: "default" },
         { text: "Extended", type: "optional", state: "state-yellow" },
@@ -115,7 +138,7 @@ ipcMain.on("reset-to-legacy-checklist", () => {
 });
 
 ipcMain.handle("load-checklist-state", () => {
-    console.log("Checklist state being sent to checklist window:", appSettings.checklist); // Debug log
+    // console.log("Checklist state being sent to checklist window:", appSettings.checklist); // Debug log
     return appSettings.checklist;
 });
 
@@ -231,7 +254,7 @@ ipcMain.on("volume-change", (event, volume) => {
     });
 });
 
-// Clock 
+// Clock
 
 ipcMain.on("toggle-clock", () => {
     const clockWindow = windows.clock;
@@ -240,11 +263,10 @@ ipcMain.on("toggle-clock", () => {
     }
 });
 
-
 // App Ready Event
 app.on("ready", () => {
-     // Create Taskbar Window
-     windows.taskbar = createTaskbarWindow(
+    // Create Taskbar Window
+    windows.taskbar = createTaskbarWindow(
         () => ipcMain.emit("toggle-reminder"),
         () => ipcMain.emit("toggle-settings"),
         () => ipcMain.emit("toggle-checklist"),
@@ -265,7 +287,6 @@ app.on("ready", () => {
     windows.countdown = createCountdownWindow(windows.taskbar);
     windows.clock = createClockWindow(windows.taskbar);
 
-
     windows.reminder.webContents.once("dom-ready", () => {
         windows.reminder.webContents.send("update-reminder-text", appSettings.text);
     });
@@ -280,8 +301,17 @@ app.on("ready", () => {
         windows.checklist.webContents.send("load-checklist-state", appSettings.checklist);
     });
 
-});
+    windows.clock.webContents.once("dom-ready", () => {
+        windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
+    });
 
+    // Ensure other windows are also synced
+    Object.values(windows).forEach((window) => {
+        if (window && window.webContents) {
+            window.webContents.send("settings-updated", appSettings);
+        }
+    });
+});
 
 // Quit the app when all windows are closed
 app.on("window-all-closed", () => {
@@ -291,4 +321,9 @@ app.on("window-all-closed", () => {
 ipcMain.on("exit-app", () => {
     console.log("Exiting the app...");
     app.quit();
+});
+
+ipcMain.on('restart-app', () => {
+    app.relaunch();
+    app.exit(0);
 });
