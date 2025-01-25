@@ -45,148 +45,146 @@
     <body>
         <div class="clock-container dragable">
             <div id="clock"></div>
-            <section id="session-countdown-display"><span id="session-title">No Active Sessions</span>:&nbsp;<span id="session-timer"></span></section>
+            <section id="session-countdown-display">
+                <span id="session-title">No Active Sessions</span>:&nbsp;
+                <span id="session-timer"></span>
+            </section>
         </div>
         <script>
-            const sessionCountdowns = [];
+            let sessionCountdowns = [];
             let activeInterval = null;
-
+            let activeSessionTitle = null;
+        
+            // Get New York time
+            function getNYTime() {
+                return new Date(
+                    new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
+                );
+            }
+        
+            // Update the clock display
             function updateClock() {
-                const now = new Date();
+                const nyTime = getNYTime();
                 const options = {
-                    timeZone: "America/New_York",
                     hour: "2-digit",
                     minute: "2-digit",
                     second: "2-digit",
                     hour12: false,
                 };
                 const formatter = new Intl.DateTimeFormat("en-US", options);
-                document.getElementById("clock").textContent = formatter.format(now);
+                document.getElementById("clock").textContent = formatter.format(nyTime);
+                checkActiveSession(nyTime);
             }
-
-            function syncClock() {
-                const now = new Date();
-                const millisecondsToNextSecond = 1000 - now.getMilliseconds();
-
-                setTimeout(() => {
-                    updateClock();
-                    setInterval(updateClock, 1000);
-                }, millisecondsToNextSecond);
-            }
-
-            function displayNextSessionCountdown() {
-    // Clear the previous interval if it exists
-    if (activeInterval) {
-        clearInterval(activeInterval);
-        activeInterval = null;
-    }
-
-    // Fetch the latest sessionCountdowns and current time
-    const now = new Date(
-        new Intl.DateTimeFormat("en-US", {
-            timeZone: "America/New_York",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false,
-        }).format(new Date())
-    );
-
-    console.log("Current Time (NY):", now);
-    console.log("Active SessionCountdowns:", sessionCountdowns);
-
-    // Determine the active session
-    const activeSession = sessionCountdowns
-        .map((session) => {
-            const [hours, minutes] = session.time.split(":").map(Number);
-
-            // Create session start and end times
-            const sessionStartTime = new Date(now);
-            sessionStartTime.setHours(hours, minutes, 0, 0);
-
-            const sessionEndTime = new Date(sessionStartTime.getTime() + session.countdown * 60 * 1000);
-
-            return { session, sessionStartTime, sessionEndTime };
-        })
-        .filter(({ sessionStartTime, sessionEndTime }) => sessionStartTime <= now && now <= sessionEndTime)
-        .sort((a, b) => b.sessionStartTime - a.sessionStartTime)[0];
-
-    if (!activeSession) {
-        // No active session
-        document.getElementById("session-title").textContent = "No Active Sessions";
-        document.getElementById("session-timer").textContent = "";
-        return;
-    }
-
-    const { session, sessionEndTime } = activeSession;
-
-    // Display the active session
-    document.getElementById("session-title").textContent = session.title;
-
-    // Set a new interval for the active session
-    activeInterval = setInterval(() => {
-    const now = new Date(
-        new Intl.DateTimeFormat("en-US", {
-            timeZone: "America/New_York",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false,
-        }).format(new Date())
-    );
-
-    const timeLeft = Math.max(0, sessionEndTime - now);
-    const remainingHours = Math.floor(timeLeft / 3600000);
-    const remainingMinutes = Math.floor((timeLeft % 3600000) / 60000);
-    const remainingSeconds = Math.floor((timeLeft % 60000) / 1000);
-
-    if (timeLeft <= 0) {
-        // Session has ended, clear the interval and check for the next session
-        clearInterval(activeInterval);
-        activeInterval = null;
-        displayNextSessionCountdown(); // Recursively check for the next session
-    } else {
-        // Dynamically build the display string
-        const timeString = [
-            remainingHours > 0 ? `${remainingHours}h` : "",
-            remainingMinutes > 0 ? `${remainingMinutes}m` : "",
-            remainingSeconds > 0 ? `${remainingSeconds}s` : "",
-        ]
-            .filter(Boolean) // Remove empty parts
-            .join(" "); // Join the remaining parts with a space
-
-        // Update the session timer
-        document.getElementById("session-timer").textContent = timeString;
-    }
-}, 1000);
-
-}
-
-
-            document.addEventListener("DOMContentLoaded", () => {
-                // Listen for session countdown updates
-                window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
-                    console.log("Renderer received updated session countdowns:", updatedSessions);
-
-                    // Clear and replace sessionCountdowns
-                    sessionCountdowns.length = 0;
-                    sessionCountdowns.push(...updatedSessions);
-
-                    console.log("Updated sessionCountdowns array in listener:", sessionCountdowns);
-
-                    // Refresh the display
-                    displayNextSessionCountdown();
+        
+            // Check if a session is currently active
+            function checkActiveSession(now) {
+                // Sort sessions by start time (descending order, prioritize most recent)
+                const sortedSessions = [...sessionCountdowns].sort((a, b) => {
+                    const [aHours, aMinutes] = a.start.split(":").map(Number);
+                    const [bHours, bMinutes] = b.start.split(":").map(Number);
+        
+                    const aStart = new Date(now);
+                    aStart.setHours(aHours, aMinutes, 0, 0);
+        
+                    const bStart = new Date(now);
+                    bStart.setHours(bHours, bMinutes, 0, 0);
+        
+                    return bStart - aStart;
                 });
-
-                // Sync the clock when the page loads
-                syncClock();
+        
+                // Find the most recent active session
+                const activeSession = sortedSessions.find((session) => {
+                    const [startHours, startMinutes] = session.start.split(":").map(Number);
+                    const [endHours, endMinutes] = session.end.split(":").map(Number);
+        
+                    const sessionStart = new Date(now);
+                    sessionStart.setHours(startHours, startMinutes, 0, 0);
+        
+                    const sessionEnd = new Date(now);
+                    sessionEnd.setHours(endHours, endMinutes, 0, 0);
+        
+                    return sessionStart <= now && now <= sessionEnd;
+                });
+        
+                if (activeSession) {
+                    if (activeSessionTitle !== activeSession.title) {
+                        activateSession(activeSession, now);
+                    }
+                } else {
+                    clearActiveSession();
+                }
+            }
+        
+            // Activate a session and start its countdown
+            function activateSession(session, now) {
+                console.log(`Activating session: "${session.title}"`);
+                document.getElementById("session-title").textContent = session.title;
+        
+                const [endHours, endMinutes] = session.end.split(":").map(Number);
+                const sessionEnd = new Date(now);
+                sessionEnd.setHours(endHours, endMinutes, 0, 0);
+        
+                let timeLeft = sessionEnd - now;
+                activeSessionTitle = session.title;
+        
+                if (activeInterval) {
+                    clearInterval(activeInterval);
+                }
+        
+                activeInterval = setInterval(() => {
+                    if (timeLeft <= 0) {
+                        console.log(`Session "${session.title}" ended.`);
+                        clearActiveSession();
+                    } else {
+                        const remainingHours = Math.floor(timeLeft / 3600000);
+                        const remainingMinutes = Math.floor((timeLeft % 3600000) / 60000);
+                        const remainingSeconds = Math.floor((timeLeft % 60000) / 1000);
+        
+                        const timeString = [
+                            remainingHours > 0 ? `${remainingHours}h` : "",
+                            remainingMinutes > 0 ? `${remainingMinutes}m` : "",
+                            remainingSeconds > 0 ? `${remainingSeconds}s` : "",
+                        ]
+                            .filter(Boolean)
+                            .join(" ");
+        
+                        document.getElementById("session-timer").textContent = timeString;
+                        console.log(`Time left for session "${session.title}": ${timeString}`);
+        
+                        timeLeft -= 1000;
+                    }
+                }, 1000);
+            }
+        
+            // Clear the active session display
+            function clearActiveSession() {
+                if (activeInterval) {
+                    clearInterval(activeInterval);
+                    activeInterval = null;
+                }
+                activeSessionTitle = null;
+                document.getElementById("session-title").textContent = "No Active Sessions";
+                document.getElementById("session-timer").textContent = "";
+                console.log("No active sessions.");
+            }
+        
+            // Listen for session updates from the Electron app
+            function listenForSessionUpdates() {
+                window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
+                    console.log("Updated sessions received:", updatedSessions);
+                    sessionCountdowns = updatedSessions; // Replace with updated sessions
+                });
+            }
+        
+            // Initialize the clock
+            document.addEventListener("DOMContentLoaded", () => {
+                listenForSessionUpdates(); // Set up listener for session updates
+                setInterval(updateClock, 1000); // Update the clock every second
+                console.log("Clock initialized.");
             });
         </script>
+        
+        
+        
     </body>
 </html>

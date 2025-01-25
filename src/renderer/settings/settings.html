@@ -239,7 +239,7 @@
 
             sessionCountdowns.forEach((session, index) => {
                 const listItem = document.createElement("li");
-                listItem.textContent = `${session.time} - ${session.title} (${session.countdown} minutes)`;
+                listItem.textContent = `${session.start} - ${session.end} | ${session.title}`;
 
                 const removeButton = document.createElement("button");
                 removeButton.textContent = "Remove";
@@ -266,7 +266,16 @@
             const totalCountdownMinutes = countdownHours * 60 + countdownMinutes;
 
             if (sessionTime && sessionTitle && totalCountdownMinutes > 0) {
-                const newSession = { time: sessionTime, title: sessionTitle, countdown: totalCountdownMinutes };
+                const [startHour, startMinute] = sessionTime.split(":").map(Number);
+
+                // Calculate the end time
+                const start = new Date();
+                start.setHours(startHour, startMinute, 0, 0);
+                const end = new Date(start.getTime() + totalCountdownMinutes * 60 * 1000);
+
+                const formattedEnd = `${String(end.getHours()).padStart(2, "0")}:${String(end.getMinutes()).padStart(2, "0")}`;
+
+                const newSession = { start: sessionTime, title: sessionTitle, end: formattedEnd };
 
                 // Fetch current sessionCountdowns and update
                 window.electronAPI.getSettings().then((settings) => {
