@@ -106,6 +106,19 @@ contextBridge.exposeInMainWorld("electronAPI", {
         });
     },
 
+    // Resumption feature
+    toggleResumption: () => {
+        console.log("Preload: toggleResumption called");
+        ipcRenderer.send("toggle-resumption");
+    },
+
+    getBeepSoundPath: async () => {
+        const beepSoundPath = await ipcRenderer.invoke("get-beep-sound-path");
+        console.log("Resolved tick sound path:", beepSoundPath);
+        return beepSoundPath;
+    },
+
+
     updateSettings: (settings) => ipcRenderer.send("update-settings", settings),
 
     // Exit the application

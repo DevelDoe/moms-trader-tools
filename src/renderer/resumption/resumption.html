@@ -1,0 +1,155 @@
+<!-- ./src/renderer/resumption/resumption.html -->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Resumption Timer</title>
+        <link rel="stylesheet" href="../../styles/styles.css" />
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                color: #fefefe;
+                background: transparent;
+                margin: 0;
+                padding: 10px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                justify-content: flex-start;
+            }
+
+            #countdownDisplay {
+                font-size: 24px;
+                margin-bottom: 10px;
+                text-align: left;
+            }
+
+            #inputRow {
+                display: flex;
+                align-items: center; /* Align items vertically */
+                gap: 7px; /* Add spacing between input and button */
+            }
+
+            input,
+            button {
+                height: 20px; /* Set same height */
+                border-radius: 4px; /* Consistent border radius */
+            }
+
+            input {
+                padding: 3px;
+                font-size: 16px;
+                border: 1px solid #ccc;
+                width: 67px;
+            }
+
+            button {
+                background-color: #089981;
+                color: white;
+                border: none;
+                padding: 0 20px;
+                font-size: 16px;
+                cursor: pointer;
+                height: 28px;
+            }
+
+            button:hover {
+                background-color: #0aa188;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="countdownDisplay" class="dragable">Resumption Timer</div>
+        <div id="inputRow">
+            <input type="text" id="haltedTime" placeholder="HH:mm:ss" />
+            <button id="toggleBtn">GO</button>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", async () => {
+                const countdownDisplay = document.getElementById("countdownDisplay");
+                const haltedTimeInput = document.getElementById("haltedTime");
+                const toggleBtn = document.getElementById("toggleBtn");
+
+                let isCounting = false;
+                let countdownInterval = null;
+                let beepSound = null;
+
+                try {
+                    const soundPath = await window.electronAPI.getBeepSoundPath(); // Fetch sound path
+                    beepSound = new Audio(soundPath);
+                    beepSound.volume = 0.5; // Set initial volume
+                } catch (error) {
+                    console.error("Error loading beep sound:", error);
+                }
+
+                // Add keydown event listener to the input field
+                haltedTimeInput.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                        toggleBtn.click(); // Trigger the button click
+                    }
+                });
+
+                toggleBtn.addEventListener("click", () => {
+                    if (isCounting) {
+                        clearInterval(countdownInterval);
+                        countdownDisplay.textContent = "Countdown stopped";
+                        toggleBtn.textContent = "Start";
+                        isCounting = false;
+                    } else {
+                        const timeString = haltedTimeInput.value;
+                        const haltedTime = parseTimeString(timeString);
+                        if (!haltedTime) {
+                            countdownDisplay.textContent = "Invalid time format. Use HH:mm:ss.";
+                            return;
+                        }
+
+                        startCountdown(haltedTime);
+                        toggleBtn.textContent = "Stop";
+                        isCounting = true;
+                    }
+                });
+
+                function startCountdown(haltedTime) {
+                    let resumptionTime = new Date(haltedTime.getTime() + 5 * 60 * 1000);
+
+                    countdownInterval = setInterval(() => {
+                        const now = new Date();
+                        const timeLeft = Math.max(0, resumptionTime - now);
+
+                        if (timeLeft === 0) {
+                            // Play sound and prepare for the next interval
+                            if (beepSound) beepSound.play();
+                            resumptionTime = new Date(resumptionTime.getTime() + 5 * 60 * 1000);
+                        }
+
+                        const minutes = Math.floor(timeLeft / 1000 / 60);
+                        const seconds = Math.floor((timeLeft / 1000) % 60);
+
+                        countdownDisplay.textContent = `Next resumption in: ${minutes}m ${seconds < 10 ? "0" : ""}${seconds}s`;
+
+                        // Beep every second during the last 10 seconds
+                        if (timeLeft <= 10 * 1000 && beepSound) {
+                            beepSound.currentTime = 0; // Reset sound to start
+                            beepSound.play().catch((error) => {
+                                console.warn("Beep sound playback failed:", error);
+                            });
+                        }
+                    }, 1000);
+                }
+
+                function parseTimeString(timeString) {
+                    const [hours, minutes, seconds] = timeString.split(":").map(Number);
+                    if (isNaN(hours) || isNaN(minutes) || isNaN(seconds) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59) {
+                        return null;
+                    }
+
+                    const now = new Date();
+                    now.setHours(hours, minutes, seconds, 0);
+                    return now;
+                }
+            });
+        </script>
+    </body>
+</html>

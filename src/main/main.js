@@ -1,12 +1,13 @@
 // ./src/main/main.js
 
-const { app, ipcMain, BrowserWindow  } = require("electron");
+const { app, ipcMain, BrowserWindow } = require("electron");
 const { createReminderWindow } = require("./windows/reminder/reminder");
 const { createSettingsWindow } = require("./windows/settings/settings");
 const { createTaskbarWindow } = require("./windows/taskbar/taskbar");
 const { createChecklistWindow } = require("./windows/checklist/checklist");
 const { createCountdownWindow } = require("./windows/countdown/countdown");
 const { createClockWindow } = require("./windows/clock/clock");
+const { createResumptionWindow } = require("./windows/resumption/resumption"); // Import
 
 const path = require("path");
 const fs = require("fs");
@@ -264,6 +265,18 @@ ipcMain.on("toggle-clock", () => {
     }
 });
 
+// Resumption 
+ipcMain.on("toggle-resumption", () => {
+    const resumptionWindow = windows.resumption;
+    if (resumptionWindow) {
+        resumptionWindow.isVisible() ? resumptionWindow.hide() : resumptionWindow.show();
+    }
+});
+
+ipcMain.handle("get-beep-sound-path", () => {
+    return path.join(app.getAppPath(), "assets/sounds/beep.mp3");
+});
+
 // App Ready Event
 app.on("ready", () => {
     // Create Taskbar Window
@@ -272,7 +285,8 @@ app.on("ready", () => {
         () => ipcMain.emit("toggle-settings"),
         () => ipcMain.emit("toggle-checklist"),
         () => ipcMain.emit("toggle-countdown"),
-        () => ipcMain.emit("toggle-clock")
+        () => ipcMain.emit("toggle-clock"),
+        () => ipcMain.emit("toggle-resumption")
     );
 
     // Ensure the taskbar window is created before passing
@@ -287,12 +301,19 @@ app.on("ready", () => {
     windows.checklist = createChecklistWindow(windows.taskbar);
     windows.countdown = createCountdownWindow(windows.taskbar);
     windows.clock = createClockWindow(windows.taskbar);
+    windows.resumption = createResumptionWindow(windows.taskbar);
 
     windows.reminder.webContents.once("dom-ready", () => {
         windows.reminder.webContents.send("update-reminder-text", appSettings.text);
     });
 
-    windows.reminder.hide(); // Hide reminder window by default
+    // Hide all windows by default
+    Object.values(windows).forEach((window) => window?.hide());
+
+    // Ensure the taskbar is visible
+    if (windows.taskbar) {
+        windows.taskbar.show();
+    }
 
     windows.settings.webContents.once("dom-ready", () => {
         windows.settings.webContents.send("update-checklist", appSettings.checklist);
@@ -324,7 +345,7 @@ ipcMain.on("exit-app", () => {
     app.quit();
 });
 
-ipcMain.on('restart-app', () => {
+ipcMain.on("restart-app", () => {
     app.relaunch();
     app.exit(0);
 });
