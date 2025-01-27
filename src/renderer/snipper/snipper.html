@@ -44,69 +44,87 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {
-    const video = document.getElementById("snipper-video");
+                const video = document.getElementById("snipper-video");
 
-    if (window.snipperAPI) {
-        console.log("snipperAPI is available in the renderer process.");
-        window.snipperAPI.readyToCapture();
-    } else {
-        console.error("snipperAPI is not available in the renderer process.");
-    }
+                if (window.snipperAPI) {
+                    console.log("snipperAPI is available in the renderer process.");
+                    window.snipperAPI.readyToCapture();
+                } else {
+                    console.error("snipperAPI is not available in the renderer process.");
+                }
 
-    if (window.snipperAPI?.onRegionSelected) {
-        window.snipperAPI.onRegionSelected(async (bounds) => {
-            console.log("Renderer: Region selected:", bounds);
+                if (window.snipperAPI?.onRegionSelected) {
+                    window.snipperAPI.onRegionSelected(async (bounds) => {
+                        console.log("Renderer: Region selected:", bounds);
 
-            const videoConstraints = {
-                video: {
-                    mandatory: {
-                        chromeMediaSource: "desktop",
-                        chromeMediaSourceId: bounds.sourceId,
-                    },
-                },
-            };
+                        const videoConstraints = {
+                            video: {
+                                mandatory: {
+                                    chromeMediaSource: "desktop",
+                                    chromeMediaSourceId: bounds.sourceId,
+                                },
+                            },
+                        };
 
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia(videoConstraints);
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia(videoConstraints);
 
-                video.srcObject = stream;
-                video.onloadedmetadata = () => {
-                    video.play();
-                    console.log("Renderer: Stream is playing.");
+                            video.srcObject = stream;
+                            video.onloadedmetadata = () => {
+                                video.play();
+                                console.log("Renderer: Stream is playing.");
 
-                    // Call the updated display function with the selected region bounds
-                    updateVideoDisplay(bounds);
-                };
+                                // Display the selected region
+                                updateVideoDisplay(bounds);
+                            };
 
-                video.addEventListener("playing", () => {
-                    console.log("Video is rendering frames.");
+                            video.addEventListener("playing", () => {
+                                console.log("Video is rendering frames.");
+                            });
+                        } catch (error) {
+                            console.error("Renderer: Error capturing snipper:", error);
+                        }
+                    });
+                } else {
+                    console.error("onRegionSelected is not available in the renderer process.");
+                }
+
+                // Update video display logic
+                function updateVideoDisplay(bounds) {
+                    const video = document.getElementById("snipper-video");
+
+                    // Adjust video dimensions to the selected bounds
+                    video.style.width = `${bounds.width}px`;
+                    video.style.height = `${bounds.height}px`;
+
+                    // Translate to align the selected region
+                    video.style.transform = `translate(-${bounds.x}px, -${bounds.y}px)`;
+                    video.style.transformOrigin = "top left";
+                }
+
+                // Scale content dynamically on window resize
+                window.addEventListener("resize", () => {
+                    const bounds = video.getBoundingClientRect(); // Get current displayed bounds
+                    scaleContent(bounds);
                 });
-            } catch (error) {
-                console.error("Renderer: Error capturing snipper:", error);
-            }
-        });
-    } else {
-        console.error("onRegionSelected is not available in the renderer process.");
-    }
 
-    // Update video display logic
-    function updateVideoDisplay(bounds) {
-        const video = document.getElementById("snipper-video");
+                function scaleContent(bounds) {
+                    const videoContainer = document.getElementById("video-container");
+                    const currentWidth = window.innerWidth;
+                    const currentHeight = window.innerHeight;
 
-        // Current window size
-        const currentWidth = window.innerWidth;
-        const currentHeight = window.innerHeight;
+                    // Calculate scaling factor
+                    const scaleX = currentWidth / bounds.width;
+                    const scaleY = currentHeight / bounds.height;
+                    const scale = Math.min(scaleX, scaleY); // Keep proportional scaling
 
-        // Scaling factor
-        const scaleX = currentWidth / bounds.width;
-        const scaleY = currentHeight / bounds.height;
-        const scale = Math.min(scaleX, scaleY); // Keep proportional scaling
+                    // Apply scaling without affecting translation
+                    videoContainer.style.transform = `scale(${scale})`;
+                    videoContainer.style.transformOrigin = "top left";
 
-        // Translate and scale
-        video.style.transform = `translate(-${bounds.x}px, -${bounds.y}px) scale(${scale})`;
-        video.style.transformOrigin = "top left";
-    }
-});
+                    console.log(`Scaled to: ${scale}, Original Region: ${bounds.width}x${bounds.height}`);
+                }
+            });
         </script>
     </body>
 </html>
