@@ -1,57 +1,64 @@
-// ./src/renderer/common/preload.js
+document.addEventListener("DOMContentLoaded", () => {
+    const video = document.getElementById("snipper-video");
 
-const { contextBridge, ipcRenderer } = require("electron");
+    if (window.snipperAPI) {
+        console.log("snipperAPI is available in the renderer process.");
+        window.snipperAPI.readyToCapture();
+    } else {
+        console.error("snipperAPI is not available in the renderer process.");
+    }
 
-contextBridge.exposeInMainWorld("electronAPI", {
-    // Settings functions
-    getSettings: () => ipcRenderer.invoke("get-settings"),
-    updateSettings: (settings) => ipcRenderer.send("update-settings", settings),
+    if (window.snipperAPI?.onRegionSelected) {
+        window.snipperAPI.onRegionSelected(async (bounds) => {
+            console.log("Renderer: Region selected:", bounds);
 
-    // Toggling windows
-    toggleSettings: () => {
-        console.log("Preload: toggleSettings called");
-        ipcRenderer.send("toggle-settings");
-    },
-    toggleReminder: () => {
-        console.log("Preload: toggleReminder called");
-        ipcRenderer.send("toggle-reminder");
-    },
-    toggleChecklist: () => ipcRenderer.send("toggle-checklist"),
+            const videoConstraints = {
+                video: {
+                    mandatory: {
+                        chromeMediaSource: "desktop",
+                        chromeMediaSourceId: bounds.sourceId,
+                    },
+                },
+            };
 
-    // Reminder text update
-    onUpdateReminderText: (callback) => {
-        ipcRenderer.on("update-reminder-text", (event, newText) => {
-            console.log("Preload received update-reminder-text:", newText);
-            callback(newText);
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(videoConstraints);
+
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    video.play();
+                    console.log("Renderer: Stream is playing.");
+
+                    // Call the updated display function with the selected region bounds
+                    updateVideoDisplay(bounds);
+                };
+
+                video.addEventListener("playing", () => {
+                    console.log("Video is rendering frames.");
+                });
+            } catch (error) {
+                console.error("Renderer: Error capturing snipper:", error);
+            }
         });
-    },
+    } else {
+        console.error("onRegionSelected is not available in the renderer process.");
+    }
 
-    // Checklist functions
-    loadChecklistState: () => ipcRenderer.invoke("load-checklist-state"),
-    addChecklistItem: (item) => {
-        console.log("Preload: Adding checklist item:", item);
-        ipcRenderer.send("add-checklist-item", item);
-    },
-    removeChecklistItem: (index) => {
-        console.log("Preload: Removing checklist item at index:", index);
-        ipcRenderer.send("remove-checklist-item", index);
-    },
-    resetChecklist: () => {
-        console.log("Preload: Resetting checklist");
-        ipcRenderer.send("reset-checklist");
-    },
-    toggleChecklistItem: (index, newState) => {
-        console.log("Preload: Toggling checklist item at index:", index, "with new state:", newState);
-        ipcRenderer.send("toggle-checklist-item", { index, newState });
-    },
-    onChecklistUpdated: (callback) => {
-        ipcRenderer.on("update-checklist", (event, checklist) => {
-            console.log("Preload received update-checklist:", checklist);
-            callback(checklist);
-        });
-    },
-    resetToLegacyChecklist: () => ipcRenderer.send("reset-to-legacy-checklist"),
+    // Update video display logic
+    function updateVideoDisplay(bounds) {
+        const video = document.getElementById("snipper-video");
 
-    // Exit the application
-    exitApp: () => ipcRenderer.send("exit-app"),
+        // Current window size
+        const currentWidth = window.innerWidth;
+        const currentHeight = window.innerHeight;
+
+        // Scaling factor
+        const scaleX = currentWidth / bounds.width;
+        const scaleY = currentHeight / bounds.height;
+        const scale = Math.min(scaleX, scaleY); // Keep proportional scaling
+
+        // Translate and scale
+        video.style.transform = `translate(-${bounds.x}px, -${bounds.y}px) scale(${scale})`;
+        video.style.transformOrigin = "top left";
+    }
 });

@@ -45,6 +45,7 @@
         <script>
             document.addEventListener("DOMContentLoaded", () => {
                 const video = document.getElementById("snipper-video");
+                const videoContainer = document.getElementById("video-container");
 
                 if (window.snipperAPI) {
                     console.log("snipperAPI is available in the renderer process.");
@@ -74,13 +75,13 @@
                                 video.play();
                                 console.log("Renderer: Stream is playing.");
 
-                                // Call the updated display function with the selected region bounds
-                                updateVideoDisplay(bounds);
-                            };
+                                // Store the original size for scaling purposes
+                                video.dataset.originalWidth = bounds.width;
+                                video.dataset.originalHeight = bounds.height;
 
-                            video.addEventListener("playing", () => {
-                                console.log("Video is rendering frames.");
-                            });
+                                // Apply scaling on initial load
+                                scaleContent();
+                            };
                         } catch (error) {
                             console.error("Renderer: Error capturing snipper:", error);
                         }
@@ -89,22 +90,25 @@
                     console.error("onRegionSelected is not available in the renderer process.");
                 }
 
-                // Update video display logic
-                function updateVideoDisplay(bounds) {
-                    const video = document.getElementById("snipper-video");
+                // Scale content on window resize
+                window.addEventListener("resize", scaleContent);
 
-                    // Current window size
-                    const currentWidth = window.innerWidth;
-                    const currentHeight = window.innerHeight;
+                function scaleContent() {
+                    const originalWidth = parseInt(video.dataset.originalWidth || video.videoWidth, 10);
+                    const originalHeight = parseInt(video.dataset.originalHeight || video.videoHeight, 10);
 
-                    // Scaling factor
-                    const scaleX = currentWidth / bounds.width;
-                    const scaleY = currentHeight / bounds.height;
-                    const scale = Math.min(scaleX, scaleY); // Keep proportional scaling
+                    // Calculate scaling factor
+                    const scaleX = window.innerWidth / originalWidth;
+                    const scaleY = window.innerHeight / originalHeight;
+                    const scale = Math.min(scaleX, scaleY); // Maintain aspect ratio
 
-                    // Translate and scale
-                    video.style.transform = `translate(-${bounds.x}px, -${bounds.y}px) scale(${scale})`;
-                    video.style.transformOrigin = "top left";
+                    // Center the content and apply scaling
+                    videoContainer.style.transform = `scale(${scale})`;
+                    videoContainer.style.transformOrigin = "top left";
+                    videoContainer.style.width = `${originalWidth}px`;
+                    videoContainer.style.height = `${originalHeight}px`;
+
+                    console.log(`Scaled to: ${scale}, Original Size: ${originalWidth}x${originalHeight}`);
                 }
             });
         </script>
