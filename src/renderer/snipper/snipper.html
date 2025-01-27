@@ -74,7 +74,7 @@
                                 video.play();
                                 console.log("Renderer: Stream is playing.");
 
-                                // Display the selected region
+                                // Call the updated display function with the selected region bounds
                                 updateVideoDisplay(bounds);
                             };
 
@@ -93,36 +93,18 @@
                 function updateVideoDisplay(bounds) {
                     const video = document.getElementById("snipper-video");
 
-                    // Adjust video dimensions to the selected bounds
-                    video.style.width = `${bounds.width}px`;
-                    video.style.height = `${bounds.height}px`;
-
-                    // Translate to align the selected region
-                    video.style.transform = `translate(-${bounds.x}px, -${bounds.y}px)`;
-                    video.style.transformOrigin = "top left";
-                }
-
-                // Scale content dynamically on window resize
-                window.addEventListener("resize", () => {
-                    const bounds = video.getBoundingClientRect(); // Get current displayed bounds
-                    scaleContent(bounds);
-                });
-
-                function scaleContent(bounds) {
-                    const videoContainer = document.getElementById("video-container");
+                    // Current window size
                     const currentWidth = window.innerWidth;
                     const currentHeight = window.innerHeight;
 
-                    // Calculate scaling factor
+                    // Scaling factor
                     const scaleX = currentWidth / bounds.width;
                     const scaleY = currentHeight / bounds.height;
                     const scale = Math.min(scaleX, scaleY); // Keep proportional scaling
 
-                    // Apply scaling without affecting translation
-                    videoContainer.style.transform = `scale(${scale})`;
-                    videoContainer.style.transformOrigin = "top left";
-
-                    console.log(`Scaled to: ${scale}, Original Region: ${bounds.width}x${bounds.height}`);
+                    // Translate and scale
+                    video.style.transform = `translate(-${bounds.x}px, -${bounds.y}px) scale(${scale})`;
+                    video.style.transformOrigin = "top left";
                 }
             });
         </script>
