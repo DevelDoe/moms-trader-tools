@@ -75,12 +75,14 @@
                                 video.play();
                                 console.log("Renderer: Stream is playing.");
 
-                                // Store the original size for scaling purposes
+                                // Store the original size and bounds for scaling purposes
                                 video.dataset.originalWidth = bounds.width;
                                 video.dataset.originalHeight = bounds.height;
+                                video.dataset.boundsX = bounds.x;
+                                video.dataset.boundsY = bounds.y;
 
-                                // Apply scaling on initial load
-                                scaleContent();
+                                // Apply scaling and alignment on initial load
+                                scaleContent(bounds);
                             };
                         } catch (error) {
                             console.error("Renderer: Error capturing snipper:", error);
@@ -91,24 +93,39 @@
                 }
 
                 // Scale content on window resize
-                window.addEventListener("resize", scaleContent);
+                window.addEventListener("resize", () => {
+                    const bounds = {
+                        x: parseInt(video.dataset.boundsX, 10),
+                        y: parseInt(video.dataset.boundsY, 10),
+                        width: parseInt(video.dataset.originalWidth, 10),
+                        height: parseInt(video.dataset.originalHeight, 10),
+                    };
+                    scaleContent(bounds);
+                });
 
-                function scaleContent() {
-                    const originalWidth = parseInt(video.dataset.originalWidth || video.videoWidth, 10);
-                    const originalHeight = parseInt(video.dataset.originalHeight || video.videoHeight, 10);
+                function scaleContent(bounds) {
+                    const originalWidth = parseInt(video.dataset.originalWidth, 10);
+                    const originalHeight = parseInt(video.dataset.originalHeight, 10);
 
-                    // Calculate scaling factor
-                    const scaleX = window.innerWidth / originalWidth;
-                    const scaleY = window.innerHeight / originalHeight;
+                    // Calculate scaling factor for the selected region
+                    const scaleX = window.innerWidth / bounds.width;
+                    const scaleY = window.innerHeight / bounds.height;
                     const scale = Math.min(scaleX, scaleY); // Maintain aspect ratio
 
-                    // Center the content and apply scaling
-                    videoContainer.style.transform = `scale(${scale})`;
+                    // Align the video to the selected region
+                    const translateX = -bounds.x * scale;
+                    const translateY = -bounds.y * scale;
+
+                    // Apply transformations to scale and align the video content
+                    videoContainer.style.transform = `
+            translate(${translateX}px, ${translateY}px)
+            scale(${scale})
+        `;
                     videoContainer.style.transformOrigin = "top left";
                     videoContainer.style.width = `${originalWidth}px`;
                     videoContainer.style.height = `${originalHeight}px`;
 
-                    console.log(`Scaled to: ${scale}, Original Size: ${originalWidth}x${originalHeight}`);
+                    console.log(`Scaled to: ${scale}, Translated to: (${translateX}, ${translateY}), Original Size: ${originalWidth}x${originalHeight}`);
                 }
             });
         </script>
