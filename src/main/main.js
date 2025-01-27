@@ -8,6 +8,7 @@ const { createChecklistWindow } = require("./windows/checklist/checklist");
 const { createCountdownWindow } = require("./windows/countdown/countdown");
 const { createClockWindow } = require("./windows/clock/clock");
 const { createResumptionWindow } = require("./windows/resumption/resumption"); // Import
+const { desktopCapturer } = require("electron");
 
 const path = require("path");
 const fs = require("fs");
@@ -15,6 +16,7 @@ const fs = require("fs");
 const SETTINGS_FILE = path.join(app.getPath("userData"), "settings.json");
 
 let windows = {}; // To store references to all windows
+let snipperWindows = {}; // Store references to dynamically created snipper windows
 let appSettings = loadSettings(); // Load app settings from file
 
 // Function to load settings from a file
@@ -265,7 +267,8 @@ ipcMain.on("toggle-clock", () => {
     }
 });
 
-// Resumption 
+// Resumption
+
 ipcMain.on("toggle-resumption", () => {
     const resumptionWindow = windows.resumption;
     if (resumptionWindow) {
@@ -276,6 +279,171 @@ ipcMain.on("toggle-resumption", () => {
 ipcMain.handle("get-beep-sound-path", () => {
     return path.join(app.getAppPath(), "assets/sounds/beep.mp3");
 });
+
+//  Snipper
+
+// Create a new snipper window
+ipcMain.on("create-snipper-window", (event, { name, bounds }) => {
+    console.log(`Creating snipper window: "${name}" with bounds:`, bounds);
+
+    if (!name || !bounds) {
+        console.error("Main process: snipper name and bounds are required.");
+        return;
+    }
+
+    if (snipperWindows[name]) {
+        console.warn(`Main process: snipper window "${name}" already exists.`);
+        return;
+    }
+
+    const snipperWindow = new BrowserWindow({
+        width: bounds.width,
+        height: bounds.height,
+        transparent: true,
+        frame: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            preload: path.join(__dirname, "../renderer/common/preload.js"), // Path to your preload file
+            contextIsolation: true, // Required for contextBridge
+            enableRemoteModule: false,
+            nodeIntegration: false, // Must be false when using contextBridge
+        },
+    });
+    
+    // Automatically open DevTools when the window is created
+    snipperWindow.webContents.openDevTools({ mode: "detach" });
+
+    snipperWindow
+        .loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
+        .then(() => console.log(`snipper window "${name}" loaded`))
+        .catch((err) => console.error("Error loading snipper HTML:", err));
+
+    // Pass the bounds to the snipper window
+    snipperWindow.webContents.once("dom-ready", () => {
+        snipperWindow.webContents.send("region-selected", bounds);
+    });
+
+    snipperWindows[name] = snipperWindow;
+
+    snipperWindow.on("closed", () => {
+        delete snipperWindows[name];
+        console.log(`Main process: snipper "${name}" closed.`);
+    });
+});
+
+ipcMain.on("resize-window-to-content", (event, dimensions) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win) {
+        console.log("Resizing window to:", dimensions);
+        win.setBounds({
+            x: win.getBounds().x,
+            y: win.getBounds().y,
+            width: Math.max(dimensions.width, 300), // Ensure a minimum width
+            height: Math.max(dimensions.height, 300), // Ensure a minimum height
+        });
+    }
+});
+
+ipcMain.on("start-region-selection", async (event, snipperName) => {
+    console.log(`Main process: Starting region selection for snipper "${snipperName}".`);
+
+    const regionWindow = new BrowserWindow({
+        fullscreen: true,
+        transparent: true,
+        frame: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            contextIsolation: true,
+            preload: path.join(__dirname, "../renderer/common/preload.js"),
+        },
+    });
+
+    regionWindow.loadFile(path.join(__dirname, "../renderer/snipper/region.html"));
+
+    ipcMain.once("region-selected", async (event, bounds) => {
+        console.log("Main process: Region selected:", bounds);
+
+        // Fetch snipper sources
+        const sources = await desktopCapturer.getSources({ types: ["screen"] });
+
+        if (sources.length === 0) {
+            console.error("No screen sources found.");
+            return;
+        }
+
+        // Dynamically find the source that matches the region bounds
+        const source = sources.find((src) => src.id.includes(bounds.display_id)) || sources[0];
+        if (!source) {
+            console.error("No matching snipper source found for the selected region.");
+            return;
+        }
+
+        bounds.sourceId = source.id; // Use the matching source ID
+
+        // Pass bounds and sourceId to create-snipper-window
+        ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds });
+    });
+
+    ipcMain.once("close-region-selection", () => {
+        regionWindow.close();
+    });
+});
+
+
+// Update snipper settings
+ipcMain.on("update-snipper-settings", (event, { name, settings }) => {
+    const snipper = snipperWindows[name];
+    if (!snipper) {
+        console.error(`No snipper window found with name "${name}"`);
+        return;
+    }
+
+    // Update settings
+    Object.assign(snipper.settings, settings);
+
+    // Apply updates to the snipper window
+    if (settings.opacity !== undefined) {
+        snipper.window.setOpacity(settings.opacity);
+    }
+
+    sendSnipperUpdates(); // Notify renderer of changes
+});
+
+// Remove a snipper window
+ipcMain.on("remove-snipper-window", (event, name) => {
+    const snipper = snipperWindows[name];
+    if (!snipper) {
+        console.error(`No snipper window found with name "${name}"`);
+        return;
+    }
+
+    // Close and remove the window
+    snipper.window.close();
+    delete snipperWindows[name];
+    sendSnipperUpdates(); // Notify renderer of changes
+});
+
+// Fetch active snippers
+ipcMain.handle("get-active-snippers", () => {
+    return Object.keys(snipperWindows).map((name) => ({
+        name,
+        settings: snipperWindows[name].settings,
+    }));
+});
+
+// Notify renderer of updates
+function sendSnipperUpdates() {
+    const activeSnippers = Object.keys(snipperWindows).map((name) => ({
+        name,
+        settings: snipperWindows[name].settings,
+    }));
+
+    Object.values(windows).forEach((window) => {
+        if (window && window.webContents && window.webContents.send) {
+            window.webContents.send("snipper-settings-updated", activeSnippers);
+        }
+    });
+}
 
 // App Ready Event
 app.on("ready", () => {

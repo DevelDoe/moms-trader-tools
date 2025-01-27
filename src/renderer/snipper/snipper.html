@@ -1,0 +1,121 @@
+<!-- ./src/renderer/snipper/snipper.html -->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Snipper</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent */
+                color: white;
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                overflow: hidden;
+                user-select: none;
+            }
+
+            #video-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            #snipper-video {
+                position: absolute;
+                top: 0;
+                left: 0;
+                transform-origin: top left; /* Ensures scaling happens from the top-left */
+            }
+        </style>
+    </head>
+    <body>
+        <div id="video-container">
+            <video id="snipper-video" autoplay muted></video>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const video = document.getElementById("snipper-video");
+
+                if (window.snipperAPI) {
+                    console.log("snipperAPI is available in the renderer process.");
+                    window.snipperAPI.readyToCapture();
+                } else {
+                    console.error("snipperAPI is not available in the renderer process.");
+                }
+
+                if (window.snipperAPI?.onRegionSelected) {
+                    window.snipperAPI.onRegionSelected(async (bounds) => {
+                        console.log("Renderer: Region selected:", bounds);
+
+                        const videoConstraints = {
+                            video: {
+                                mandatory: {
+                                    chromeMediaSource: "snipper",
+                                    chromeMediaSourceId: bounds.sourceId,
+                                },
+                            },
+                        };
+
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia(videoConstraints);
+
+                            video.srcObject = stream;
+                            video.onloadedmetadata = () => {
+                                video.play();
+                                console.log("Renderer: Stream is playing.");
+
+                                // Call the updated display function with the selected region bounds
+                                updateVideoDisplay(bounds);
+                            };
+
+                            video.addEventListener("playing", () => {
+                                console.log("Video is rendering frames.");
+                            });
+                        } catch (error) {
+                            console.error("Renderer: Error capturing snipper:", error);
+                        }
+                    });
+                } else {
+                    console.error("onRegionSelected is not available in the renderer process.");
+                }
+
+                // Update video display logic
+                function updateVideoDisplay() {
+                    const video = document.getElementById("snipper-video");
+
+                    // Get the current window size
+                    const currentWidth = window.innerWidth;
+                    const currentHeight = window.innerHeight;
+
+                    // Calculate scaling factor while maintaining aspect ratio
+                    const scaleX = currentWidth / originalWidth;
+                    const scaleY = currentHeight / originalHeight;
+                    const scale = Math.min(scaleX, scaleY); // Keep proportional scaling
+
+                    // Lock to the top-right corner of the selected region
+                    const offsetX = (bounds.x + bounds.width) * scale - currentWidth; // Adjust for right lock
+                    const offsetY = bounds.y * scale; // Adjust Y position
+
+                    // Apply the translation and scaling
+                    video.style.transform = `
+                    translate(-${offsetX}px, -${offsetY}px)
+                    scale(${scale})
+                `;
+                    video.style.transformOrigin = "top left"; // Anchor scaling to top-left
+                    video.style.width = `${snipper.width}px`;
+                    video.style.height = `${snipper.height}px`;
+                }
+            });
+        </script>
+    </body>
+</html>

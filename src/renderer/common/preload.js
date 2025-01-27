@@ -15,119 +15,99 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
 
     // Toggling windows
-    toggleSettings: () => {
-        console.log("Preload: toggleSettings called");
-        ipcRenderer.send("toggle-settings");
-    },
-    toggleReminder: () => {
-        console.log("Preload: toggleReminder called");
-        ipcRenderer.send("toggle-reminder");
-    },
+    toggleSettings: () => ipcRenderer.send("toggle-settings"),
+    toggleReminder: () => ipcRenderer.send("toggle-reminder"),
     toggleChecklist: () => ipcRenderer.send("toggle-checklist"),
+    toggleCountdown: () => ipcRenderer.send("toggle-countdown"),
+    toggleClock: () => ipcRenderer.send("toggle-clock"),
+    toggleResumption: () => ipcRenderer.send("toggle-resumption"),
 
-    // Reminder text update
+    // Reminder
     onUpdateReminderText: (callback) => {
-        ipcRenderer.removeAllListeners("update-reminder-text");
         ipcRenderer.on("update-reminder-text", (event, newText) => {
-            console.log("Preload received update-reminder-text:", newText);
             callback(newText);
         });
     },
 
-    // Checklist functions
+    // Checklist
     loadChecklistState: () => ipcRenderer.invoke("load-checklist-state"),
-    addChecklistItem: (item) => {
-        console.log("Preload: Adding checklist item:", item);
-        ipcRenderer.send("add-checklist-item", item);
-    },
-    removeChecklistItem: (index) => {
-        console.log("Preload: Removing checklist item at index:", index);
-        ipcRenderer.send("remove-checklist-item", index);
-    },
-    resetChecklist: () => {
-        console.log("Preload: Resetting checklist");
-        ipcRenderer.send("reset-checklist");
-    },
-    toggleChecklistItem: (index, newState) => {
-        console.log("Preload: Toggling checklist item at index:", index, "with new state:", newState);
-        ipcRenderer.send("toggle-checklist-item", { index, newState });
-    },
+    addChecklistItem: (item) => ipcRenderer.send("add-checklist-item", item),
+    removeChecklistItem: (index) => ipcRenderer.send("remove-checklist-item", index),
+    resetChecklist: () => ipcRenderer.send("reset-checklist"),
+    toggleChecklistItem: (index, newState) => ipcRenderer.send("toggle-checklist-item", { index, newState }),
     onChecklistUpdated: (callback) => {
-        ipcRenderer.removeAllListeners("update-checklist");
-        ipcRenderer.on("update-checklist", (event, checklist) => {
-            console.log("Preload received update-checklist:", checklist);
-            callback(checklist);
-        });
+        ipcRenderer.on("update-checklist", (event, checklist) => callback(checklist));
     },
     resetToLegacyChecklist: () => ipcRenderer.send("reset-to-legacy-checklist"),
 
     // Countdown
-    toggleCountdown: () => {
-        console.log("Preload: toggleCountdown called");
-        ipcRenderer.send("toggle-countdown");
-    },
-
-    getTickSoundPath: async () => {
-        const tickSoundPath = await ipcRenderer.invoke("get-tick-sound-path");
-        console.log("Resolved tick sound path:", tickSoundPath);
-        return tickSoundPath;
-    },
-
-    setVolume: (volume) => {
-        console.log("Preload: setVolume called with volume:", volume);
-        ipcRenderer.send("volume-change", volume);
-    },
-
+    getTickSoundPath: async () => await ipcRenderer.invoke("get-tick-sound-path"),
+    setVolume: (volume) => ipcRenderer.send("volume-change", volume),
     onVolumeUpdate: (callback) => {
-        ipcRenderer.on("update-volume", (event, volume) => {
-            console.log("Preload received volume update:", volume);
-            callback(volume);
-        });
+        ipcRenderer.on("update-volume", (event, volume) => callback(volume));
     },
 
-    // Clock 
-    toggleClock: () => {
-        console.log("Preload: toggleClock called");
-        ipcRenderer.send("toggle-clock");
-    },
-
+    // Session countdowns
     onUpdateSessionCountdowns: (callback) => {
-        ipcRenderer.removeAllListeners("update-session-countdowns");
         ipcRenderer.on("update-session-countdowns", (event, updatedSessions) => {
-            console.log("Preload: Received updated session countdowns:", updatedSessions);
-    
-            // Update the sessionCountdowns array directly in the renderer
             callback(updatedSessions);
-    
-            // Notify the renderer to refresh the session display
             if (window.displayNextSessionCountdown) {
-                window.displayNextSessionCountdown(); // Ensure this function is globally accessible
+                window.displayNextSessionCountdown();
             }
         });
     },
 
-    // Resumption feature
-    toggleResumption: () => {
-        console.log("Preload: toggleResumption called");
-        ipcRenderer.send("toggle-resumption");
+    // Resumption
+    getBeepSoundPath: async () => await ipcRenderer.invoke("get-beep-sound-path"),
+
+    // snipper management
+    createSnipperWindow: (name) => {
+        console.log("Preload: Sending request to create snipper window with name:", name);
+        ipcRenderer.send("create-snipper-window", name);
     },
-
-    getBeepSoundPath: async () => {
-        const beepSoundPath = await ipcRenderer.invoke("get-beep-sound-path");
-        console.log("Resolved tick sound path:", beepSoundPath);
-        return beepSoundPath;
+    updateSnipperSettings: (name, settings) => ipcRenderer.send("update-snipper-settings", { name, settings }),
+    removeSnipperWindow: (name) => ipcRenderer.send("remove-snipper-window", name),
+    onSnipperSettingsUpdated: (callback) => {
+        ipcRenderer.on("snipper-settings-updated", (event, activeSnippers) => callback(activeSnippers));
     },
+    getActiveSnippers: async () => await ipcRenderer.invoke("get-active-snippers"),
+    getSnipperSettings: async () => await ipcRenderer.invoke("get-snipper-settings"),
+    closeCurrentSnipper: () => ipcRenderer.send("close-current-snipper"),
+    onSnipperUpdated: (callback) => {
+        ipcRenderer.on("snipper-updated", (event, settings) => callback(settings));
+    },
+    startRegionSelection: (snipperName) => ipcRenderer.send("start-region-selection", snipperName),
 
-
-    updateSettings: (settings) => ipcRenderer.send("update-settings", settings),
-
-    // Exit the application
+    // Exit and restart
     exitApp: () => ipcRenderer.send("exit-app"),
-    restartApp: () => ipcRenderer.send('restart-app'),
+    restartApp: () => ipcRenderer.send("restart-app"),
 
-    // Resize window to fit content
-    resizeWindowToContent: (width, height) => {
-        console.log("Preload: Sending resize request to main process with dimensions:", width, height);
-        ipcRenderer.send("resize-window-to-content", { width, height });
+    // Resize window
+    resizeWindowToContent: (width, height) => ipcRenderer.send("resize-window-to-content", { width, height }),
+});
+
+contextBridge.exposeInMainWorld("regionAPI", {
+    send: (channel, data) => {
+        const validChannels = ["region-selected", "close-region-selection"];
+        if (validChannels.includes(channel)) {
+            ipcRenderer.send(channel, data);
+        }
+    },
+    on: (channel, callback) => {
+        const validChannels = ["snipper-updated", "region-selected"]; // Add valid listeners here if needed
+        if (validChannels.includes(channel)) {
+            ipcRenderer.on(channel, (event, ...args) => callback(...args));
+        }
+    },
+});
+
+contextBridge.exposeInMainWorld("snipperAPI", {
+    readyToCapture: () => {
+        console.log("snipperAPI: readyToCapture called");
+        ipcRenderer.send("ready-to-capture");
+    },
+    onRegionSelected: (callback) => {
+        console.log("snipperAPI: Listening for region-selected");
+        ipcRenderer.on("region-selected", (event, bounds) => callback(bounds));
     },
 });

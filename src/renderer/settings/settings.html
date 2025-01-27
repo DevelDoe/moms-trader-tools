@@ -147,6 +147,11 @@
                 <ul id="session-list"></ul>
             </section>
 
+            <section id="screen-management">
+                <h2>Screen Management</h2>
+                <div id="screenControls"></div>
+            </section>
+
             <br />
             <button onclick="window.electronAPI.toggleSettings()">Close</button>
         </div>
@@ -157,41 +162,42 @@
                 // Load initial settings
                 const settings = await window.electronAPI.getSettings();
                 document.getElementById("reminder-text").value = settings.text || "REMINDER";
-
+    
                 // Initialize checklist
                 const checklistItems = await window.electronAPI.loadChecklistState();
                 renderChecklist(checklistItems);
-
+    
                 // Initialize volume slider
                 const volumeSlider = document.getElementById("volume-slider");
                 volumeSlider.value = settings.volume || 0.5; // Use saved volume or default
-
                 volumeSlider.addEventListener("input", () => {
                     const volume = parseFloat(volumeSlider.value);
                     window.electronAPI.setVolume(volume);
                 });
-
-                // Load session countdowns
+    
+                // Load and render session countdowns
                 const sessionCountdowns = settings.sessionCountdowns || [];
                 renderSessionCountdowns(sessionCountdowns);
-
+    
                 // Listen for checklist updates
                 window.electronAPI.onChecklistUpdated((updatedItems) => {
                     renderChecklist(updatedItems);
                 });
             } catch (error) {
-                console.error("Error loading settings or checklist:", error);
+                console.error("Error initializing settings or checklist:", error);
+                alert("Failed to load settings. Please try restarting the application.");
             }
         });
-
+    
         // Render checklist items
         function renderChecklist(items) {
             const checklistContainer = document.getElementById("checklist-items");
             checklistContainer.innerHTML = ""; // Clear previous items
+    
             items.forEach((item, index) => {
                 const listItem = document.createElement("li");
                 listItem.textContent = `${item.text} (${item.type})`;
-
+    
                 const removeButton = document.createElement("button");
                 removeButton.textContent = "Remove";
                 removeButton.addEventListener("click", async () => {
@@ -199,24 +205,20 @@
                         await window.electronAPI.removeChecklistItem(index);
                     } catch (error) {
                         console.error("Error removing checklist item:", error);
-                        alert("Failed to remove checklist item.");
+                        alert("Failed to remove checklist item. Please try again.");
                     }
                 });
-
+    
                 listItem.appendChild(removeButton);
                 checklistContainer.appendChild(listItem);
             });
         }
-
-        document.getElementById("reset-legacy-checklist-btn").addEventListener("click", () => {
-            console.log("Reset to legacy checklist button clicked");
-            window.electronAPI.resetToLegacyChecklist();
-        });
-
+    
+        // Add new checklist item
         document.getElementById("add-item-btn").addEventListener("click", async () => {
             const itemText = document.getElementById("new-item-text").value.trim();
             const itemType = document.getElementById("new-item-type").value;
-
+    
             if (itemText) {
                 const newItem = { text: itemText, type: itemType };
                 try {
@@ -230,70 +232,103 @@
                 alert("Please enter the item text.");
             }
         });
-
+    
+        // Reset checklist to legacy
+        document.getElementById("reset-legacy-checklist-btn").addEventListener("click", async () => {
+            try {
+                await window.electronAPI.resetToLegacyChecklist();
+                console.log("Checklist reset to legacy defaults.");
+            } catch (error) {
+                console.error("Error resetting to legacy checklist:", error);
+                alert("Failed to reset checklist. Please try again.");
+            }
+        });
+    
         // Render session countdowns
         function renderSessionCountdowns(sessionCountdowns) {
             const sessionList = document.getElementById("session-list");
             sessionList.innerHTML = ""; // Clear existing sessions
-
+    
             sessionCountdowns.forEach((session, index) => {
                 const listItem = document.createElement("li");
                 listItem.textContent = `${session.start} - ${session.end} | ${session.title}`;
-
+    
                 const removeButton = document.createElement("button");
                 removeButton.textContent = "Remove";
                 removeButton.addEventListener("click", () => {
-                    sessionCountdowns.splice(index, 1);
-                    renderSessionCountdowns(sessionCountdowns);
-
-                    // Save updated session countdowns
-                    window.electronAPI.updateSettings({ sessionCountdowns });
+                    try {
+                        sessionCountdowns.splice(index, 1);
+                        renderSessionCountdowns(sessionCountdowns);
+    
+                        // Save updated session countdowns
+                        window.electronAPI.updateSettings({ sessionCountdowns });
+                    } catch (error) {
+                        console.error("Error removing session countdown:", error);
+                        alert("Failed to remove session countdown. Please try again.");
+                    }
                 });
-
+    
                 listItem.appendChild(removeButton);
                 sessionList.appendChild(listItem);
             });
         }
-
-        // Add session countdown
+    
+        // Add new session countdown
         document.getElementById("add-session-btn").addEventListener("click", () => {
             const sessionTime = document.getElementById("session-time").value;
             const sessionTitle = document.getElementById("session-title").value.trim();
             const countdownHours = parseInt(document.getElementById("countdown-hours").value, 10);
             const countdownMinutes = parseInt(document.getElementById("countdown-minutes").value, 10);
-
+    
             const totalCountdownMinutes = countdownHours * 60 + countdownMinutes;
-
+    
             if (sessionTime && sessionTitle && totalCountdownMinutes > 0) {
                 const [startHour, startMinute] = sessionTime.split(":").map(Number);
-
+    
                 // Calculate the end time
                 const start = new Date();
                 start.setHours(startHour, startMinute, 0, 0);
                 const end = new Date(start.getTime() + totalCountdownMinutes * 60 * 1000);
-
+    
                 const formattedEnd = `${String(end.getHours()).padStart(2, "0")}:${String(end.getMinutes()).padStart(2, "0")}`;
-
+    
                 const newSession = { start: sessionTime, title: sessionTitle, end: formattedEnd };
-
-                // Fetch current sessionCountdowns and update
-                window.electronAPI.getSettings().then((settings) => {
-                    const updatedSessions = [...(settings.sessionCountdowns || []), newSession];
-                    window.electronAPI.updateSettings({ sessionCountdowns: updatedSessions });
-                    renderSessionCountdowns(updatedSessions);
-                });
+    
+                try {
+                    window.electronAPI.getSettings().then((settings) => {
+                        const updatedSessions = [...(settings.sessionCountdowns || []), newSession];
+                        window.electronAPI.updateSettings({ sessionCountdowns: updatedSessions });
+                        renderSessionCountdowns(updatedSessions);
+                    });
+                } catch (error) {
+                    console.error("Error adding session countdown:", error);
+                    alert("Failed to add session countdown. Please try again.");
+                }
             } else {
                 alert("Please fill out all fields correctly.");
             }
         });
-
+    
+        // Restart app
         document.getElementById("restart-app-button").addEventListener("click", () => {
-            window.electronAPI.restartApp();
+            try {
+                window.electronAPI.restartApp();
+            } catch (error) {
+                console.error("Error restarting app:", error);
+                alert("Failed to restart the app. Please try again.");
+            }
         });
-
+    
+        // Save reminder text settings
         function saveSettings() {
             const newText = document.getElementById("reminder-text").value;
-            window.electronAPI.updateSettings({ text: newText });
+            try {
+                window.electronAPI.updateSettings({ text: newText });
+            } catch (error) {
+                console.error("Error saving settings:", error);
+                alert("Failed to save settings. Please try again.");
+            }
         }
     </script>
+    
 </html>

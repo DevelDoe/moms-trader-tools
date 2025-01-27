@@ -1,0 +1,82 @@
+<!-- ./src/renderer/snipper/region.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Select Region</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        #selection-box {
+            position: absolute;
+            border: 2px dashed white;
+            background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent fill for better visibility */
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="selection-box"></div>
+
+    <script>
+        let startX = 0, startY = 0, endX = 0, endY = 0;
+        const selectionBox = document.getElementById("selection-box");
+        let isSelecting = false; // Track the selection state
+
+        // Start selection on mousedown
+        document.addEventListener("mousedown", (e) => {
+            isSelecting = true;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            selectionBox.style.left = `${startX}px`;
+            selectionBox.style.top = `${startY}px`;
+            selectionBox.style.width = "0px";
+            selectionBox.style.height = "0px";
+            selectionBox.style.display = "block";
+        });
+
+        // Update selection box dimensions on mousemove
+        document.addEventListener("mousemove", (e) => {
+            if (!isSelecting) return;
+
+            endX = e.clientX;
+            endY = e.clientY;
+
+            // Update box dimensions and position
+            selectionBox.style.left = `${Math.min(startX, endX)}px`;
+            selectionBox.style.top = `${Math.min(startY, endY)}px`;
+            selectionBox.style.width = `${Math.abs(endX - startX)}px`;
+            selectionBox.style.height = `${Math.abs(endY - startY)}px`;
+        });
+
+        // Finalize selection on mouseup
+        document.addEventListener("mouseup", () => {
+            if (!isSelecting) return;
+
+            isSelecting = false;
+            selectionBox.style.display = "none";
+
+            // Send the selected region back to the main process
+            window.regionAPI.send("region-selected", {
+                x: Math.min(startX, endX),
+                y: Math.min(startY, endY),
+                width: Math.abs(endX - startX),
+                height: Math.abs(endY - startY),
+            });
+
+            // Close the region selection window
+            window.regionAPI.send("close-region-selection");
+        });
+    </script>
+</body>
+</html>
