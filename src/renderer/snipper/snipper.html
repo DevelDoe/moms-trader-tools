@@ -90,30 +90,21 @@
                 }
 
                 // Update video display logic
-                function updateVideoDisplay() {
+                function updateVideoDisplay(bounds) {
                     const video = document.getElementById("snipper-video");
 
-                    // Get the current window size
+                    // Current window size
                     const currentWidth = window.innerWidth;
                     const currentHeight = window.innerHeight;
 
-                    // Calculate scaling factor while maintaining aspect ratio
-                    const scaleX = currentWidth / originalWidth;
-                    const scaleY = currentHeight / originalHeight;
+                    // Scaling factor
+                    const scaleX = currentWidth / bounds.width;
+                    const scaleY = currentHeight / bounds.height;
                     const scale = Math.min(scaleX, scaleY); // Keep proportional scaling
 
-                    // Lock to the top-right corner of the selected region
-                    const offsetX = (bounds.x + bounds.width) * scale - currentWidth; // Adjust for right lock
-                    const offsetY = bounds.y * scale; // Adjust Y position
-
-                    // Apply the translation and scaling
-                    video.style.transform = `
-                    translate(-${offsetX}px, -${offsetY}px)
-                    scale(${scale})
-                `;
-                    video.style.transformOrigin = "top left"; // Anchor scaling to top-left
-                    video.style.width = `${snipper.width}px`;
-                    video.style.height = `${snipper.height}px`;
+                    // Translate and scale
+                    video.style.transform = `translate(-${bounds.x}px, -${bounds.y}px) scale(${scale})`;
+                    video.style.transformOrigin = "top left";
                 }
             });
         </script>
