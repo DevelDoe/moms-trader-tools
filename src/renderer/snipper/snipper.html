@@ -46,6 +46,10 @@
             document.addEventListener("DOMContentLoaded", () => {
                 const video = document.getElementById("snipper-video");
 
+                let bounds = {}; // Selected region bounds
+                let originalWidth = 0; // Original width of the selected region
+                let originalHeight = 0; // Original height of the selected region
+
                 if (window.snipperAPI) {
                     console.log("snipperAPI is available in the renderer process.");
                     window.snipperAPI.readyToCapture();
@@ -54,8 +58,12 @@
                 }
 
                 if (window.snipperAPI?.onRegionSelected) {
-                    window.snipperAPI.onRegionSelected(async (bounds) => {
-                        console.log("Renderer: Region selected:", bounds);
+                    window.snipperAPI.onRegionSelected(async (selectedBounds) => {
+                        console.log("Renderer: Region selected:", selectedBounds);
+
+                        bounds = selectedBounds; // Save the selected region bounds
+                        originalWidth = bounds.width;
+                        originalHeight = bounds.height;
 
                         const videoConstraints = {
                             video: {
@@ -73,9 +81,7 @@
                             video.onloadedmetadata = () => {
                                 video.play();
                                 console.log("Renderer: Stream is playing.");
-
-                                // Call the updated display function with the selected region bounds
-                                updateVideoDisplay(bounds);
+                                updateVideoDisplay(); // Display the initial region
                             };
 
                             video.addEventListener("playing", () => {
@@ -89,22 +95,34 @@
                     console.error("onRegionSelected is not available in the renderer process.");
                 }
 
-                // Update video display logic
-                function updateVideoDisplay(bounds) {
-                    const video = document.getElementById("snipper-video");
+                // Recalculate scaling and alignment on window resize
+                window.addEventListener("resize", updateVideoDisplay);
 
-                    // Current window size
+                function updateVideoDisplay() {
                     const currentWidth = window.innerWidth;
                     const currentHeight = window.innerHeight;
 
-                    // Scaling factor
-                    const scaleX = currentWidth / bounds.width;
-                    const scaleY = currentHeight / bounds.height;
-                    const scale = Math.min(scaleX, scaleY); // Keep proportional scaling
+                    // Calculate scaling factors
+                    const scaleX = currentWidth / originalWidth;
+                    const scaleY = currentHeight / originalHeight;
+                    const scale = Math.min(scaleX, scaleY); // Keep aspect ratio
 
-                    // Translate and scale
-                    video.style.transform = `translate(-${bounds.x}px, -${bounds.y}px) scale(${scale})`;
+                    // Adjust for selected region alignment
+                    const offsetX = -bounds.x * scale;
+                    const offsetY = -bounds.y * scale;
+
+                    // Apply transformations to the video element
+                    video.style.transform = `
+            translate(${offsetX}px, ${offsetY}px)
+            scale(${scale})
+        `;
                     video.style.transformOrigin = "top left";
+
+                    // Ensure the video element covers the entire screen
+                    video.style.width = `${screen.width}px`;
+                    video.style.height = `${screen.height}px`;
+
+                    console.log(`Scaled to: ${scale}, Translated to: (${offsetX}px, ${offsetY}px), Original Size: ${originalWidth}x${originalHeight}`);
                 }
             });
         </script>
