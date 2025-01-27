@@ -44,90 +44,69 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {
-                const video = document.getElementById("snipper-video");
-                const videoContainer = document.getElementById("video-container");
+    const video = document.getElementById("snipper-video");
 
-                if (window.snipperAPI) {
-                    console.log("snipperAPI is available in the renderer process.");
-                    window.snipperAPI.readyToCapture();
-                } else {
-                    console.error("snipperAPI is not available in the renderer process.");
-                }
+    if (window.snipperAPI) {
+        console.log("snipperAPI is available in the renderer process.");
+        window.snipperAPI.readyToCapture();
+    } else {
+        console.error("snipperAPI is not available in the renderer process.");
+    }
 
-                if (window.snipperAPI?.onRegionSelected) {
-                    window.snipperAPI.onRegionSelected(async (bounds) => {
-                        console.log("Renderer: Region selected:", bounds);
+    if (window.snipperAPI?.onRegionSelected) {
+        window.snipperAPI.onRegionSelected(async (bounds) => {
+            console.log("Renderer: Region selected:", bounds);
 
-                        const videoConstraints = {
-                            video: {
-                                mandatory: {
-                                    chromeMediaSource: "desktop",
-                                    chromeMediaSourceId: bounds.sourceId,
-                                },
-                            },
-                        };
+            const videoConstraints = {
+                video: {
+                    mandatory: {
+                        chromeMediaSource: "desktop",
+                        chromeMediaSourceId: bounds.sourceId,
+                    },
+                },
+            };
 
-                        try {
-                            const stream = await navigator.mediaDevices.getUserMedia(videoConstraints);
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(videoConstraints);
 
-                            video.srcObject = stream;
-                            video.onloadedmetadata = () => {
-                                video.play();
-                                console.log("Renderer: Stream is playing.");
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    video.play();
+                    console.log("Renderer: Stream is playing.");
 
-                                // Store the original size and bounds for scaling purposes
-                                video.dataset.originalWidth = bounds.width;
-                                video.dataset.originalHeight = bounds.height;
-                                video.dataset.boundsX = bounds.x;
-                                video.dataset.boundsY = bounds.y;
+                    // Call the updated display function with the selected region bounds
+                    updateVideoDisplay(bounds);
+                };
 
-                                // Apply scaling and alignment on initial load
-                                scaleContent(bounds);
-                            };
-                        } catch (error) {
-                            console.error("Renderer: Error capturing snipper:", error);
-                        }
-                    });
-                } else {
-                    console.error("onRegionSelected is not available in the renderer process.");
-                }
-
-                // Scale content on window resize
-                window.addEventListener("resize", () => {
-                    const bounds = {
-                        x: parseInt(video.dataset.boundsX, 10),
-                        y: parseInt(video.dataset.boundsY, 10),
-                        width: parseInt(video.dataset.originalWidth, 10),
-                        height: parseInt(video.dataset.originalHeight, 10),
-                    };
-                    scaleContent(bounds);
+                video.addEventListener("playing", () => {
+                    console.log("Video is rendering frames.");
                 });
+            } catch (error) {
+                console.error("Renderer: Error capturing snipper:", error);
+            }
+        });
+    } else {
+        console.error("onRegionSelected is not available in the renderer process.");
+    }
 
-                function scaleContent(bounds) {
-                    const originalWidth = parseInt(video.dataset.originalWidth, 10);
-                    const originalHeight = parseInt(video.dataset.originalHeight, 10);
+    // Update video display logic
+    function updateVideoDisplay(bounds) {
+        const video = document.getElementById("snipper-video");
 
-                    // Calculate scaling factor for the selected region
-                    const scaleX = window.innerWidth / bounds.width;
-                    const scaleY = window.innerHeight / bounds.height;
-                    const scale = Math.min(scaleX, scaleY); // Maintain aspect ratio
+        // Current window size
+        const currentWidth = window.innerWidth;
+        const currentHeight = window.innerHeight;
 
-                    // Align the video to the selected region
-                    const translateX = -bounds.x * scale;
-                    const translateY = -bounds.y * scale;
+        // Scaling factor
+        const scaleX = currentWidth / bounds.width;
+        const scaleY = currentHeight / bounds.height;
+        const scale = Math.min(scaleX, scaleY); // Keep proportional scaling
 
-                    // Apply transformations to scale and align the video content
-                    videoContainer.style.transform = `
-            translate(${translateX}px, ${translateY}px)
-            scale(${scale})
-        `;
-                    videoContainer.style.transformOrigin = "top left";
-                    videoContainer.style.width = `${originalWidth}px`;
-                    videoContainer.style.height = `${originalHeight}px`;
-
-                    console.log(`Scaled to: ${scale}, Translated to: (${translateX}, ${translateY}), Original Size: ${originalWidth}x${originalHeight}`);
-                }
-            });
+        // Translate and scale
+        video.style.transform = `translate(-${bounds.x}px, -${bounds.y}px) scale(${scale})`;
+        video.style.transformOrigin = "top left";
+    }
+});
         </script>
     </body>
 </html>
