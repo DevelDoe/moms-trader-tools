@@ -83,57 +83,59 @@
                 });
 
                 function adjustReminderWindowSize() {
-                    setTimeout(() => {
-                        const reminderItems = document.querySelectorAll(".reminder-item");
+    setTimeout(() => {
+        const reminderItems = document.querySelectorAll(".reminder-item");
 
-                        let maxWidth = 0;
-                        let totalHeight = 0;
+        if (reminderItems.length === 0) {
+            console.warn("⚠ No items found for resizing.");
+            return;
+        }
 
-                        if (reminderItems.length === 0) {
-                            console.warn("⚠ No items found for resizing.");
-                            return;
-                        }
+        // **Force reflow before measuring**
+        document.body.style.display = "none";
+        document.body.offsetHeight; // Trigger reflow
+        document.body.style.display = "block";
 
-                        // Force layout reflow to ensure measurements are correct
-                        document.body.offsetHeight;
+        let maxWidth = 0;
+        let totalHeight = 0;
 
-                        reminderItems.forEach((item) => {
-                            const rect = item.getBoundingClientRect();
-                            if (!isNaN(rect.width) && rect.width > 0) {
-                                maxWidth = Math.max(maxWidth, rect.width);
-                            }
-                            if (!isNaN(rect.height) && rect.height > 0) {
-                                totalHeight += rect.height + 7; // Add extra padding for wrapped text
-                            }
-                        });
+        reminderItems.forEach((item) => {
+            const rect = item.getBoundingClientRect();
+            maxWidth = Math.max(maxWidth, rect.width);
+            totalHeight += rect.height + 7; // Extra padding
+        });
 
-                        // Fallback values if measurement fails
-                        maxWidth = maxWidth || 200;
-                        totalHeight = totalHeight || 50;
+        // Fallback values if measurement fails
+        maxWidth = maxWidth || 250;
+        totalHeight = totalHeight || 50;
 
-                        let width = Math.min(Math.max(maxWidth + 40, 250), 600); // Min 250px, Max 600px
-                        let height = Math.max(totalHeight + 20, 50); // Min 50px height
+        let width = Math.min(Math.max(maxWidth + 40, 250), 600); // Min 250px, Max 600px
+        let height = Math.max(totalHeight + 20, 50); // Min 50px height
 
-                        width = Math.floor(width);
-                        height = Math.floor(height);
+        width = Math.floor(width);
+        height = Math.floor(height);
 
-                        console.log(`✔ Resizing Reminder Window: ${width}x${height}`);
+        console.log(`✔ Resizing Reminder Window: ${width}x${height}`);
 
-                        if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
-                            console.error("❌ Invalid window size detected!", { width, height });
-                            return;
-                        }
+        if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+            console.error("❌ Invalid window size detected!", { width, height });
+            return;
+        }
 
-                        // Delay resizing to ensure rendering is complete
-                        setTimeout(() => {
-                            try {
-                                window.electronAPI.resizeWindowToContent(width, height);
-                            } catch (error) {
-                                console.error("❌ Error resizing window:", error);
-                            }
-                        }, 500); // Delay to allow proper layout calculations
-                    }, 100); // Ensure DOM is fully updated before measuring
-                }
+        // **Apply size change only if needed**
+        const currentWidth = window.innerWidth;
+        const currentHeight = window.innerHeight;
+
+        if (currentWidth !== width || currentHeight !== height) {
+            try {
+                window.electronAPI.resizeWindowToContent(width, height);
+            } catch (error) {
+                console.error("❌ Error resizing window:", error);
+            }
+        }
+    }, 200); // Ensures DOM is fully updated before measuring
+}
+
 
                 window.electronAPI.sendReminderReady();
             });
