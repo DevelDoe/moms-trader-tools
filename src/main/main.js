@@ -371,7 +371,14 @@ ipcMain.on("reset-to-default-sessions", () => {
 });
 
 function updateSessionWindows() {
-    clockWindow.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
+    if (windows.clock) {
+        console.log("Updating clock window with session countdowns:", appSettings.sessionCountdowns);
+        windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
+    }
+    if (windows.settings) {
+        console.log("Updating settings window with session countdowns:", appSettings.sessionCountdowns);
+        windows.settings.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
+    }
 }
 
 // Resumption
