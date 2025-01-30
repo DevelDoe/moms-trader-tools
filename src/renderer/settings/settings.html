@@ -235,37 +235,6 @@
                 });
             }
 
-            // Countdown Section
-            function initializeCountdownDuration() {
-                const hoursSelect = document.getElementById("countdown-hours");
-                const minutesSelect = document.getElementById("countdown-minutes");
-
-                if (!hoursSelect || !minutesSelect) {
-                    console.error("❌ Countdown duration elements not found!");
-                    return;
-                }
-
-                // Clear existing options
-                hoursSelect.innerHTML = "";
-                minutesSelect.innerHTML = "";
-
-                // Populate hours dropdown (1 to 25)
-                for (let i = 1; i <= 25; i++) {
-                    const option = document.createElement("option");
-                    option.value = i;
-                    option.textContent = `${i} ${i === 1 ? "hour" : "hours"}`;
-                    hoursSelect.appendChild(option);
-                }
-
-                // Populate minutes dropdown (1 to 60)
-                for (let i = 1; i <= 60; i++) {
-                    const option = document.createElement("option");
-                    option.value = i;
-                    option.textContent = `${i} ${i === 1 ? "minute" : "minutes"}`;
-                    minutesSelect.appendChild(option);
-                }
-            }
-
             // Session Countdowns
             function initializeSessionCountdowns(sessions, sessionVolume) {
                 const sessionList = document.getElementById("session-list");
@@ -322,6 +291,34 @@
                         sessionVolumeSlider.value = volume;
                     }
                 });
+
+                const hoursSelect = document.getElementById("countdown-hours");
+                const minutesSelect = document.getElementById("countdown-minutes");
+
+                if (!hoursSelect || !minutesSelect) {
+                    console.error("❌ Countdown duration elements not found!");
+                    return;
+                }
+
+                // Clear existing options
+                hoursSelect.innerHTML = "";
+                minutesSelect.innerHTML = "";
+
+                // Populate hours dropdown (1 to 25)
+                for (let i = 1; i <= 25; i++) {
+                    const option = document.createElement("option");
+                    option.value = i;
+                    option.textContent = `${i} ${i === 1 ? "hour" : "hours"}`;
+                    hoursSelect.appendChild(option);
+                }
+
+                // Populate minutes dropdown (1 to 60)
+                for (let i = 1; i <= 60; i++) {
+                    const option = document.createElement("option");
+                    option.value = i;
+                    option.textContent = `${i} ${i === 1 ? "minute" : "minutes"}`;
+                    minutesSelect.appendChild(option);
+                }
             }
 
             function saveSettings(newSettings) {
