@@ -67,9 +67,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onSessionVolumeUpdate: (callback) => {
         ipcRenderer.on("update-session-volume", (event, volume) => callback(volume));
     },
-    
-
     getBellSoundPath: async () => await ipcRenderer.invoke("get-bell-sound-path"),
+    resetToDefaultSessions: () => ipcRenderer.send("reset-to-default-sessions"),
 
     // Resumption
     getBeepSoundPath: async () => await ipcRenderer.invoke("get-beep-sound-path"),
