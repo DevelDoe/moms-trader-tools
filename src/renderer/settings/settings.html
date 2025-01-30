@@ -126,6 +126,7 @@
                     document.getElementById("add-reminder-btn").addEventListener("click", addReminderItem);
                     document.getElementById("add-item-btn").addEventListener("click", addChecklistItem);
                     document.getElementById("reset-legacy-checklist-btn").addEventListener("click", resetChecklist);
+                    document.getElementById("reset-default-sessions-btn").addEventListener("click", resetDefaultSessions);
 
                     // Listen for global settings updates
                     window.electronAPI.onSettingsUpdated((updatedSettings) => {
@@ -313,7 +314,7 @@
                     }
                 });
 
-                document.getElementById("reset-default-sessions-btn").addEventListener("click", resetDefaultSessions);
+                
             }
 
             function resetDefaultSessions() {
