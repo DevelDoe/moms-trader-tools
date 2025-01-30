@@ -245,53 +245,12 @@
 
             // Session Countdowns
             function initializeSessionCountdowns(sessions, sessionVolume) {
-                document.getElementById("add-session-btn").addEventListener("click", async () => {
-                    const sessionTimeInput = document.getElementById("session-time").value;
-                    const sessionTitleInput = document.getElementById("session-title").value.trim();
-                    const hours = parseInt(document.getElementById("countdown-hours").value, 10);
-                    const minutes = parseInt(document.getElementById("countdown-minutes").value, 10);
-
-                    if (!sessionTimeInput || !sessionTitleInput || isNaN(hours) || isNaN(minutes)) {
-                        alert("Please fill in all session details.");
-                        return;
-                    }
-
-                    // Parse the session start time
-                    const [startHour, startMinute] = sessionTimeInput.split(":").map(Number);
-                    const startTime = new Date();
-                    startTime.setHours(startHour, startMinute, 0, 0);
-
-                    // Calculate the end time by adding the duration
-                    const endTime = new Date(startTime.getTime() + hours * 60 * 60 * 1000 + minutes * 60 * 1000);
-
-                    // Format start and end times as HH:MM
-                    const formatTime = (date) => date.toTimeString().slice(0, 5);
-                    const session = {
-                        start: formatTime(startTime),
-                        end: formatTime(endTime),
-                        title: sessionTitleInput,
-                    };
-
-                    // Retrieve existing sessions, add the new session, and save
-                    const settings = await window.electronAPI.getSettings();
-                    const updatedSessions = [...(settings.sessionCountdowns || []), session];
-                    saveSettings({ sessionCountdowns: updatedSessions });
-
-                    // Clear input fields
-                    document.getElementById("session-time").value = "";
-                    document.getElementById("session-title").value = "";
-                    document.getElementById("countdown-hours").value = "";
-                    document.getElementById("countdown-minutes").value = "";
-                });
-
-                // Volumw
-
                 const sessionList = document.getElementById("session-list");
                 const sessionVolumeSlider = document.getElementById("session-volume-slider");
 
                 sessionList.innerHTML = "";
 
-                // Populate session list
+                // ✅ Populate session list
                 sessions.forEach((session, index) => {
                     const listItem = document.createElement("li");
                     listItem.textContent = `${session.start} - ${session.end} | ${session.title}`;
@@ -301,42 +260,45 @@
                     removeButton.addEventListener("click", () => {
                         sessions.splice(index, 1);
                         saveSettings({ sessionCountdowns: sessions });
+                        initializeSessionCountdowns(sessions, sessionVolume); // Refresh UI
                     });
 
                     listItem.appendChild(removeButton);
                     sessionList.appendChild(listItem);
                 });
 
-                // **Prevent Infinite Loop & Add Deadzone**
+                // ✅ Restore the last saved volume
+                sessionVolumeSlider.value = sessionVolume || 0.1; // Default to 0.1 if no saved value
+
+                // ✅ Update volume on change with a delay to avoid spamming updates
                 let isUserAdjusting = false;
                 let volumeUpdateTimeout = null;
 
-                // **Set initial slider value ONCE when opening settings**
-                sessionVolumeSlider.value = sessionVolume || 0.1; // Default to 0.1 if no saved value
-
                 sessionVolumeSlider.addEventListener("input", () => {
                     if (!isUserAdjusting) {
-                        isUserAdjusting = true; // Prevent recursion
+                        isUserAdjusting = true;
                     }
 
-                    // **Clear previous timeout to reset the delay**
                     clearTimeout(volumeUpdateTimeout);
 
-                    // **Set a new timeout for 1 second (1000ms)**
                     volumeUpdateTimeout = setTimeout(() => {
-                        const newVolume = sessionVolumeSlider.value;
-                        console.log(`🔊 User finalized session volume: ${newVolume}`);
+                        const newVolume = parseFloat(sessionVolumeSlider.value);
+                        console.log(`🔊 User set session volume: ${newVolume}`);
+
+                        // Send the new volume to Electron
                         window.electronAPI.setSessionVolume(newVolume);
+
+                        // Save the updated volume
                         saveSettings({ sessionVolume: newVolume });
 
-                        isUserAdjusting = false; // Allow updates again
-                    }, 500); // 1-second delay after user stops dragging
+                        isUserAdjusting = false;
+                    }, 500); // Prevent excessive updates while dragging
                 });
 
-                // **Ensure slider does NOT auto-update while the user is adjusting**
+                // ✅ Ensure UI updates when Electron sends volume updates
                 window.electronAPI.onSessionVolumeUpdate((volume) => {
                     if (!isUserAdjusting) {
-                        console.log(`🔊 Updating UI session volume to: ${volume}`);
+                        console.log(`🔊 Electron updated session volume: ${volume}`);
                         sessionVolumeSlider.value = volume;
                     }
                 });
@@ -363,13 +325,55 @@
                     hoursSelect.appendChild(option);
                 }
 
-                // Populate minutes dropdown (1 to 60)
-                for (let i = 1; i <= 60; i++) {
+                // Populate minutes dropdown (0 to 59)
+                for (let i = 0; i < 60; i++) {
                     const option = document.createElement("option");
                     option.value = i;
                     option.textContent = `${i} ${i === 1 ? "minute" : "minutes"}`;
                     minutesSelect.appendChild(option);
                 }
+            }
+
+            async function addSessionCountdown() {
+                const sessionTimeInput = document.getElementById("session-time").value;
+                const sessionTitleInput = document.getElementById("session-title").value.trim();
+                const hours = parseInt(document.getElementById("countdown-hours").value, 10);
+                const minutes = parseInt(document.getElementById("countdown-minutes").value, 10);
+
+                if (!sessionTimeInput || !sessionTitleInput || isNaN(hours) || isNaN(minutes)) {
+                    alert("Please fill in all session details.");
+                    return;
+                }
+
+                // Parse the session start time
+                const [startHour, startMinute] = sessionTimeInput.split(":").map(Number);
+                const startTime = new Date();
+                startTime.setHours(startHour, startMinute, 0, 0);
+
+                // Calculate the end time by adding the duration
+                const endTime = new Date(startTime.getTime() + hours * 60 * 60 * 1000 + minutes * 60 * 1000);
+
+                // Format start and end times as HH:MM
+                const formatTime = (date) => date.toTimeString().slice(0, 5);
+                const session = {
+                    start: formatTime(startTime),
+                    end: formatTime(endTime),
+                    title: sessionTitleInput,
+                };
+
+                // Retrieve existing sessions, add the new session, and save
+                const settings = await window.electronAPI.getSettings();
+                const updatedSessions = [...(settings.sessionCountdowns || []), session];
+                saveSettings({ sessionCountdowns: updatedSessions });
+
+                // ✅ Refresh the session list
+                initializeSessionCountdowns(updatedSessions, settings.sessionVolume);
+
+                // ✅ Reset input fields
+                document.getElementById("session-time").value = "";
+                document.getElementById("session-title").value = "";
+                document.getElementById("countdown-hours").value = "1"; // Reset to 1 hour
+                document.getElementById("countdown-minutes").value = "0"; // Reset to 0 minutes
             }
 
             function saveSettings(newSettings) {
