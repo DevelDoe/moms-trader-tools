@@ -244,6 +244,47 @@
 
             // Session Countdowns
             function initializeSessionCountdowns(sessions, sessionVolume) {
+                document.getElementById("add-session-btn").addEventListener("click", async () => {
+                    const sessionTimeInput = document.getElementById("session-time").value;
+                    const sessionTitleInput = document.getElementById("session-title").value.trim();
+                    const hours = parseInt(document.getElementById("countdown-hours").value, 10);
+                    const minutes = parseInt(document.getElementById("countdown-minutes").value, 10);
+
+                    if (!sessionTimeInput || !sessionTitleInput || isNaN(hours) || isNaN(minutes)) {
+                        alert("Please fill in all session details.");
+                        return;
+                    }
+
+                    // Parse the session start time
+                    const [startHour, startMinute] = sessionTimeInput.split(":").map(Number);
+                    const startTime = new Date();
+                    startTime.setHours(startHour, startMinute, 0, 0);
+
+                    // Calculate the end time by adding the duration
+                    const endTime = new Date(startTime.getTime() + hours * 60 * 60 * 1000 + minutes * 60 * 1000);
+
+                    // Format start and end times as HH:MM
+                    const formatTime = (date) => date.toTimeString().slice(0, 5);
+                    const session = {
+                        start: formatTime(startTime),
+                        end: formatTime(endTime),
+                        title: sessionTitleInput,
+                    };
+
+                    // Retrieve existing sessions, add the new session, and save
+                    const settings = await window.electronAPI.getSettings();
+                    const updatedSessions = [...(settings.sessionCountdowns || []), session];
+                    saveSettings({ sessionCountdowns: updatedSessions });
+
+                    // Clear input fields
+                    document.getElementById("session-time").value = "";
+                    document.getElementById("session-title").value = "";
+                    document.getElementById("countdown-hours").value = "";
+                    document.getElementById("countdown-minutes").value = "";
+                });
+
+                // Volumw
+
                 const sessionList = document.getElementById("session-list");
                 const sessionVolumeSlider = document.getElementById("session-volume-slider");
 
@@ -298,7 +339,6 @@
                         sessionVolumeSlider.value = volume;
                     }
                 });
-
             }
 
             function initializeCountdownDuration() {
