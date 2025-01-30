@@ -557,9 +557,7 @@ app.on("ready", () => {
     if (windows.taskbar) {
         windows.taskbar.show();
     }
-    if (windows.reminder) {
-        windows.reminder.show();
-    }
+    
 
     windows.settings.webContents.once("dom-ready", () => {
         windows.settings.webContents.send("update-checklist", appSettings.checklist);
