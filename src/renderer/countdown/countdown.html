@@ -102,9 +102,8 @@
     `;
 
                         // Apply colors **to each digit separately**
-                        applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part"));
-                        applyColors(tensDigit, document.getElementById("tens-digit"));
-                        applyColors(onesDigit, document.getElementById("ones-digit"));
+                        applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part")); // Five-minute stays the same
+applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true); // One-minute follows new color rules
 
                         if (oneMinuteRemaining <= 10) {
                             if (!isLockTickActive) {
