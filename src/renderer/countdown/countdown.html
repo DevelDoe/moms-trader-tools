@@ -88,22 +88,22 @@
                         const fiveMinuteRemaining = Math.floor(totalSecondsFiveMinute / 60);
 
                         // Calculate full seconds countdown for the last minute
-                        const oneMinuteRemaining = 60 - seconds;
+                        const oneMinuteRemaining = 59 - seconds; // ✅ Fixes the lag issue
                         const tensDigit = Math.floor(oneMinuteRemaining / 10);
                         const onesDigit = oneMinuteRemaining % 10;
 
                         // Update five-minute countdown
-                        document.getElementById("five-minute-part").textContent = fiveMinuteRemaining + 1; 
+                        document.getElementById("five-minute-part").textContent = fiveMinuteRemaining + 1;
 
                         // Update one-minute countdown digits **separately** without removing span elements
                         document.getElementById("one-minute-part").innerHTML = `
-        <span id="tens-digit">${tensDigit}</span>
-        <span id="ones-digit">${onesDigit}</span>
-    `;
+            <span id="tens-digit">${tensDigit}</span>
+            <span id="ones-digit">${onesDigit}</span>
+        `;
 
                         // Apply colors **to each digit separately**
-                        applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part")); // Five-minute stays the same
                         applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true); // One-minute follows new color rules
+                        applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part")); // Five-minute remains unchanged
 
                         if (oneMinuteRemaining <= 10) {
                             if (!isLockTickActive) {
@@ -115,10 +115,14 @@
                             isLockTickActive = false;
                             deactivateLockTickEffect();
                         }
+
+                        // **⚡ Dynamic tick adjustment for exact precision**
+                        const nowMillis = new Date().getTime();
+                        const nextTick = 1000 - (nowMillis % 1000); // Calculate remaining time until next full second
+                        setTimeout(updateDisplay, nextTick);
                     }
 
-                    setInterval(updateDisplay, 1000);
-                    updateDisplay();
+                    updateDisplay(); // Start the loop
                 }
 
                 function applyColors(remaining, element, isOneMinutePart = false) {
