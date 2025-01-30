@@ -196,7 +196,7 @@
                     const removeIcon = document.createElement("img");
                     removeIcon.src = "../../../assets/images/delete.svg"; // Adjust the path as necessary
                     removeIcon.alt = "Remove";
-                    removeIcon.className = "remove-icon";
+                    removeIcon.className = "trash-icon";
                     removeIcon.addEventListener("click", async () => {
                         await window.electronAPI.removeChecklistItem(index);
                         window.electronAPI.getSettings().then((settings) => {
