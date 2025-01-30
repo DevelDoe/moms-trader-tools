@@ -251,6 +251,7 @@
                 const sessionList = document.getElementById("session-list");
                 const sessionVolumeSlider = document.getElementById("session-volume-slider");
                 const addSessionButton = document.getElementById("add-session-btn");
+                
 
                 // ✅ Ensure the button event listener is attached once
                 if (!addSessionButton.dataset.listener) {
@@ -313,6 +314,9 @@
                         sessionVolumeSlider.value = volume;
                     }
                 });
+
+                document.getElementById("reset-default-sessions-btn").addEventListener("click", resetDefaultSessions);
+
             }
 
             function initializeCountdownDuration() {
