@@ -83,7 +83,7 @@
                 </div>
                 <div>
                     <label for="session-time">Session Time:</label>
-                    <input type="time" id="session-time" step="60">
+                    <input type="time" id="session-time" />
                 </div>
                 <div>
                     <label for="session-title">Countdown Title:</label>
@@ -96,7 +96,8 @@
                 </div>
                 <button id="add-session-btn">Add Session Countdown</button>
                 <ul id="session-list"></ul>
-                <p></p>
+                <p id="restart-message" style="display: none; color: yellow; font-size: 14px; margin-top: 5px">Restart the app for changes to take effect.</p>
+                <button id="restart-app-button">Restart App</button>
             </section>
 
             <!-- Screen Management -->
@@ -375,6 +376,14 @@
 
                 // ✅ Refresh the session list
                 initializeSessionCountdowns(updatedSessions, settings.sessionVolume);
+
+                // ✅ Show restart message
+                const restartMessage = document.getElementById("restart-message");
+                restartMessage.style.display = "block";
+
+                setTimeout(() => {
+                    restartMessage.style.display = "none";
+                }, 5000); // Hide after 5 seconds
 
                 // ✅ Reset input fields
                 document.getElementById("session-time").value = "";
