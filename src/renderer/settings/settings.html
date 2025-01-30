@@ -117,6 +117,7 @@
                     initializeChecklistSection(settings.checklist || []);
                     initializeCountdownSection(settings);
                     initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
+                    initializeCountdownDuration();
 
                     // Event listeners
                     document.getElementById("restart-app-button").addEventListener("click", restartApp);
