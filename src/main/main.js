@@ -142,13 +142,17 @@ ipcMain.on("toggle-reminder", () => {
         } else {
             reminderWindow.show();
 
+            // Workaround: Hide and show the window again to force layout re-render
             setTimeout(() => {
-                console.log("Sending reminder items after opening...");
-                reminderWindow.webContents.send("update-reminder-items", appSettings.reminderItems);
-            }, 10); // ✅ Give time for UI to load first
+                reminderWindow.hide();
+                setTimeout(() => {
+                    reminderWindow.show();
+                }, 200); // Small delay to allow it to refresh
+            }, 500);
         }
     }
 });
+
 
 ipcMain.on("reminder-ready", (event) => {
     console.log("Reminder window is ready!");
