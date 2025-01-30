@@ -70,8 +70,7 @@
         // **Start with Opacity 0 Before Updating Content**
         reminderContainer.style.opacity = "0";
 
-        setTimeout(() => {
-            reminderContainer.innerHTML = ""; // Clear previous items
+        reminderContainer.innerHTML = ""; // Clear previous items
 
             items.forEach((item) => {
                 if (!item.text.trim()) return;
@@ -90,7 +89,6 @@
                     reminderContainer.style.opacity = "1";
                 });
             });
-        }, 1); // Small delay to ensure smooth transition
     });
 
     function adjustReminderWindowSize() {
