@@ -6,7 +6,7 @@ const path = require("path");
 function createCountdownWindow(taskbarWindow) {
     const countdownWindow = new BrowserWindow({
         width: 100,
-        height: 110,
+        height: 30,
         transparent: false,
         frame: false,
         resizable: true,
