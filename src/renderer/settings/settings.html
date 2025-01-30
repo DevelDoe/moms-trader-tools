@@ -12,6 +12,19 @@
                 margin: 0 auto;
                 color: #fff;
             }
+            button {
+                background: none;
+                border: none;
+                color: inherit;
+                cursor: pointer;
+                padding: 5px;
+                margin-left: 10px;
+                font-size: 16px; /* Adjust size as needed */
+            }
+
+            button:hover {
+                color: #f00; /* Change color on hover */
+            }
         </style>
     </head>
     <body>
@@ -114,6 +127,26 @@
                         initializeReminderSection(updatedSettings.reminderItems || []);
                         initializeChecklistSection(updatedSettings.checklist || []);
                         initializeSessionCountdowns(updatedSettings.sessionCountdowns || [], updatedSettings.sessionVolume);
+                    });
+
+                    const reminderList = document.getElementById("reminder-items");
+                    reminderList.innerHTML = "";
+
+                    items.forEach((item, index) => {
+                        const listItem = document.createElement("li");
+                        listItem.textContent = `${item.text} (${item.type})`;
+
+                        // Create the remove button with the Unicode trash icon
+                        const removeButton = document.createElement("button");
+                        removeButton.textContent = "🗑"; // Unicode trash icon
+
+                        removeButton.addEventListener("click", () => {
+                            items.splice(index, 1);
+                            saveSettings({ reminderItems: items });
+                        });
+
+                        listItem.appendChild(removeButton);
+                        reminderList.appendChild(listItem);
                     });
                 } catch (error) {
                     console.error("Initialization error:", error);
