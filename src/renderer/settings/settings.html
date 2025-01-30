@@ -342,34 +342,46 @@
                 });
             }
 
-            function initializeCountdownDuration() {
-                const hoursSelect = document.getElementById("countdown-hours");
-                const minutesSelect = document.getElementById("countdown-minutes");
+            function initializeSessionCountdowns(sessions, sessionVolume) {
+                const sessionList = document.getElementById("session-list");
+                const sessionVolumeSlider = document.getElementById("session-volume-slider");
 
-                if (!hoursSelect || !minutesSelect) {
-                    console.error("❌ Countdown duration elements not found!");
-                    return;
-                }
+                sessionList.innerHTML = "";
 
-                // Clear existing options
-                hoursSelect.innerHTML = "";
-                minutesSelect.innerHTML = "";
+                // Populate session list
+                sessions.forEach((session, index) => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${session.start} - ${session.end} | ${session.title}`;
 
-                // Populate hours dropdown (1 to 25)
-                for (let i = 1; i <= 25; i++) {
-                    const option = document.createElement("option");
-                    option.value = i;
-                    option.textContent = `${i} ${i === 1 ? "hour" : "hours"}`;
-                    hoursSelect.appendChild(option);
-                }
+                    const removeButton = document.createElement("button");
+                    removeButton.textContent = "Remove";
+                    removeButton.addEventListener("click", () => {
+                        sessions.splice(index, 1);
+                        saveSettings({ sessionCountdowns: sessions });
+                        initializeSessionCountdowns(sessions, sessionVolume); // Refresh the list
+                    });
 
-                // Populate minutes dropdown (1 to 60)
-                for (let i = 1; i <= 60; i++) {
-                    const option = document.createElement("option");
-                    option.value = i;
-                    option.textContent = `${i} ${i === 1 ? "minute" : "minutes"}`;
-                    minutesSelect.appendChild(option);
-                }
+                    listItem.appendChild(removeButton);
+                    sessionList.appendChild(listItem);
+                });
+
+                // Set initial slider value
+                sessionVolumeSlider.value = sessionVolume || 0.1;
+
+                sessionVolumeSlider.addEventListener("input", () => {
+                    const newVolume = sessionVolumeSlider.value;
+                    window.electronAPI.setSessionVolume(newVolume);
+                    saveSettings({ sessionVolume: newVolume });
+                });
+            }
+
+            function saveSettings(newSettings) {
+                console.log("Saving settings:", newSettings);
+                window.electronAPI.updateSettings(newSettings);
+            }
+
+            function restartApp() {
+                window.electronAPI.restartApp();
             }
 
             function saveSettings(newSettings) {
