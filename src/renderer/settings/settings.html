@@ -129,6 +129,7 @@
                         console.log("Settings updated globally:", updatedSettings);
                         initializeReminderSection(updatedSettings.reminderItems || []);
                         initializeChecklistSection(updatedSettings.checklist || []);
+                        initializeCountdownSection(settings);
                         initializeSessionCountdowns(updatedSettings.sessionCountdowns || [], updatedSettings.sessionVolume);
                     });
                 } catch (error) {
