@@ -7,7 +7,7 @@ function createReminderWindow(taskbarWindow) {
     const reminderWindow = new BrowserWindow({
         width: 10, // Initial size
         height: 10, // Adjusted for multiple items
-        transparent: false,
+        transparent: true,
         frame: false,
         resizable: true,
         alwaysOnTop: true,
