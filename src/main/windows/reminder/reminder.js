@@ -22,7 +22,7 @@ function createReminderWindow(taskbarWindow) {
 
     reminderWindow.loadFile(path.join(__dirname, "../../../renderer/reminder/reminder.html"));
 
-    reminderWindow.webContents.openDevTools({ mode: "detach" });
+    // reminderWindow.webContents.openDevTools({ mode: "detach" });
 
     if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {
         const taskbarBounds = taskbarWindow.getBounds();
