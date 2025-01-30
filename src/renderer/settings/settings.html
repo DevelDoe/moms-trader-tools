@@ -377,9 +377,9 @@
                 // ✅ Refresh the session list
                 initializeSessionCountdowns(updatedSessions, settings.sessionVolume);
 
-                // ✅ Show restart message
-                const restartMessage = document.getElementById("restart-message");
-                restartMessage.style.display = "block";
+                // ✅ Show restart message and button (but do NOT remove them after some time)
+                document.getElementById("restart-message").style.display = "block";
+                document.getElementById("restart-app-button").style.display = "block";
 
                 setTimeout(() => {
                     restartMessage.style.display = "none";
