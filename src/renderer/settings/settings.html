@@ -274,6 +274,23 @@
                     sessionList.appendChild(listItem);
                 });
 
+                // ✅ Populate session list
+                sessions.forEach((session, index) => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${session.start} - ${session.end} | ${session.title}`;
+
+                    const removeButton = document.createElement("button");
+                    removeButton.textContent = "Remove";
+                    removeButton.addEventListener("click", () => {
+                        sessions.splice(index, 1);
+                        saveSettings({ sessionCountdowns: sessions });
+                        initializeSessionCountdowns(sessions, sessionVolume); // Refresh UI
+                    });
+
+                    listItem.appendChild(removeButton);
+                    sessionList.appendChild(listItem);
+                });
+
                 // ✅ Restore the last saved volume
                 sessionVolumeSlider.value = sessionVolume || 0.1; // Default to 0.1 if no saved value
 
