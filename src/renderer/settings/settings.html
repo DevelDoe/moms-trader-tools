@@ -319,7 +319,6 @@
             }
 
             function resetDefaultSessions() {
-                console.log("clicked reset sessions")
                 window.electronAPI.resetToDefaultSessions();
                 window.electronAPI.getSettings().then((settings) => {
                     initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
