@@ -92,9 +92,9 @@
                         const tensDigit = Math.floor(oneMinuteRemaining / 10);
                         const onesDigit = oneMinuteRemaining % 10; // Get the second digit
 
-
+                        // Update display elements
                         document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
-                        document.getElementById("one-minute-part").textContent = tensDigit;
+                        document.getElementById("one-minute-part").innerHTML = `<span>${tensDigit}</span><span>${onesDigit}</span>`;
 
                         applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part"));
                         applyColors(tensDigit, document.getElementById("one-minute-part"));
