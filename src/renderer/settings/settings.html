@@ -269,6 +269,7 @@
                         sessions.splice(index, 1);
                         saveSettings({ sessionCountdowns: sessions });
                         initializeSessionCountdowns(sessions, sessionVolume); // Refresh UI
+                        showRestartNotification(); // ✅ Show restart message when a session is removed
                     });
 
                     listItem.appendChild(removeButton);
@@ -377,9 +378,8 @@
                 // ✅ Refresh the session list
                 initializeSessionCountdowns(updatedSessions, settings.sessionVolume);
 
-                // ✅ Show restart message and button (but do NOT remove them after some time)
-                document.getElementById("restart-message").style.display = "block";
-                document.getElementById("restart-app-button").style.display = "block";
+                // ✅ Show restart message and button (keeps it visible)
+                showRestartNotification();
 
                 setTimeout(() => {
                     restartMessage.style.display = "none";
@@ -390,6 +390,12 @@
                 document.getElementById("session-title").value = "";
                 document.getElementById("countdown-hours").value = "1"; // Reset to 1 hour
                 document.getElementById("countdown-minutes").value = "0"; // Reset to 0 minutes
+            }
+
+            // ✅ Function to show restart message & button
+            function showRestartNotification() {
+                document.getElementById("restart-message").style.display = "block";
+                document.getElementById("restart-app-button").style.display = "block";
             }
 
             function saveSettings(newSettings) {
