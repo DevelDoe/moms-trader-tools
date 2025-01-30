@@ -116,6 +116,7 @@
                     initializeReminderSection(settings.reminderItems || []);
                     initializeChecklistSection(settings.checklist || []);
                     initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
+                    initializeCountdownDuration();
                     initializeCountdownSection(settings);
 
                     // Event listeners
@@ -265,11 +266,6 @@
                     minutesSelect.appendChild(option);
                 }
             }
-
-            // Call the function when the page loads
-            document.addEventListener("DOMContentLoaded", () => {
-                initializeCountdownDuration();
-            });
 
             // Session Countdowns
             function initializeSessionCountdowns(sessions, sessionVolume) {
