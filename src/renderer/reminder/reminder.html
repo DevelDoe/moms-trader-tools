@@ -110,29 +110,28 @@
                         // Fallback values if measurement fails
                         maxWidth = maxWidth || 200;
                         totalHeight = totalHeight || 50;
-                        
 
-                        let width = Math.min(Math.max(maxWidth + 40, 250), 600); // Min 200px, Max 600px
+                        let width = Math.min(Math.max(maxWidth + 40, 250), 600); // Min 250px, Max 600px
                         let height = Math.max(totalHeight + 20, 50); // Min 50px height
 
-                        // Ensure values are integers before passing to Electron
                         width = Math.floor(width);
                         height = Math.floor(height);
 
-                        // Log the final width/height before resizing
                         console.log(`✔ Resizing Reminder Window: ${width}x${height}`);
 
-                        // Prevent crash: Ensure values are valid before resizing
                         if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
                             console.error("❌ Invalid window size detected!", { width, height });
                             return;
                         }
 
-                        try {
-                            window.electronAPI.resizeWindowToContent(width, height);
-                        } catch (error) {
-                            console.error("❌ Error resizing window:", error);
-                        }
+                        // Delay resizing to ensure rendering is complete
+                        setTimeout(() => {
+                            try {
+                                window.electronAPI.resizeWindowToContent(width, height);
+                            } catch (error) {
+                                console.error("❌ Error resizing window:", error);
+                            }
+                        }, 500); // Delay to allow proper layout calculations
                     }, 100); // Ensure DOM is fully updated before measuring
                 }
 
