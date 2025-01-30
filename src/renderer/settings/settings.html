@@ -235,6 +235,13 @@
                 });
             }
 
+            // Countdown Bar Section
+            function initializeCountdownSection(settings) {
+                const slider = document.getElementById("volume-slider");
+                slider.value = settings.volume || 0.5;
+                slider.addEventListener("input", () => window.electronAPI.setVolume(slider.value));
+            }
+
             // Session Countdowns
             function initializeSessionCountdowns(sessions, sessionVolume) {
                 const sessionList = document.getElementById("session-list");
