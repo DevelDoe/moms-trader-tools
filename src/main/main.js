@@ -187,6 +187,21 @@ function getLegacyChecklistItems() {
     ];
 }
 
+ipcMain.on("reset-to-default-sessions", () => {
+    console.log("Resetting session countdowns to default settings...");
+
+    appSettings.sessionCountdowns = [
+        { start: "04:00", end: "09:30", title: "Pre Market" },
+        { start: "07:00", end: "09:30", title: "Breaking News" },
+        { start: "09:30", end: "16:00", title: "Open Market" },
+        { start: "15:00", end: "16:00", title: "Power Hour" },
+        { start: "16:00", end: "20:00", title: "Post Market" }
+    ];
+
+    saveSettings(); // Save to file
+    updateSessionWindows(); // Notify UI about the change
+});
+
 ipcMain.on("reset-to-legacy-checklist", () => {
     console.log("Resetting checklist to legacy default items...");
     appSettings.checklist = getLegacyChecklistItems(); // Replace current checklist
