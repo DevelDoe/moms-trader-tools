@@ -34,7 +34,7 @@ function createCountdownWindow(taskbarWindow) {
         countdownWindow.setBounds({
             x: countdownX,
             y: countdownY,
-            width: 40,
+            width: 100,
             height: 110,
         });
     } else {
