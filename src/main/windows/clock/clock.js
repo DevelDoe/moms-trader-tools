@@ -22,8 +22,7 @@ function createClockWindow(taskbarWindow) {
 
     clockWindow.loadFile(path.join(__dirname, "../../../renderer/clock/clock.html"));
 
-    // clockWindow.webContents.openDevTools({ mode: "detach" }); // Opens DevTools in a separate window
-    // clockWindow.webContents.openDevTools(); // Opens DevTools in a separate window
+    // clockWindow.webContents.openDevTools({ mode: "detach" });
 
 
     // Dynamically position the clock window relative to the taskbar

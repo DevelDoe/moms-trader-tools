@@ -9,49 +9,133 @@
         <link rel="stylesheet" href="../../styles/styles.css" />
         <style>
             body {
-                margin: 0;
-                padding: 0;
-                background-color: rgba(0, 0, 0, 0.05); /* Uniform border */
+                margin: 0px;
+                margin-right: 20px;
+                padding: 0px;
+                background-color: #1c1d23;
+                overflow: hidden; /* Prevents scrollbars */
+                min-width: 100px;
             }
 
             #reminder {
-                border-radius: 1px;
-                height: 100%;
-                width: 100%;
-                box-sizing: border-box; /* Include border in height/width calculation */
-                background-color: rgba(0, 0, 0, 0); /* Fully transparent */
-                padding: 6px; /* Ensure no padding affects layout */
-            }
-            @keyframes pulseColor {
-                0% {
-                    color: rgb(252, 77, 57);
-                }
-                50% {
-                    color: salmon; 
-                }
-                100% {
-                    color: rgb(248, 78, 59); 
-                }
+                padding: 10px;
+                font-size: 14px;
+                word-wrap: break-word;
+                white-space: normal;
+                max-width: 600px; /* Prevent extreme resizing */
             }
 
-            #text {
-                font-size: 16px; /* Adjust as needed */
-                font-weight: bold; /* Optional for better visibility */
-                animation: pulseColor 3s infinite; /* 3s for a slow pulse, runs infinitely */
+            .reminder-item {
+                margin: 5px 0;
+                font-size: 16px;
+                font-weight: 100;
+                line-height: 1.4;
+                word-wrap: break-word;
+                white-space: normal; /* Allow proper wrapping */
+                display: block;
+            }
+
+            .critical {
+                color: #f23645;
+                font-weight: 600;
+            }
+
+            .optional {
+                color: #ff9800;
+            }
+
+            .reminder {
+                color: #089981;
             }
         </style>
     </head>
     <body>
-        <div id="reminder" class="dragable">
-            <span id="text"></span>
-        </div>
-    </body>
-    <script>
-        window.electronAPI.onUpdateReminderText((newText) => {
-            const textElement = document.getElementById("text");
-            textElement.textContent = newText || "REMINDER";
-        });
+        <div id="reminder" class="dragable"></div>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const reminderContainer = document.getElementById("reminder");
 
-        window.electronAPI.sendReminderReady();
-    </script>
+                window.electronAPI.onUpdateReminderItems((items) => {
+                    console.log("📩 Received reminder items:", items);
+
+                    reminderContainer.innerHTML = ""; // Clear previous items
+
+                    if (!items || items.length === 0) {
+                        console.warn("⚠ No reminder items received!");
+                        return;
+                    }
+
+                    // Add new reminder items
+                    items.forEach((item) => {
+                        if (!item.text.trim()) return;
+                        const itemElement = document.createElement("div");
+                        itemElement.className = `reminder-item ${item.type}`;
+                        itemElement.textContent = item.text;
+                        reminderContainer.appendChild(itemElement);
+                    });
+
+                    // Resize window AFTER DOM updates
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => adjustReminderWindowSize());
+                    });
+                });
+
+                function adjustReminderWindowSize() {
+                    setTimeout(() => {
+                        const reminderItems = document.querySelectorAll(".reminder-item");
+
+                        let maxWidth = 0;
+                        let totalHeight = 0;
+
+                        if (reminderItems.length === 0) {
+                            console.warn("⚠ No items found for resizing.");
+                            return;
+                        }
+
+                        // Force layout reflow to ensure measurements are correct
+                        document.body.offsetHeight;
+
+                        reminderItems.forEach((item) => {
+                            const rect = item.getBoundingClientRect();
+                            if (!isNaN(rect.width) && rect.width > 0) {
+                                maxWidth = Math.max(maxWidth, rect.width);
+                            }
+                            if (!isNaN(rect.height) && rect.height > 0) {
+                                totalHeight += rect.height + 7; // Add extra padding for wrapped text
+                            }
+                        });
+
+                        // Fallback values if measurement fails
+                        maxWidth = maxWidth || 200;
+                        totalHeight = totalHeight || 50;
+                        
+
+                        let width = Math.min(Math.max(maxWidth + 40, 50), 600); // Min 200px, Max 600px
+                        let height = Math.max(totalHeight + 20, 50); // Min 50px height
+
+                        // Ensure values are integers before passing to Electron
+                        width = Math.floor(width);
+                        height = Math.floor(height);
+
+                        // Log the final width/height before resizing
+                        console.log(`✔ Resizing Reminder Window: ${width}x${height}`);
+
+                        // Prevent crash: Ensure values are valid before resizing
+                        if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+                            console.error("❌ Invalid window size detected!", { width, height });
+                            return;
+                        }
+
+                        try {
+                            window.electronAPI.resizeWindowToContent(width, height);
+                        } catch (error) {
+                            console.error("❌ Error resizing window:", error);
+                        }
+                    }, 100); // Ensure DOM is fully updated before measuring
+                }
+
+                window.electronAPI.sendReminderReady();
+            });
+        </script>
+    </body>
 </html>

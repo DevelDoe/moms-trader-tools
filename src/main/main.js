@@ -25,19 +25,27 @@ function loadSettings() {
         const data = fs.readFileSync(SETTINGS_FILE, "utf-8");
         const settings = JSON.parse(data);
 
-        // Log the settings to inspect their content
         console.log("Loaded settings on boot:", settings);
 
         // Ensure all settings properties exist
         if (!Array.isArray(settings.checklist)) settings.checklist = [];
         if (!Array.isArray(settings.sessionCountdowns)) settings.sessionCountdowns = [];
+        if (!Array.isArray(settings.reminderItems)) settings.reminderItems = []; // Ensure this exists
+
+        // Remove deprecated 'text' key if present
+        if ("text" in settings) {
+            console.log("Removing deprecated 'text' attribute from settings...");
+            delete settings.text;
+            fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2)); // Save the cleaned settings
+        }
 
         return settings;
-    } catch {
+    } catch (error) {
+        console.error("Error loading settings:", error);
         return {
-            text: "REMINDER", // Default reminder text
-            checklist: [], // Initialize with an empty checklist
-            sessionCountdowns: [], // Initialize with no session countdowns
+            checklist: [],
+            sessionCountdowns: [],
+            reminderItems: [], // Initialize as an empty list
         };
     }
 }
@@ -45,9 +53,15 @@ function loadSettings() {
 function saveSettings() {
     if (!Array.isArray(appSettings.checklist)) appSettings.checklist = [];
     if (!Array.isArray(appSettings.sessionCountdowns)) appSettings.sessionCountdowns = [];
+    if (!Array.isArray(appSettings.reminderItems)) appSettings.reminderItems = [];
+
+    // Remove `text` to ensure it never gets saved again
+    if ("text" in appSettings) {
+        console.log("Removing 'text' before saving...");
+        delete appSettings.text;
+    }
 
     console.log("Saving updated settings:", appSettings);
-
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
 }
 
@@ -60,8 +74,8 @@ ipcMain.on("resize-window-to-content", (event, { width, height }) => {
         senderWindow.setBounds({
             x: senderWindow.getBounds().x,
             y: senderWindow.getBounds().y,
-            width: Math.max(width, 80), // Minimum width
-            height: Math.max(height, 100), // Minimum height
+            width: Math.max(width, 1), // Set a minimum width
+            height: Math.max(height, 1), // Set a minimum height
         });
     }
 });
@@ -75,7 +89,15 @@ ipcMain.on("toggle-settings", () => {
     }
 });
 
-ipcMain.handle("get-settings", () => appSettings);
+ipcMain.handle("get-settings", () => {
+    if (!Array.isArray(appSettings.reminderItems)) {
+        console.error("Fixing reminderItems array issue...");
+        appSettings.reminderItems = [];
+    }
+
+    console.log("Returning settings:", appSettings);
+    return appSettings;
+});
 
 ipcMain.on("update-settings", (event, newSettings) => {
     appSettings = { ...appSettings, ...newSettings };
@@ -85,7 +107,7 @@ ipcMain.on("update-settings", (event, newSettings) => {
         windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
     }
     if (windows.reminder) {
-        windows.reminder.webContents.send("update-reminder-text", newSettings.text);
+        windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
     }
 
     // Force a refresh in all relevant windows
@@ -101,7 +123,24 @@ ipcMain.on("update-settings", (event, newSettings) => {
 ipcMain.on("toggle-reminder", () => {
     const reminderWindow = windows.reminder;
     if (reminderWindow) {
-        reminderWindow.isVisible() ? reminderWindow.hide() : reminderWindow.show();
+        if (reminderWindow.isVisible()) {
+            reminderWindow.hide();
+        } else {
+            reminderWindow.show();
+
+            setTimeout(() => {
+                console.log("📏 Sending reminder items after opening...");
+                reminderWindow.webContents.send("update-reminder-items", appSettings.reminderItems);
+            }, 10); // ✅ Give time for UI to load first
+        }
+    }
+});
+
+ipcMain.on("reminder-ready", (event) => {
+    console.log("Reminder window is ready!");
+
+    if (windows.reminder) {
+        windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
     }
 });
 
@@ -222,7 +261,7 @@ ipcMain.on("toggle-countdown", () => {
             // Set volume to 0 when window is closed
             Object.values(windows).forEach((window) => {
                 if (window && window.webContents) {
-                    window.webContents.send("update-volume", 0);
+                    window.webContents.send("update-countdown-volume", 0);
                 }
             });
         } else {
@@ -230,17 +269,17 @@ ipcMain.on("toggle-countdown", () => {
             // Set volume to 0.5 when window is shown
             Object.values(windows).forEach((window) => {
                 if (window && window.webContents) {
-                    window.webContents.send("update-volume", 0.5);
+                    window.webContents.send("update-countdown-volume", 0.5);
                 }
             });
         }
     }
 });
 
-ipcMain.on("volume-change", (event, volume) => {
+ipcMain.on("countdown-volume-change", (event, volume) => {
     console.log("Received volume change:", volume);
     if (windows.countdown) {
-        windows.countdown.webContents.send("update-volume", volume);
+        windows.countdown.webContents.send("update-countdown-volume", volume);
     }
 });
 
@@ -248,23 +287,59 @@ ipcMain.handle("get-tick-sound-path", () => {
     return path.join(app.getAppPath(), "assets/sounds/tick.mp3");
 });
 
-ipcMain.on("volume-change", (event, volume) => {
+ipcMain.on("countdown-volume-change", (event, volume) => {
     console.log("Main process received volume change:", volume);
     // Broadcast the volume update to all renderer processes
     Object.values(windows).forEach((window) => {
         if (window && window.webContents) {
-            window.webContents.send("update-volume", volume);
+            window.webContents.send("update-countdown-volume", volume);
         }
     });
 });
 
 // Clock
 
-ipcMain.on("toggle-clock", () => {
+ipcMain.on("toggle-clock", async () => {
     const clockWindow = windows.clock;
     if (clockWindow) {
-        clockWindow.isVisible() ? clockWindow.hide() : clockWindow.show();
+        if (clockWindow.isVisible()) {
+            clockWindow.hide();
+            // Mute the session bell when clock is closed
+            console.log("Clock hidden, muting session volume.");
+            if (windows.clock) {
+                windows.clock.webContents.send("update-session-volume", 0);
+            }
+        } else {
+            clockWindow.show();
+
+            // Fetch the stored session volume from settings
+            const settings = await loadSettings(); // Ensure this function is async and correctly loads settings
+            const sessionVolume = settings.sessionVolume || 0.1; // Default to 0.1 if missing
+
+            console.log(`Clock opened, restoring session volume to ${sessionVolume}.`);
+            if (windows.clock) {
+                windows.clock.webContents.send("update-session-volume", sessionVolume);
+            }
+        }
     }
+});
+
+
+ipcMain.handle("get-bell-sound-path", () => {
+    return path.join(app.getAppPath(), "assets/sounds/bell.mp3");
+});
+
+ipcMain.on("session-volume-change", (event, volume) => {
+    console.log("🔊 Session bell volume changed to:", volume);
+    appSettings.sessionVolume = volume;
+    saveSettings(); // Save to settings.json
+
+    // Broadcast the updated volume to all windows
+    Object.values(windows).forEach((window) => {
+        if (window && window.webContents) {
+            window.webContents.send("update-session-volume", volume);
+        }
+    });
 });
 
 // Resumption
@@ -309,9 +384,9 @@ ipcMain.on("create-snipper-window", (event, { name, bounds }) => {
             nodeIntegration: false, // Must be false when using contextBridge
         },
     });
-    
+
     // Automatically open DevTools when the window is created
-    snipperWindow.webContents.openDevTools({ mode: "detach" });
+    // snipperWindow.webContents.openDevTools({ mode: "detach" });
 
     snipperWindow
         .loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
@@ -329,19 +404,6 @@ ipcMain.on("create-snipper-window", (event, { name, bounds }) => {
         delete snipperWindows[name];
         console.log(`Main process: snipper "${name}" closed.`);
     });
-});
-
-ipcMain.on("resize-window-to-content", (event, dimensions) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (win) {
-        console.log("Resizing window to:", dimensions);
-        win.setBounds({
-            x: win.getBounds().x,
-            y: win.getBounds().y,
-            width: Math.max(dimensions.width, 300), // Ensure a minimum width
-            height: Math.max(dimensions.height, 300), // Ensure a minimum height
-        });
-    }
 });
 
 ipcMain.on("start-region-selection", async (event, snipperName) => {
@@ -388,7 +450,6 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         regionWindow.close();
     });
 });
-
 
 // Update snipper settings
 ipcMain.on("update-snipper-settings", (event, { name, settings }) => {
@@ -481,6 +542,9 @@ app.on("ready", () => {
     // Ensure the taskbar is visible
     if (windows.taskbar) {
         windows.taskbar.show();
+    }
+    if (windows.reminder) {
+        windows.reminder.show();
     }
 
     windows.settings.webContents.once("dom-ready", () => {

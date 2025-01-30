@@ -3,15 +3,15 @@
 const { BrowserWindow } = require("electron");
 const path = require("path");
 
-function createReminderWindow(taskbarWindow, text = "REMINDER") {
+function createReminderWindow(taskbarWindow) {
     const reminderWindow = new BrowserWindow({
-        width: 180,
-        height: 130,
-        transparent: true,
+        width: 10, // Initial size
+        height: 10, // Adjusted for multiple items
+        transparent: false,
         frame: false,
         resizable: true,
-        show: false,
         alwaysOnTop: true,
+        show: false,
         webPreferences: {
             preload: path.join(__dirname, "../../../renderer/common/preload.js"),
             contextIsolation: true,
@@ -22,25 +22,20 @@ function createReminderWindow(taskbarWindow, text = "REMINDER") {
 
     reminderWindow.loadFile(path.join(__dirname, "../../../renderer/reminder/reminder.html"));
 
-    // Dynamically position the reminder window relative to the taskbar
+    reminderWindow.webContents.openDevTools({ mode: "detach" });
+
     if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {
         const taskbarBounds = taskbarWindow.getBounds();
-        const reminderX = taskbarBounds.x; // Align horizontally
-        const reminderY = taskbarBounds.y + taskbarBounds.height + 10; // Below the taskbar
-
         reminderWindow.setBounds({
-            x: reminderX,
-            y: reminderY,
-            width: 180,
-            height: 130,
+            x: taskbarBounds.x,
+            y: taskbarBounds.y + taskbarBounds.height + 10,
+            width: 10,
+            height: 10,
         });
     } else {
         console.warn("Taskbar window is undefined or does not support getBounds. Positioning skipped.");
     }
 
-    reminderWindow.webContents.once("dom-ready", () => {
-        reminderWindow.webContents.send("update-reminder-text", text);
-    });
 
     return reminderWindow;
 }

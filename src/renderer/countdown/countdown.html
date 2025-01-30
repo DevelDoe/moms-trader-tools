@@ -67,8 +67,8 @@
                     tickSound.volume = 0;
 
                     // Listen for volume updates from Electron main process
-                    window.electronAPI.onVolumeUpdate((volume) => {
-                        console.log("Volume updated:", volume);
+                    window.electronAPI.onCountdownVolumeUpdate((volume) => {
+                        console.log("Countdown Volume updated:", volume);
                         tickSound.volume = volume;
                     });
                 } catch (error) {

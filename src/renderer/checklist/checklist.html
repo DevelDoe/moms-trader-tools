@@ -12,34 +12,50 @@
             body {
                 margin: 0;
                 padding: 0;
-                background-color: rgba(59, 59, 59, 0.2); /* Transparent background */
                 color: white;
                 text-align: center;
                 overflow: hidden;
-                -webkit-app-region: drag; /* Makes the window draggable */
                 text-transform: uppercase;
                 height: 100%;
                 font-size: 12px;
-
-                /* border: 1px solid rgba(128, 128, 128, 0.342); */
+                overflow: hidden;
+                position: relative;
+                background-color: transparent;
             }
 
             #container {
-                /* position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%); */
-                -webkit-app-region: drag; /* Make the entire container draggable */
-                background-color: transparent;
                 padding-top: 15px;
                 height: 100%;
+                position: relative;
+            }
+
+            /* Make only #grab draggable */
+            #grab {
+                -webkit-app-region: drag; /* Enables dragging */
+                cursor: move; /* Ensures cursor changes */
+                box-sizing: border-box;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                opacity: 0.07;
+                background: repeating-linear-gradient(45deg, #00000041, #00000046 2px, #d2d2d200 2px, #d2d2d200 10px);
+                border: 1px solid white;
+            }
+
+            #grab:hover {
+                cursor: move;
             }
 
             #checklist {
+                position: relative;
                 list-style: none;
                 padding: 0;
                 margin: 0;
                 -webkit-app-region: no-drag; /* Prevent drag on interactive items */
+                cursor: pointer;
+                font-weight: 100;
             }
 
             #checklist li {
@@ -48,7 +64,7 @@
                 text-align: center;
                 user-select: none;
                 -webkit-app-region: no-drag;
-                padding: 6px 0;
+                padding: 12px 0;
                 border-bottom: 1px solid rgba(0, 0, 0, 0.253);
             }
 
@@ -64,13 +80,11 @@
 
             #checklist li.state-red {
                 background-color: #f23645;
-                border-left: red;
                 color: white;
             }
 
             #checklist li.state-yellow {
                 background-color: yellow;
-                border-left: 5px solid #ff9800;
                 color: black;
             }
 
@@ -116,33 +130,31 @@
             /* Critical Items */
             .critical {
                 background-color: #007bff; /* Blue */
-                border-left: 5px solid rgb(85, 1, 1);
             }
 
             /* Important Optional Items */
             .important {
                 background-color: #ffc107; /* Yellow */
-                border-left: 5px solid #ff9800;
             }
 
             .reminder {
                 background-color: white;
-                border-left: 5px solid #9e9e9e;
                 color: black !important;
             }
 
             /* Optional Items */
             .state-yellow {
                 background-color: #fdf4e3; /* Light Yellow */
-                border-left: 5px solid #ffc107;
             }
         </style>
     </head>
-    <body>
+    <body class="dragable">
         <div id="container">
+            <span id="grab">grab me</span>
             <ul id="checklist"></ul>
-            <button id="reset-btn">Reset</button>
+            <button id="reset-btn">RESET</button>
         </div>
+
         <script>
             document.addEventListener("DOMContentLoaded", async () => {
                 try {
@@ -192,7 +204,7 @@
                                 if (item.classList.toggle("completed")) {
                                     item.style.borderLeftColor = "green"; // Completed items get green border
                                 } else {
-                                    item.style.borderLeftColor = "rgb(85, 1, 1)"; // Default critical border color
+                                    item.style.borderLeftColor = "red"; // Default critical border color
                                 }
                             }
                         }
@@ -208,7 +220,7 @@
                                 item.style.borderLeftColor = "rgb(255, 152, 0)"; // Yellow border
                             } else if (item.dataset.type === "critical") {
                                 item.classList.remove("completed"); // Remove 'completed' class
-                                item.style.borderLeftColor = "rgb(85, 1, 1)"; // Default critical border
+                                item.style.borderLeftColor = "red"; // Default critical border
                             }
                         }
                     });
@@ -244,7 +256,7 @@
             }
 
             function resizeChecklistWindowToContent() {
-                const bodyWidth = document.body.scrollWidth;
+                const bodyWidth = document.body.scrollWidth + 10;
                 const bodyHeight = document.body.scrollHeight;
 
                 // Send the calculated dimensions to the main process

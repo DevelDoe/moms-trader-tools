@@ -1,5 +1,3 @@
-<!-- ./src/renderer/settings/settings.html -->
-
 <!DOCTYPE html>
 <html lang="en-G">
     <head>
@@ -13,8 +11,6 @@
                 max-width: 400px;
                 margin: 0 auto;
                 color: #fff;
-                background-color: rgba(0, 0, 0, 1);
-                /* border: 1px solid gray; */
             }
         </style>
     </head>
@@ -22,13 +18,23 @@
         <div class="settings-container">
             <h1 class="dragable">Settings</h1>
             <button id="restart-app-button">Restart App</button>
-            <section id="reminder">
-                <h2>Reminder</h2>
-                <label for="reminder-text">Reminder Text:</label>
-                <textarea rows="4" cols="40" id="reminder-text"></textarea><br />
-                <button onclick="saveSettings()">Save</button>
+
+            <!-- Reminder Settings -->
+            <section id="reminder-settings">
+                <h2>Reminder Items</h2>
+                <div>
+                    <input type="text" id="new-reminder-text" placeholder="Reminder text" />
+                    <select id="new-reminder-type">
+                        <option value="critical">Critical</option>
+                        <option value="optional">Optional</option>
+                        <option value="reminder">Reminder</option>
+                    </select>
+                    <button id="add-reminder-btn">Add Item</button>
+                </div>
+                <ul id="reminder-items"></ul>
             </section>
 
+            <!-- Checklist Settings -->
             <section id="checklist-settings">
                 <h2>Checklist</h2>
                 <div>
@@ -44,6 +50,7 @@
                 <button id="reset-legacy-checklist-btn">Reset to Legacy Checklist</button>
             </section>
 
+            <!-- Countdown Settings -->
             <section id="countdown">
                 <h2>Bar Countdown</h2>
                 <div>
@@ -52,9 +59,13 @@
                 </div>
             </section>
 
+            <!-- Session Countdowns -->
             <section id="session-countdowns">
                 <h2>Session Countdowns</h2>
-                
+                <div>
+                    <label for="session-volume-slider">🔊 Session Bell Volume:</label>
+                    <input id="session-volume-slider" type="range" min="0" max="1" step="0.01" value="0" />
+                </div>
                 <div>
                     <label for="session-time">Session Time:</label>
                     <input type="time" id="session-time" />
@@ -64,89 +75,15 @@
                     <input type="text" id="session-title" placeholder="Countdown Title" />
                 </div>
                 <div>
-                    <label for="session-countdown">Countdown:</label>
-                    <select id="countdown-hours">
-                        <option value="0">0 Hours</option>
-                        <option value="1">1 Hour</option>
-                        <option value="2">2 Hours</option>
-                        <option value="3">3 Hours</option>
-                        <option value="4">4 Hours</option>
-                        <option value="5">5 Hours</option>
-                        <option value="6">6 Hours</option>
-                        <option value="7">7 Hours</option>
-                        <option value="8">8 Hours</option>
-                        <option value="9">9 Hours</option>
-                        <option value="10">10 Hours</option>
-                        <option value="11">11 Hours</option>
-                        <option value="12">12 Hours</option>
-                    </select>
-                    <select id="countdown-minutes">
-                        <option value="0">0 Minutes</option>
-                        <option value="1">1 Minute</option>
-                        <option value="2">2 Minutes</option>
-                        <option value="3">3 Minutes</option>
-                        <option value="4">4 Minutes</option>
-                        <option value="5">5 Minutes</option>
-                        <option value="6">6 Minutes</option>
-                        <option value="7">7 Minutes</option>
-                        <option value="8">8 Minutes</option>
-                        <option value="9">9 Minutes</option>
-                        <option value="10">10 Minutes</option>
-                        <option value="11">11 Minutes</option>
-                        <option value="12">12 Minutes</option>
-                        <option value="13">13 Minutes</option>
-                        <option value="14">14 Minutes</option>
-                        <option value="15">15 Minutes</option>
-                        <option value="16">16 Minutes</option>
-                        <option value="17">17 Minutes</option>
-                        <option value="18">18 Minutes</option>
-                        <option value="19">19 Minutes</option>
-                        <option value="20">20 Minutes</option>
-                        <option value="21">21 Minutes</option>
-                        <option value="22">22 Minutes</option>
-                        <option value="23">23 Minutes</option>
-                        <option value="24">24 Minutes</option>
-                        <option value="25">25 Minutes</option>
-                        <option value="26">26 Minutes</option>
-                        <option value="27">27 Minutes</option>
-                        <option value="28">28 Minutes</option>
-                        <option value="29">29 Minutes</option>
-                        <option value="30">30 Minutes</option>
-                        <option value="31">31 Minutes</option>
-                        <option value="32">32 Minutes</option>
-                        <option value="33">33 Minutes</option>
-                        <option value="34">34 Minutes</option>
-                        <option value="35">35 Minutes</option>
-                        <option value="36">36 Minutes</option>
-                        <option value="37">37 Minutes</option>
-                        <option value="38">38 Minutes</option>
-                        <option value="39">39 Minutes</option>
-                        <option value="40">40 Minutes</option>
-                        <option value="41">41 Minutes</option>
-                        <option value="42">42 Minutes</option>
-                        <option value="43">43 Minutes</option>
-                        <option value="44">44 Minutes</option>
-                        <option value="45">45 Minutes</option>
-                        <option value="46">46 Minutes</option>
-                        <option value="47">47 Minutes</option>
-                        <option value="48">48 Minutes</option>
-                        <option value="49">49 Minutes</option>
-                        <option value="50">50 Minutes</option>
-                        <option value="51">51 Minutes</option>
-                        <option value="52">52 Minutes</option>
-                        <option value="53">53 Minutes</option>
-                        <option value="54">54 Minutes</option>
-                        <option value="55">55 Minutes</option>
-                        <option value="56">56 Minutes</option>
-                        <option value="57">57 Minutes</option>
-                        <option value="58">58 Minutes</option>
-                        <option value="59">59 Minutes</option>
-                    </select>
+                    <label for="session-countdown">Countdown Duration:</label>
+                    <select id="countdown-hours"></select>
+                    <select id="countdown-minutes"></select>
                 </div>
                 <button id="add-session-btn">Add Session Countdown</button>
                 <ul id="session-list"></ul>
             </section>
 
+            <!-- Screen Management -->
             <section id="screen-management">
                 <h2>Screen Management</h2>
                 <div id="screenControls"></div>
@@ -155,180 +92,184 @@
             <br />
             <button onclick="window.electronAPI.toggleSettings()">Close</button>
         </div>
-    </body>
-    <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            try {
-                // Load initial settings
-                const settings = await window.electronAPI.getSettings();
-                document.getElementById("reminder-text").value = settings.text || "REMINDER";
-    
-                // Initialize checklist
-                const checklistItems = await window.electronAPI.loadChecklistState();
-                renderChecklist(checklistItems);
-    
-                // Initialize volume slider
-                const volumeSlider = document.getElementById("volume-slider");
-                volumeSlider.value = settings.volume || 0.5; // Use saved volume or default
-                volumeSlider.addEventListener("input", () => {
-                    const volume = parseFloat(volumeSlider.value);
-                    window.electronAPI.setVolume(volume);
-                });
-    
-                // Load and render session countdowns
-                const sessionCountdowns = settings.sessionCountdowns || [];
-                renderSessionCountdowns(sessionCountdowns);
-    
-                // Listen for checklist updates
-                window.electronAPI.onChecklistUpdated((updatedItems) => {
-                    renderChecklist(updatedItems);
-                });
-            } catch (error) {
-                console.error("Error initializing settings or checklist:", error);
-                alert("Failed to load settings. Please try restarting the application.");
-            }
-        });
-    
-        // Render checklist items
-        function renderChecklist(items) {
-            const checklistContainer = document.getElementById("checklist-items");
-            checklistContainer.innerHTML = ""; // Clear previous items
-    
-            items.forEach((item, index) => {
-                const listItem = document.createElement("li");
-                listItem.textContent = `${item.text} (${item.type})`;
-    
-                const removeButton = document.createElement("button");
-                removeButton.textContent = "Remove";
-                removeButton.addEventListener("click", async () => {
-                    try {
-                        await window.electronAPI.removeChecklistItem(index);
-                    } catch (error) {
-                        console.error("Error removing checklist item:", error);
-                        alert("Failed to remove checklist item. Please try again.");
-                    }
-                });
-    
-                listItem.appendChild(removeButton);
-                checklistContainer.appendChild(listItem);
-            });
-        }
-    
-        // Add new checklist item
-        document.getElementById("add-item-btn").addEventListener("click", async () => {
-            const itemText = document.getElementById("new-item-text").value.trim();
-            const itemType = document.getElementById("new-item-type").value;
-    
-            if (itemText) {
-                const newItem = { text: itemText, type: itemType };
+
+        <script>
+            document.addEventListener("DOMContentLoaded", async () => {
                 try {
-                    await window.electronAPI.addChecklistItem(newItem); // Save to backend
-                    document.getElementById("new-item-text").value = ""; // Clear input
-                } catch (error) {
-                    console.error("Error adding checklist item:", error);
-                    alert("Failed to add checklist item. Please try again.");
-                }
-            } else {
-                alert("Please enter the item text.");
-            }
-        });
-    
-        // Reset checklist to legacy
-        document.getElementById("reset-legacy-checklist-btn").addEventListener("click", async () => {
-            try {
-                await window.electronAPI.resetToLegacyChecklist();
-                console.log("Checklist reset to legacy defaults.");
-            } catch (error) {
-                console.error("Error resetting to legacy checklist:", error);
-                alert("Failed to reset checklist. Please try again.");
-            }
-        });
-    
-        // Render session countdowns
-        function renderSessionCountdowns(sessionCountdowns) {
-            const sessionList = document.getElementById("session-list");
-            sessionList.innerHTML = ""; // Clear existing sessions
-    
-            sessionCountdowns.forEach((session, index) => {
-                const listItem = document.createElement("li");
-                listItem.textContent = `${session.start} - ${session.end} | ${session.title}`;
-    
-                const removeButton = document.createElement("button");
-                removeButton.textContent = "Remove";
-                removeButton.addEventListener("click", () => {
-                    try {
-                        sessionCountdowns.splice(index, 1);
-                        renderSessionCountdowns(sessionCountdowns);
-    
-                        // Save updated session countdowns
-                        window.electronAPI.updateSettings({ sessionCountdowns });
-                    } catch (error) {
-                        console.error("Error removing session countdown:", error);
-                        alert("Failed to remove session countdown. Please try again.");
-                    }
-                });
-    
-                listItem.appendChild(removeButton);
-                sessionList.appendChild(listItem);
-            });
-        }
-    
-        // Add new session countdown
-        document.getElementById("add-session-btn").addEventListener("click", () => {
-            const sessionTime = document.getElementById("session-time").value;
-            const sessionTitle = document.getElementById("session-title").value.trim();
-            const countdownHours = parseInt(document.getElementById("countdown-hours").value, 10);
-            const countdownMinutes = parseInt(document.getElementById("countdown-minutes").value, 10);
-    
-            const totalCountdownMinutes = countdownHours * 60 + countdownMinutes;
-    
-            if (sessionTime && sessionTitle && totalCountdownMinutes > 0) {
-                const [startHour, startMinute] = sessionTime.split(":").map(Number);
-    
-                // Calculate the end time
-                const start = new Date();
-                start.setHours(startHour, startMinute, 0, 0);
-                const end = new Date(start.getTime() + totalCountdownMinutes * 60 * 1000);
-    
-                const formattedEnd = `${String(end.getHours()).padStart(2, "0")}:${String(end.getMinutes()).padStart(2, "0")}`;
-    
-                const newSession = { start: sessionTime, title: sessionTitle, end: formattedEnd };
-    
-                try {
-                    window.electronAPI.getSettings().then((settings) => {
-                        const updatedSessions = [...(settings.sessionCountdowns || []), newSession];
-                        window.electronAPI.updateSettings({ sessionCountdowns: updatedSessions });
-                        renderSessionCountdowns(updatedSessions);
+                    const settings = await window.electronAPI.getSettings();
+                    initializeReminderSection(settings.reminderItems || []);
+                    initializeChecklistSection(settings.checklist || []);
+                    initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
+                    initializeCountdownSection(settings);
+
+                    // Event listeners
+                    document.getElementById("restart-app-button").addEventListener("click", restartApp);
+                    document.getElementById("add-reminder-btn").addEventListener("click", addReminderItem);
+                    document.getElementById("add-item-btn").addEventListener("click", addChecklistItem);
+                    document.getElementById("reset-legacy-checklist-btn").addEventListener("click", resetChecklist);
+
+                    // Listen for global settings updates
+                    window.electronAPI.onSettingsUpdated((updatedSettings) => {
+                        console.log("Settings updated globally:", updatedSettings);
+                        initializeReminderSection(updatedSettings.reminderItems || []);
+                        initializeChecklistSection(updatedSettings.checklist || []);
+                        initializeSessionCountdowns(updatedSettings.sessionCountdowns || [], updatedSettings.sessionVolume);
                     });
                 } catch (error) {
-                    console.error("Error adding session countdown:", error);
-                    alert("Failed to add session countdown. Please try again.");
+                    console.error("Initialization error:", error);
                 }
-            } else {
-                alert("Please fill out all fields correctly.");
+            });
+
+            // Reminder Section
+            function initializeReminderSection(items) {
+                const reminderList = document.getElementById("reminder-items");
+                reminderList.innerHTML = "";
+
+                items.forEach((item, index) => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${item.text} (${item.type})`;
+
+                    const removeButton = document.createElement("button");
+                    removeButton.textContent = "Remove";
+                    removeButton.addEventListener("click", () => {
+                        items.splice(index, 1);
+                        saveSettings({ reminderItems: items });
+                    });
+
+                    listItem.appendChild(removeButton);
+                    reminderList.appendChild(listItem);
+                });
             }
-        });
-    
-        // Restart app
-        document.getElementById("restart-app-button").addEventListener("click", () => {
-            try {
+
+            function addReminderItem() {
+                const text = document.getElementById("new-reminder-text").value.trim();
+                const type = document.getElementById("new-reminder-type").value;
+
+                if (!text) {
+                    alert("Enter reminder text.");
+                    return;
+                }
+
+                window.electronAPI.getSettings().then((settings) => {
+                    const updatedItems = [...(settings.reminderItems || []), { text, type }];
+                    saveSettings({ reminderItems: updatedItems });
+                });
+            }
+
+            // Checklist Section
+            function initializeChecklistSection(items) {
+                const checklistContainer = document.getElementById("checklist-items");
+                checklistContainer.innerHTML = "";
+
+                items.forEach((item, index) => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${item.text} (${item.type})`;
+
+                    const removeButton = document.createElement("button");
+                    removeButton.textContent = "Remove";
+                    removeButton.addEventListener("click", async () => {
+                        await window.electronAPI.removeChecklistItem(index);
+                        window.electronAPI.getSettings().then((settings) => {
+                            initializeChecklistSection(settings.checklist || []);
+                        });
+                    });
+
+                    listItem.appendChild(removeButton);
+                    checklistContainer.appendChild(listItem);
+                });
+            }
+
+            function addChecklistItem() {
+                const text = document.getElementById("new-item-text").value.trim();
+                const type = document.getElementById("new-item-type").value;
+                if (!text) return alert("Enter checklist item text.");
+
+                window.electronAPI.addChecklistItem({ text, type });
+                window.electronAPI.getSettings().then((settings) => {
+                    initializeChecklistSection(settings.checklist || []);
+                });
+            }
+
+            function resetChecklist() {
+                window.electronAPI.resetToLegacyChecklist();
+                window.electronAPI.getSettings().then((settings) => {
+                    initializeChecklistSection(settings.checklist || []);
+                });
+            }
+
+            // Countdown Section
+            function initializeCountdownSection(settings) {
+                const countdownSlider = document.getElementById("volume-slider");
+                countdownSlider.value = settings.volume || 0.5;
+                countdownSlider.addEventListener("input", () => window.electronAPI.setCountdownVolume(countdownSlider.value));
+            }
+
+            // Session Countdowns
+            function initializeSessionCountdowns(sessions, sessionVolume) {
+                const sessionList = document.getElementById("session-list");
+                const sessionVolumeSlider = document.getElementById("session-volume-slider");
+
+                sessionList.innerHTML = "";
+
+                // Populate session list
+                sessions.forEach((session, index) => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${session.start} - ${session.end} | ${session.title}`;
+
+                    const removeButton = document.createElement("button");
+                    removeButton.textContent = "Remove";
+                    removeButton.addEventListener("click", () => {
+                        sessions.splice(index, 1);
+                        saveSettings({ sessionCountdowns: sessions });
+                    });
+
+                    listItem.appendChild(removeButton);
+                    sessionList.appendChild(listItem);
+                });
+
+                // **Prevent Infinite Loop & Add Deadzone**
+                let isUserAdjusting = false;
+                let volumeUpdateTimeout = null;
+
+                // **Set initial slider value ONCE when opening settings**
+                sessionVolumeSlider.value = sessionVolume || 0.1; // Default to 0.1 if no saved value
+
+                sessionVolumeSlider.addEventListener("input", () => {
+                    if (!isUserAdjusting) {
+                        isUserAdjusting = true; // Prevent recursion
+                    }
+
+                    // **Clear previous timeout to reset the delay**
+                    clearTimeout(volumeUpdateTimeout);
+
+                    // **Set a new timeout for 1 second (1000ms)**
+                    volumeUpdateTimeout = setTimeout(() => {
+                        const newVolume = sessionVolumeSlider.value;
+                        console.log(`🔊 User finalized session volume: ${newVolume}`);
+                        window.electronAPI.setSessionVolume(newVolume);
+                        saveSettings({ sessionVolume: newVolume });
+
+                        isUserAdjusting = false; // Allow updates again
+                    }, 500); // 1-second delay after user stops dragging
+                });
+
+                // **Ensure slider does NOT auto-update while the user is adjusting**
+                window.electronAPI.onSessionVolumeUpdate((volume) => {
+                    if (!isUserAdjusting) {
+                        console.log(`🔊 Updating UI session volume to: ${volume}`);
+                        sessionVolumeSlider.value = volume;
+                    }
+                });
+            }
+
+            function saveSettings(newSettings) {
+                console.log("Saving settings:", newSettings);
+                window.electronAPI.updateSettings(newSettings);
+            }
+
+            function restartApp() {
                 window.electronAPI.restartApp();
-            } catch (error) {
-                console.error("Error restarting app:", error);
-                alert("Failed to restart the app. Please try again.");
             }
-        });
-    
-        // Save reminder text settings
-        function saveSettings() {
-            const newText = document.getElementById("reminder-text").value;
-            try {
-                window.electronAPI.updateSettings({ text: newText });
-            } catch (error) {
-                console.error("Error saving settings:", error);
-                alert("Failed to save settings. Please try again.");
-            }
-        }
-    </script>
-    
+        </script>
+    </body>
 </html>

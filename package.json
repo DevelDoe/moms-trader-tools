@@ -12,7 +12,10 @@
     },
     "author": "ChatGPT & M Ray",
     "license": "MIT",
-    "dependencies": {},
+    "dependencies": {
+        "chokidar": "^4.0.3",
+        "ignore": "^7.0.3"
+    },
     "devDependencies": {
         "electron": "^26.1.0",
         "electron-packager": "^17.1.2"

@@ -7,6 +7,9 @@
         <title>Taskbar</title>
         <link rel="stylesheet" href="../../styles/styles.css" />
         <style>
+            body{
+                background-color: #1c1d2340;
+            }
             .menu {
                 display: flex;
                 justify-content: space-around;
@@ -28,7 +31,7 @@
             .menu-item:hover {
                 color: white;
             }
-            #snipper-modal{
+            #snipper-modal {
                 height: 100%;
             }
             #snipper-modal input {
@@ -66,7 +69,7 @@
             </div>
             <div
                 id="snipper-modal"
-                style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #333; padding: 20px; border-radius: 8px; color: white; text-align: center;"
+                style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #333; padding: 20px; border-radius: 8px; color: white; text-align: center"
             >
                 <h3>Enter Snipper Name</h3>
                 <input type="text" id="snipper-name-input" placeholder="snipper name" style="width: 80%; padding: 5px" />

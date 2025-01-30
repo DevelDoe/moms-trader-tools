@@ -15,13 +15,15 @@
                 margin: 0;
                 font-size: 2rem;
                 color: #ffffff;
+            background-color: transparent;
             }
 
             #clock {
                 margin: 0 auto;
                 padding: 0;
                 margin-bottom: -15px;
-                font-size: 14px;
+                font-size: 15px;
+                font-weight: bold;
                 color: #f23645;
             }
 
@@ -29,16 +31,17 @@
                 margin-top: 10px;
                 font-size: 24px;
                 display: inline-block;
+                font-weight: bold;
             }
 
             #session-title {
                 font-weight: bold;
-                text-transform: uppercase;
                 float: left;
             }
 
             #session-timer {
                 /* color: #ff6666; */
+                font-weight: bold;
             }
         </style>
     </head>
@@ -54,12 +57,36 @@
             let sessionCountdowns = [];
             let activeInterval = null;
             let activeSessionTitle = null;
+            let bellSound = null; // 🔔 Bell sound instance
+            let lastSessionTitle = null; // Track last played session to avoid duplicate bell sounds
+        
+            // Load bell sound when the page loads
+            document.addEventListener("DOMContentLoaded", async () => {
+                listenForSessionUpdates(); // Set up listener for session updates
+                setInterval(updateClock, 1000); // Update the clock every second
+                console.log("Clock initialized.");
+        
+                // 🔔 Load bell sound
+                try {
+                    const bellSoundPath = await window.electronAPI.getBellSoundPath();
+                    bellSound = new Audio(bellSoundPath);
+                    bellSound.volume = 0; // Start muted
+        
+                    // Listen for volume updates from Electron main process
+                    window.electronAPI.onSessionVolumeUpdate((volume) => {
+                        console.log("Session Bell Volume updated:", volume);
+                        bellSound.volume = volume;
+                    });
+        
+                    console.log("Bell sound loaded:", bellSoundPath);
+                } catch (error) {
+                    console.error("Error loading bell sound:", error);
+                }
+            });
         
             // Get New York time
             function getNYTime() {
-                return new Date(
-                    new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
-                );
+                return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
             }
         
             // Update the clock display
@@ -118,7 +145,16 @@
             // Activate a session and start its countdown
             function activateSession(session, now) {
                 console.log(`Activating session: "${session.title}"`);
-                document.getElementById("session-title").textContent = session.title;
+                document.getElementById("session-title").textContent = session.title.toUpperCase();
+        
+                // ✅ Play bell **only if this is a new session**
+                if (bellSound && session.title !== lastSessionTitle) {
+                    lastSessionTitle = session.title; // Mark this session to prevent multiple rings
+                    bellSound.currentTime = 0;
+                    bellSound.play().catch((error) => {
+                        console.warn("🔔 Bell sound playback failed:", error);
+                    });
+                }
         
                 const [endHours, endMinutes] = session.end.split(":").map(Number);
                 const sessionEnd = new Date(now);
@@ -175,16 +211,7 @@
                     sessionCountdowns = updatedSessions; // Replace with updated sessions
                 });
             }
-        
-            // Initialize the clock
-            document.addEventListener("DOMContentLoaded", () => {
-                listenForSessionUpdates(); // Set up listener for session updates
-                setInterval(updateClock, 1000); // Update the clock every second
-                console.log("Clock initialized.");
-            });
         </script>
-        
-        
         
     </body>
 </html>

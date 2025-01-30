@@ -1,3 +1,5 @@
+//  ./src/renderer/common/preload.html -->
+
 const { contextBridge, ipcRenderer } = require("electron");
 
 console.log("Preload script loaded");
@@ -16,18 +18,23 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     // Toggling windows
     toggleSettings: () => ipcRenderer.send("toggle-settings"),
-    toggleReminder: () => ipcRenderer.send("toggle-reminder"),
+    toggleReminder: () => {
+        console.log("🔄 Toggling Reminder...");
+        ipcRenderer.send("toggle-reminder"); 
+    },
     toggleChecklist: () => ipcRenderer.send("toggle-checklist"),
     toggleCountdown: () => ipcRenderer.send("toggle-countdown"),
     toggleClock: () => ipcRenderer.send("toggle-clock"),
     toggleResumption: () => ipcRenderer.send("toggle-resumption"),
 
     // Reminder
-    onUpdateReminderText: (callback) => {
-        ipcRenderer.on("update-reminder-text", (event, newText) => {
-            callback(newText);
+    onUpdateReminderItems: (callback) => {
+        ipcRenderer.on("update-reminder-items", (event, items) => {
+            console.log("Received updated reminder items:", items);
+            callback(items);
         });
     },
+    sendReminderReady: () => ipcRenderer.send("reminder-ready"),
 
     // Checklist
     loadChecklistState: () => ipcRenderer.invoke("load-checklist-state"),
@@ -42,9 +49,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     // Countdown
     getTickSoundPath: async () => await ipcRenderer.invoke("get-tick-sound-path"),
-    setVolume: (volume) => ipcRenderer.send("volume-change", volume),
-    onVolumeUpdate: (callback) => {
-        ipcRenderer.on("update-volume", (event, volume) => callback(volume));
+    setCountdownVolume: (volume) => ipcRenderer.send("countdown-volume-change", volume),
+    onCountdownVolumeUpdate: (callback) => {
+        ipcRenderer.on("update-countdown-volume", (event, volume) => callback(volume));
     },
 
     // Session countdowns
@@ -56,6 +63,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
             }
         });
     },
+    setSessionVolume: (volume) => ipcRenderer.send("session-volume-change", volume),
+    onSessionVolumeUpdate: (callback) => {
+        ipcRenderer.on("update-session-volume", (event, volume) => callback(volume));
+    },
+    
+
+    getBellSoundPath: async () => await ipcRenderer.invoke("get-bell-sound-path"),
 
     // Resumption
     getBeepSoundPath: async () => await ipcRenderer.invoke("get-beep-sound-path"),

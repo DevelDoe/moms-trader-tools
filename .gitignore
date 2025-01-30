@@ -83,3 +83,6 @@ reports/
 !src/**/*.html
 !src/**/*.css
 !src/**/*.json
+
+# temp files
+dump.*

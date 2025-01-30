@@ -22,6 +22,8 @@ function createChecklistWindow(taskbarWindow) {
 
     checklistWindow.loadFile(path.join(__dirname, "../../../renderer/checklist/checklist.html"));
 
+    // checklistWindow.webContents.openDevTools({ mode: "detach" });
+
     // Dynamically position the checklist window relative to the taskbar
     if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {
         const taskbarBounds = taskbarWindow.getBounds();

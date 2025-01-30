@@ -5,8 +5,8 @@ const path = require("path");
 
 function createTaskbarWindow(toggleReminder, toggleSettings) {
     const taskbarWindow = new BrowserWindow({
-        width: 700,
-        height: 58,
+        width: 690,
+        height: 52,
         frame: false,
         alwaysOnTop: true,
         transparent: true,
@@ -20,7 +20,7 @@ function createTaskbarWindow(toggleReminder, toggleSettings) {
 
     taskbarWindow.loadFile(path.join(__dirname, "../../../renderer/taskbar/taskbar.html"));
 
-    taskbarWindow.webContents.openDevTools({ mode: "detach" }); // Opens DevTools in a separate window
+    // taskbarWindow.webContents.openDevTools({ mode: "detach" }); 
 
 
     const menuTemplate = [
