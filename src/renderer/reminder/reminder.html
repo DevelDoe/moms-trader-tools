@@ -55,82 +55,81 @@
         <div id="reminder" class="dragable"></div>
         <script>
             document.addEventListener("DOMContentLoaded", () => {
-    const reminderContainer = document.getElementById("reminder");
+                const reminderContainer = document.getElementById("reminder");
 
-    window.electronAPI.onUpdateReminderItems((items) => {
-        console.log("📩 Received reminder items:", items);
+                window.electronAPI.onUpdateReminderItems((items) => {
+                    console.log("📩 Received reminder items:", items);
 
-        if (!items || items.length === 0) {
-            console.warn("⚠ No reminder items received!");
-            return;
-        }
+                    if (!items || items.length === 0) {
+                        console.warn("⚠ No reminder items received!");
+                        return;
+                    }
 
-        // **Start with Opacity 0 Before Updating Content**
-        reminderContainer.style.opacity = "0";
+                    // **Start with Opacity 0 Before Updating Content**
+                    reminderContainer.style.opacity = "0";
 
-        reminderContainer.innerHTML = ""; // Clear previous items
+                    reminderContainer.innerHTML = ""; // Clear previous items
 
-            items.forEach((item) => {
-                if (!item.text.trim()) return;
-                const itemElement = document.createElement("div");
-                itemElement.className = `reminder-item ${item.type}`;
-                itemElement.textContent = item.text;
-                reminderContainer.appendChild(itemElement);
-            });
+                    items.forEach((item) => {
+                        if (!item.text.trim()) return;
+                        const itemElement = document.createElement("div");
+                        itemElement.className = `reminder-item ${item.type}`;
+                        itemElement.textContent = item.text;
+                        reminderContainer.appendChild(itemElement);
+                    });
 
-            // **Resize and Fade In**
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    adjustReminderWindowSize();
+                    // **Resize and Fade In**
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            adjustReminderWindowSize();
 
-                    // **Trigger Fade-In (CSS handles transition)**
-                    reminderContainer.style.opacity = "1";
+                            // **Trigger Fade-In (CSS handles transition)**
+                            reminderContainer.style.opacity = "1";
+                        });
+                    });
                 });
+
+                function adjustReminderWindowSize() {
+                    setTimeout(() => {
+                        const reminderItems = document.querySelectorAll(".reminder-item");
+
+                        if (reminderItems.length === 0) {
+                            console.warn("⚠ No items found for resizing.");
+                            return;
+                        }
+
+                        let maxWidth = 0;
+                        let totalHeight = 0;
+
+                        reminderItems.forEach((item) => {
+                            const rect = item.getBoundingClientRect();
+                            maxWidth = Math.max(maxWidth, rect.width);
+                            totalHeight += rect.height + 7; // Add extra padding for wrapped text
+                        });
+
+                        let width = Math.min(Math.max(maxWidth + 40, 250), 600);
+                        let height = Math.max(totalHeight + 20, 50);
+
+                        width = Math.floor(width);
+                        height = Math.floor(height);
+
+                        console.log(`✔ Resizing Reminder Window: ${width}x${height}`);
+
+                        if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+                            console.error("❌ Invalid window size detected!", { width, height });
+                            return;
+                        }
+
+                        try {
+                            window.electronAPI.resizeWindowToContent(width, height);
+                        } catch (error) {
+                            console.error("❌ Error resizing window:", error);
+                        }
+                    }, 150);
+                }
+
+                window.electronAPI.sendReminderReady();
             });
-    });
-
-    function adjustReminderWindowSize() {
-        setTimeout(() => {
-            const reminderItems = document.querySelectorAll(".reminder-item");
-
-            if (reminderItems.length === 0) {
-                console.warn("⚠ No items found for resizing.");
-                return;
-            }
-
-            let maxWidth = 0;
-            let totalHeight = 0;
-
-            reminderItems.forEach((item) => {
-                const rect = item.getBoundingClientRect();
-                maxWidth = Math.max(maxWidth, rect.width);
-                totalHeight += rect.height + 7; // Add extra padding for wrapped text
-            });
-
-            let width = Math.min(Math.max(maxWidth + 40, 250), 600);
-            let height = Math.max(totalHeight + 20, 50);
-
-            width = Math.floor(width);
-            height = Math.floor(height);
-
-            console.log(`✔ Resizing Reminder Window: ${width}x${height}`);
-
-            if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
-                console.error("❌ Invalid window size detected!", { width, height });
-                return;
-            }
-
-            try {
-                window.electronAPI.resizeWindowToContent(width, height);
-            } catch (error) {
-                console.error("❌ Error resizing window:", error);
-            }
-        }, 150);
-    }
-
-    window.electronAPI.sendReminderReady();
-});
-
         </script>
     </body>
 </html>
