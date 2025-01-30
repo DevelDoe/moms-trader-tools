@@ -49,7 +49,7 @@
     </head>
     <body>
         <div id="countdown">
-            <span id="five-minute-part" class="countdown-part"></span><br>
+            <span id="five-minute-part" class="countdown-part"></span><br />
             <span id="one-minute-part" class="countdown-part"></span>
         </div>
 
@@ -93,7 +93,7 @@
                         const onesDigit = oneMinuteRemaining % 10;
 
                         // Update five-minute countdown
-                        document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
+                        document.getElementById("five-minute-part").textContent = fiveMinuteRemaining + 1; 
 
                         // Update one-minute countdown digits **separately** without removing span elements
                         document.getElementById("one-minute-part").innerHTML = `
@@ -103,7 +103,7 @@
 
                         // Apply colors **to each digit separately**
                         applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part")); // Five-minute stays the same
-applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true); // One-minute follows new color rules
+                        applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true); // One-minute follows new color rules
 
                         if (oneMinuteRemaining <= 10) {
                             if (!isLockTickActive) {
