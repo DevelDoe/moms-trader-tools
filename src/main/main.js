@@ -202,9 +202,7 @@ ipcMain.on("reset-to-default-sessions", () => {
     updateSessionWindows(); // Notify UI about the change
 });
 
-function updateSessionWindows() {
-    mainWindow.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
-}
+
 
 ipcMain.on("reset-to-legacy-checklist", () => {
     console.log("Resetting checklist to legacy default items...");
