@@ -100,19 +100,33 @@ ipcMain.handle("get-settings", () => {
 });
 
 ipcMain.on("update-settings", (event, newSettings) => {
+    const previousReminderItems = JSON.stringify(appSettings.reminderItems);
+    const previousSessionVolume = appSettings.sessionVolume;
+
     appSettings = { ...appSettings, ...newSettings };
     saveSettings();
 
-    if (windows.clock) {
-        windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
-    }
-    if (windows.reminder) {
-        windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
+    // Only send reminder update if `reminderItems` changed
+    if (JSON.stringify(appSettings.reminderItems) !== previousReminderItems) {
+        console.log("📌 Reminder items changed, updating reminder window...");
+        if (windows.reminder) {
+            windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
+        }
     }
 
-    // Force a refresh in all relevant windows
+    // Only send session volume update separately
+    if (appSettings.sessionVolume !== previousSessionVolume) {
+        console.log("🔊 Session volume changed, updating session volume...");
+        Object.values(windows).forEach((window) => {
+            if (window && window.webContents) {
+                window.webContents.send("update-session-volume", appSettings.sessionVolume);
+            }
+        });
+    }
+
+    // Send full settings update only to windows that need everything
     Object.values(windows).forEach((window) => {
-        if (window && window.webContents) {
+        if (window && window.webContents && window !== windows.reminder) {
             window.webContents.send("settings-updated", appSettings);
         }
     });
