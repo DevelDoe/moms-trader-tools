@@ -184,6 +184,7 @@
             }
 
             // Checklist Section
+            // Checklist Section
             function initializeChecklistSection(items) {
                 const checklistContainer = document.getElementById("checklist-items");
                 checklistContainer.innerHTML = "";
@@ -192,19 +193,27 @@
                     const listItem = document.createElement("li");
                     listItem.textContent = `${item.text} (${item.type})`;
 
-                    // Create an img element for the trash icon
-                    const removeIcon = document.createElement("img");
-                    removeIcon.src = "../../../assets/images/delete.svg"; // Adjust the path as necessary
-                    removeIcon.alt = "Remove";
-                    removeIcon.className = "trash-icon";
-                    removeIcon.addEventListener("click", async () => {
+                    // Create the remove button
+                    const removeButton = document.createElement("button");
+                    removeButton.className = "remove-btn";
+                    removeButton.setAttribute("aria-label", "Remove item");
+
+                    // Create the trash icon image
+                    const trashIcon = document.createElement("img");
+                    trashIcon.src = "../../../assets/images/delete.svg"; // Ensure this path is correct
+                    trashIcon.alt = "Remove";
+                    trashIcon.className = "trash-icon";
+
+                    removeButton.appendChild(trashIcon);
+
+                    removeButton.addEventListener("click", async () => {
                         await window.electronAPI.removeChecklistItem(index);
                         window.electronAPI.getSettings().then((settings) => {
                             initializeChecklistSection(settings.checklist || []);
                         });
                     });
 
-                    listItem.appendChild(removeIcon);
+                    listItem.appendChild(removeButton);
                     checklistContainer.appendChild(listItem);
                 });
             }
