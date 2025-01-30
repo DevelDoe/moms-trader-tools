@@ -90,14 +90,21 @@
                         // Calculate full seconds countdown for the last minute
                         const oneMinuteRemaining = 60 - seconds;
                         const tensDigit = Math.floor(oneMinuteRemaining / 10);
-                        const onesDigit = oneMinuteRemaining % 10; // Get the second digit
+                        const onesDigit = oneMinuteRemaining % 10;
 
-                        // Update display elements
+                        // Update five-minute countdown
                         document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
-                        document.getElementById("one-minute-part").innerHTML = `<span>${tensDigit}</span><span>${onesDigit}</span>`;
 
+                        // Update one-minute countdown digits **separately** without removing span elements
+                        document.getElementById("one-minute-part").innerHTML = `
+        <span id="tens-digit">${tensDigit}</span>
+        <span id="ones-digit">${onesDigit}</span>
+    `;
+
+                        // Apply colors **to each digit separately**
                         applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part"));
-                        applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"));
+                        applyColors(tensDigit, document.getElementById("tens-digit"));
+                        applyColors(onesDigit, document.getElementById("ones-digit"));
 
                         if (oneMinuteRemaining <= 10) {
                             if (!isLockTickActive) {
