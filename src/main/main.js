@@ -129,7 +129,7 @@ ipcMain.on("toggle-reminder", () => {
             reminderWindow.show();
 
             setTimeout(() => {
-                console.log("📏 Sending reminder items after opening...");
+                console.log("Sending reminder items after opening...");
                 reminderWindow.webContents.send("update-reminder-items", appSettings.reminderItems);
             }, 10); // ✅ Give time for UI to load first
         }
