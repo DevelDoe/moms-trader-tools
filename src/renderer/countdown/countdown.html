@@ -122,16 +122,28 @@
                     updateDisplay();
                 }
 
-                function applyColors(remaining, element) {
-                    const colorMap = {
-                        5: "#089981",
-                        4: "#089981",
-                        3: "yellow",
-                        2: "yellow",
-                        1: "#f23645",
-                        0: "#f23645",
-                    };
-                    element.style.color = colorMap[remaining] || "transparent";
+                function applyColors(remaining, element, isOneMinutePart = false) {
+                    if (isOneMinutePart) {
+                        // Apply new color rules for the one-minute countdown
+                        if (remaining >= 40) {
+                            element.style.color = "#f23645"; // Red (40-60)
+                        } else if (remaining >= 20) {
+                            element.style.color = "yellow"; // Yellow (20-39)
+                        } else {
+                            element.style.color = "#089981"; // Green (0-19)
+                        }
+                    } else {
+                        // Keep five-minute part unchanged
+                        const colorMap = {
+                            5: "#089981",
+                            4: "#089981",
+                            3: "yellow",
+                            2: "yellow",
+                            1: "#f23645",
+                            0: "#f23645",
+                        };
+                        element.style.color = colorMap[remaining] || "transparent";
+                    }
                 }
 
                 function playTickSound() {
