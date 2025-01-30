@@ -63,7 +63,6 @@
                     <button id="add-item-btn">Add Item</button>
                 </div>
                 <ul id="checklist-items"></ul>
-                
             </section>
 
             <!-- Countdown Settings -->
@@ -251,7 +250,6 @@
                 const sessionList = document.getElementById("session-list");
                 const sessionVolumeSlider = document.getElementById("session-volume-slider");
                 const addSessionButton = document.getElementById("add-session-btn");
-                
 
                 // ✅ Ensure the button event listener is attached once
                 if (!addSessionButton.dataset.listener) {
@@ -316,7 +314,13 @@
                 });
 
                 document.getElementById("reset-default-sessions-btn").addEventListener("click", resetDefaultSessions);
+            }
 
+            function resetDefaultSessions() {
+                window.electronAPI.resetToDefaultSessions();
+                window.electronAPI.getSettings().then((settings) => {
+                    initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
+                });
             }
 
             function initializeCountdownDuration() {
