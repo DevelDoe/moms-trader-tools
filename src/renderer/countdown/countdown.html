@@ -20,7 +20,6 @@
                 margin: 3px;
                 -webkit-app-region: drag; /* Makes the window draggable */
                 color: transparent !important;
-                
             }
             .countdown-part {
                 display: inline-block; /* Makes the two parts stay next to each other */
@@ -83,11 +82,15 @@
                         const seconds = now.getSeconds();
                         const minutes = now.getMinutes();
 
+                        // Calculate five-minute countdown
                         const secondsSinceLastFiveMinutes = (minutes % 5) * 60 + seconds;
                         const totalSecondsFiveMinute = 300 - secondsSinceLastFiveMinutes - 1;
-
-                        const oneMinuteRemaining = 60 - seconds;
                         const fiveMinuteRemaining = Math.floor(totalSecondsFiveMinute / 60);
+
+                        // Calculate full seconds countdown for the last minute
+                        const oneMinuteRemaining = 60 - seconds;
+                        const tensDigit = Math.floor(oneMinuteRemaining / 10);
+                        const onesDigit = oneMinuteRemaining % 10; // Get the second digit
 
                         const tensDigit = Math.floor(oneMinuteRemaining / 10);
 
