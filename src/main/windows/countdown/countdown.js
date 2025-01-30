@@ -35,7 +35,7 @@ function createCountdownWindow(taskbarWindow) {
             x: countdownX,
             y: countdownY,
             width: 60,
-            height: 30,
+            height: 35,
         });
     } else {
         console.warn("Taskbar window is undefined or does not support getBounds. Positioning skipped.");
