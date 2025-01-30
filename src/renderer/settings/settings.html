@@ -12,19 +12,7 @@
                 margin: 0 auto;
                 color: #fff;
             }
-            button {
-                background: none;
-                border: none;
-                color: inherit;
-                cursor: pointer;
-                padding: 5px;
-                margin-left: 10px;
-                font-size: 10px; /* Adjust size as needed */
-            }
-
-            button:hover {
-                color: #f00; /* Change color on hover */
-            }
+            
         </style>
     </head>
     <body>
@@ -128,8 +116,6 @@
                         initializeChecklistSection(updatedSettings.checklist || []);
                         initializeSessionCountdowns(updatedSettings.sessionCountdowns || [], updatedSettings.sessionVolume);
                     });
-
-                    
                 } catch (error) {
                     console.error("Initialization error:", error);
                 }
