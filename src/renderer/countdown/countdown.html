@@ -97,7 +97,7 @@
                         document.getElementById("one-minute-part").innerHTML = `<span>${tensDigit}</span><span>${onesDigit}</span>`;
 
                         applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part"));
-                        applyColors(tensDigit, document.getElementById("one-minute-part"));
+                        applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"));
 
                         if (oneMinuteRemaining <= 10) {
                             if (!isLockTickActive) {
