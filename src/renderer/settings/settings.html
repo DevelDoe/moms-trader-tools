@@ -129,25 +129,7 @@
                         initializeSessionCountdowns(updatedSettings.sessionCountdowns || [], updatedSettings.sessionVolume);
                     });
 
-                    const reminderList = document.getElementById("reminder-items");
-                    reminderList.innerHTML = "";
-
-                    items.forEach((item, index) => {
-                        const listItem = document.createElement("li");
-                        listItem.textContent = `${item.text} (${item.type})`;
-
-                        // Create the remove button with the Unicode trash icon
-                        const removeButton = document.createElement("button");
-                        removeButton.textContent = "🗑"; // Unicode trash icon
-
-                        removeButton.addEventListener("click", () => {
-                            items.splice(index, 1);
-                            saveSettings({ reminderItems: items });
-                        });
-
-                        listItem.appendChild(removeButton);
-                        reminderList.appendChild(listItem);
-                    });
+                    
                 } catch (error) {
                     console.error("Initialization error:", error);
                 }
