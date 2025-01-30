@@ -7,7 +7,7 @@ function createCountdownWindow(taskbarWindow) {
     const countdownWindow = new BrowserWindow({
         width: 100,
         height: 110,
-        transparent: true,
+        transparent: false,
         frame: false,
         resizable: true,
         show: false,
