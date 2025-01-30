@@ -192,16 +192,19 @@
                     const listItem = document.createElement("li");
                     listItem.textContent = `${item.text} (${item.type})`;
 
-                    const removeButton = document.createElement("button");
-                    removeButton.textContent = "Remove";
-                    removeButton.addEventListener("click", async () => {
+                    // Create an img element for the trash icon
+                    const removeIcon = document.createElement("img");
+                    removeIcon.src = "../assets/images/delete.svg"; // Adjust the path as necessary
+                    removeIcon.alt = "Remove";
+                    removeIcon.className = "remove-icon";
+                    removeIcon.addEventListener("click", async () => {
                         await window.electronAPI.removeChecklistItem(index);
                         window.electronAPI.getSettings().then((settings) => {
                             initializeChecklistSection(settings.checklist || []);
                         });
                     });
 
-                    listItem.appendChild(removeButton);
+                    listItem.appendChild(removeIcon);
                     checklistContainer.appendChild(listItem);
                 });
             }
