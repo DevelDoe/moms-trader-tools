@@ -115,8 +115,8 @@
                     const settings = await window.electronAPI.getSettings();
                     initializeReminderSection(settings.reminderItems || []);
                     initializeChecklistSection(settings.checklist || []);
-                    initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
                     initializeCountdownSection(settings);
+                    initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
 
                     // Event listeners
                     document.getElementById("restart-app-button").addEventListener("click", restartApp);
