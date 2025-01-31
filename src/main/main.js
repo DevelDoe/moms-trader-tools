@@ -451,20 +451,18 @@ ipcMain.on("snipper-cancelled", (event) => {
 });
 
 // Create Snipper Window
-ipcMain.on("create-snipper-window", (event, { name, bounds }) => {
-    if (!name || !bounds) {
-        console.error("Snipper name and bounds are required.");
+ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
+    if (!name || !bounds || !sourceId) {
+        console.error("❌ Missing required data for creating Snipper window.");
         return;
     }
 
-    console.log(`📸 Creating snipper window: "${name}" with bounds:`, bounds, "sourceId:", sourceId);
+    console.log(`📸 Creating Snipper window: "${name}" with bounds:`, bounds, "sourceId:", sourceId);
 
     if (snipperWindows[name]) {
-        console.warn(`Snipper "${name}" already exists.`);
+        console.warn(`⚠️ Snipper "${name}" already exists.`);
         return;
     }
-
-    console.log(`Creating snipper window: "${name}" with bounds:`, bounds);
 
     const snipperWindow = new BrowserWindow({
         width: bounds.width,
@@ -478,25 +476,22 @@ ipcMain.on("create-snipper-window", (event, { name, bounds }) => {
         },
     });
 
-    snipperWindow
-        .loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
-        .then(() => console.log(`Snipper window "${name}" loaded`))
-        .catch((err) => console.error("Error loading snipper HTML:", err));
+    snipperWindow.loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
+        .then(() => console.log(`✅ Snipper window "${name}" loaded`))
+        .catch((err) => console.error("❌ Error loading snipper HTML:", err));
 
+    // ✅ Send the correct `sourceId` to renderer
     snipperWindow.webContents.once("dom-ready", () => {
-        snipperWindow.webContents.send("region-selected", bounds);
+        snipperWindow.webContents.send("region-selected", { ...bounds, sourceId });
     });
 
     snipperWindows[name] = snipperWindow;
 
     snipperWindow.on("closed", () => {
-        console.log(`Snipper "${name}" closed.`);
+        console.log(`❌ Snipper "${name}" closed.`);
         delete snipperWindows[name];
 
-        // ❌ DO NOT REMOVE THE SNIPPER FROM `appSettings.snippers` AUTOMATICALLY
-        // appSettings.snippers = appSettings.snippers.filter(snip => snip.name !== name);
-
-        saveSettings(); // Ensure settings still include the snippers
+        saveSettings();
         sendSnipperUpdates();
     });
 
