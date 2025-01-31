@@ -71,12 +71,16 @@ function saveSettings() {
     if (Object.keys(snipperWindows).length > 0) {
         appSettings.snippers = Object.keys(snipperWindows).map((name) => {
             const win = snipperWindows[name];
+            const bounds = win.getBounds();
+    
+            console.log(`💾 Saving Snipper: ${name} Bounds:`, bounds); // ✅ Log actual saved bounds
+    
             return {
                 name,
-                x: win.getBounds().x,
-                y: win.getBounds().y,
-                width: win.getBounds().width,
-                height: win.getBounds().height,
+                x: bounds.x,
+                y: bounds.y,
+                width: bounds.width,
+                height: bounds.height,
             };
         });
     }
