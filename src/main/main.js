@@ -65,7 +65,6 @@ function saveSettings() {
         console.log("Removing deprecated 'text' from settings...");
         delete appSettings.text;
     }
-    
 
     console.log("✅ Final settings before writing:", JSON.stringify(appSettings, null, 2));
 
@@ -462,7 +461,8 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
         },
     });
 
-    snipperWindow.loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
+    snipperWindow
+        .loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
         .then(() => console.log(`✅ Snipper window "${name}" loaded`))
         .catch((err) => console.error("❌ Error loading snipper HTML:", err));
 
@@ -512,7 +512,8 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
         },
     });
 
-    snipperWindow.loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
+    snipperWindow
+        .loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
         .then(() => console.log(`✅ Snipper window "${name}" loaded`))
         .catch((err) => console.error("❌ Error loading snipper HTML:", err));
 
@@ -577,14 +578,13 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
             console.log(`📌 Saving selected region for "${snipperName}":`, bounds);
 
             // ✅ Save the region bounds immediately!
-            appSettings.snippers = appSettings.snippers.filter(snip => snip.name !== snipperName); // Remove existing entry if it exists
+            appSettings.snippers = appSettings.snippers.filter((snip) => snip.name !== snipperName); // Remove existing entry if it exists
             appSettings.snippers.push({ name: snipperName, ...bounds });
 
             saveSettings();
 
             // Now create the Snipper window using the saved bounds
             ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds });
-
         } catch (error) {
             console.error("⚠️ Error processing region selection:", error);
         }
@@ -597,8 +597,6 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         regionWindow.close();
     });
 });
-
-
 
 // Update Snipper Settings (Rename & Move)
 ipcMain.on("update-snipper-settings", (event, { oldName, newName, x, y }) => {
@@ -737,7 +735,7 @@ app.on("ready", () => {
 
     // Restore Snippers from saved settings
     if (Array.isArray(appSettings.snippers)) {
-        console.log("🔄 Restoring Snippers from settings...");
+        console.log("🔄 Restoring Snippers from saved regions:", appSettings.snippers);
 
         desktopCapturer
             .getSources({ types: ["screen"] })
@@ -748,10 +746,9 @@ app.on("ready", () => {
                 }
 
                 appSettings.snippers.forEach((snip) => {
-                    console.log(`🔍 Looking for source for Snipper: ${snip.name}`);
+                    console.log(`🔍 Restoring Snipper: ${snip.name} with saved region bounds:`, snip);
 
-                    // Select a valid screen source, default to the first one
-                    const source = sources.find((src) => src.id.includes("screen")) || sources[0];
+                    const source = sources.find((src) => snip.sourceId && src.id === snip.sourceId) || sources[0];
 
                     if (!source) {
                         console.error(`❌ No matching source found for Snipper: ${snip.name}`);
@@ -760,16 +757,10 @@ app.on("ready", () => {
 
                     console.log(`📸 Assigning sourceId: ${source.id} to Snipper: ${snip.name}`);
 
-                    // ✅ Fix: Pass sourceId correctly when creating Snipper window
                     ipcMain.emit("create-snipper-window", null, {
                         name: snip.name,
-                        bounds: {
-                            x: snip.x,
-                            y: snip.y,
-                            width: snip.width,
-                            height: snip.height,
-                        },
-                        sourceId: source.id, // ✅ Ensure sourceId is included
+                        bounds: snip, // ✅ Use saved region bounds!
+                        sourceId: source.id,
                     });
                 });
             })
