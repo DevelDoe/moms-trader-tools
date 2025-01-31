@@ -65,25 +65,7 @@ function saveSettings() {
         console.log("Removing deprecated 'text' from settings...");
         delete appSettings.text;
     }
-
-    console.log("💾 Saving settings (before saving):", JSON.stringify(appSettings, null, 2));
-
-    if (Object.keys(snipperWindows).length > 0) {
-        appSettings.snippers = Object.keys(snipperWindows).map((name) => {
-            const win = snipperWindows[name];
-            const bounds = win.getBounds();
     
-            console.log(`💾 Saving Snipper: ${name} Bounds:`, bounds); // ✅ Log actual saved bounds
-    
-            return {
-                name,
-                x: bounds.x,
-                y: bounds.y,
-                width: bounds.width,
-                height: bounds.height,
-            };
-        });
-    }
 
     console.log("✅ Final settings before writing:", JSON.stringify(appSettings, null, 2));
 
@@ -570,14 +552,12 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
     await regionWindow.loadFile(path.join(__dirname, "../renderer/snipper/region.html"));
 
-    // ✅ Ensure only one listener exists at a time
     ipcMain.removeAllListeners("region-selected");
 
     ipcMain.once("region-selected", async (event, bounds) => {
         console.log("✅ Region selected:", bounds);
 
         try {
-            // Fetch screen sources (this can be empty if permission is denied)
             const sources = await desktopCapturer.getSources({ types: ["screen"] });
 
             if (sources.length === 0) {
@@ -585,21 +565,25 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
                 return;
             }
 
-            // ✅ Handle missing `display_id` by defaulting to first source
             const source = sources.find((src) => bounds.display_id && src.id.includes(bounds.display_id)) || sources[0];
 
             if (!source) {
-                console.error("❌ No matching snipper source found for the selected region.");
+                console.error("❌ No matching snipper source found.");
                 return;
             }
 
-            // ✅ Add the correct `sourceId`
             bounds.sourceId = source.id;
 
-            console.log(`📸 Creating snipper window "${snipperName}" with bounds:`, bounds);
+            console.log(`📌 Saving selected region for "${snipperName}":`, bounds);
 
-            // ✅ FIXED: Now we pass `sourceId`
-            ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds, sourceId: bounds.sourceId });
+            // ✅ Save the region bounds immediately!
+            appSettings.snippers = appSettings.snippers.filter(snip => snip.name !== snipperName); // Remove existing entry if it exists
+            appSettings.snippers.push({ name: snipperName, ...bounds });
+
+            saveSettings();
+
+            // Now create the Snipper window using the saved bounds
+            ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds });
 
         } catch (error) {
             console.error("⚠️ Error processing region selection:", error);
@@ -613,6 +597,7 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         regionWindow.close();
     });
 });
+
 
 
 // Update Snipper Settings (Rename & Move)
