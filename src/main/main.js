@@ -459,7 +459,6 @@ ipcMain.on("create-snipper-window", (event, { name, bounds }) => {
 
     console.log(`📸 Creating snipper window: "${name}" with bounds:`, bounds, "sourceId:", sourceId);
 
-
     if (snipperWindows[name]) {
         console.warn(`Snipper "${name}" already exists.`);
         return;
@@ -702,12 +701,39 @@ app.on("ready", () => {
 
     // Restore Snippers from saved settings
     if (Array.isArray(appSettings.snippers)) {
-        appSettings.snippers.forEach((snip) => {
-            ipcMain.emit("create-snipper-window", null, {
-                name: snip.name,
-                bounds: { x: snip.x, y: snip.y, width: snip.width, height: snip.height },
+        console.log("🔄 Restoring Snippers from settings...");
+
+        desktopCapturer
+            .getSources({ types: ["screen"] })
+            .then((sources) => {
+                if (sources.length === 0) {
+                    console.error("❌ No screen sources available for Snipper.");
+                    return;
+                }
+
+                appSettings.snippers.forEach((snip) => {
+                    console.log(`🔍 Looking for source for Snipper: ${snip.name}`);
+
+                    // Pick the first available source (fallback)
+                    const source = sources[0];
+
+                    if (!source) {
+                        console.error(`❌ No matching source found for Snipper: ${snip.name}`);
+                        return;
+                    }
+
+                    console.log(`📸 Assigning sourceId: ${source.id} to Snipper: ${snip.name}`);
+
+                    ipcMain.emit("create-snipper-window", null, {
+                        name: snip.name,
+                        bounds: { x: snip.x, y: snip.y, width: snip.width, height: snip.height },
+                        sourceId: source.id, // ✅ Now sending a valid sourceId
+                    });
+                });
+            })
+            .catch((error) => {
+                console.error("❌ Error fetching screen sources:", error);
             });
-        });
     }
 
     console.log("Snippers restored from settings:", appSettings.snippers);
