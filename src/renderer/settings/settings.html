@@ -427,11 +427,7 @@
                     const listItem = document.createElement("li");
                     listItem.textContent = `${snipper.name} (x: ${snipper.x}, y: ${snipper.y}) `;
 
-                    // Rename Button
-                    const renameBtn = document.createElement("button");
-                    renameBtn.textContent = "✏ Rename";
-                    renameBtn.style.marginRight = "8px";
-                    renameBtn.onclick = () => renameSnipper(snipper.name);
+
 
                     // Remove Button
                     const removeBtn = document.createElement("button");
@@ -441,22 +437,9 @@
                         loadSnippers(); // ✅ Refresh list after deletion
                     };
 
-                    listItem.appendChild(renameBtn);
                     listItem.appendChild(removeBtn);
                     snipperList.appendChild(listItem);
                 });
-            }
-
-            async function renameSnipper(oldName) {
-                const newName = prompt("Enter a new name for Snipper:", oldName);
-                if (!newName || newName.trim() === "") return;
-
-                try {
-                    await window.electronAPI.updateSnipperSettings(oldName, { name: newName });
-                    loadSnippers(); // ✅ Refresh list after renaming
-                } catch (error) {
-                    console.error("Error renaming snipper:", error);
-                }
             }
 
             function saveSettings(newSettings) {
