@@ -44,7 +44,6 @@ function loadSettings() {
         }
 
         return settings;
-
     } catch (error) {
         console.error("Error loading settings:", error);
         return {
@@ -69,7 +68,6 @@ function saveSettings() {
 
     console.log("💾 Saving settings (before saving):", JSON.stringify(appSettings, null, 2));
 
-
     if (Object.keys(snipperWindows).length > 0) {
         appSettings.snippers = Object.keys(snipperWindows).map((name) => {
             const win = snipperWindows[name];
@@ -84,7 +82,6 @@ function saveSettings() {
     }
 
     console.log("✅ Final settings before writing:", JSON.stringify(appSettings, null, 2));
-
 
     console.log("Saving updated settings:", appSettings);
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
@@ -438,7 +435,7 @@ ipcMain.on("open-snipper-dialog", (event) => {
 
 ipcMain.on("snipper-name-confirmed", (event, name) => {
     console.log(`✅ Snipper name confirmed: ${name}`);
-    
+
     const senderWindow = BrowserWindow.fromWebContents(event.sender);
     if (senderWindow) senderWindow.close(); // Close the dialog window
 
@@ -448,7 +445,7 @@ ipcMain.on("snipper-name-confirmed", (event, name) => {
 
 ipcMain.on("snipper-cancelled", (event) => {
     console.log("❌ Snipper creation cancelled.");
-    
+
     const senderWindow = BrowserWindow.fromWebContents(event.sender);
     if (senderWindow) senderWindow.close(); // Close the dialog window
 });
@@ -459,6 +456,9 @@ ipcMain.on("create-snipper-window", (event, { name, bounds }) => {
         console.error("Snipper name and bounds are required.");
         return;
     }
+
+    console.log(`📸 Creating snipper window: "${name}" with bounds:`, bounds, "sourceId:", sourceId);
+
 
     if (snipperWindows[name]) {
         console.warn(`Snipper "${name}" already exists.`);
@@ -479,7 +479,8 @@ ipcMain.on("create-snipper-window", (event, { name, bounds }) => {
         },
     });
 
-    snipperWindow.loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
+    snipperWindow
+        .loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
         .then(() => console.log(`Snipper window "${name}" loaded`))
         .catch((err) => console.error("Error loading snipper HTML:", err));
 
@@ -492,10 +493,10 @@ ipcMain.on("create-snipper-window", (event, { name, bounds }) => {
     snipperWindow.on("closed", () => {
         console.log(`Snipper "${name}" closed.`);
         delete snipperWindows[name];
-    
+
         // ❌ DO NOT REMOVE THE SNIPPER FROM `appSettings.snippers` AUTOMATICALLY
         // appSettings.snippers = appSettings.snippers.filter(snip => snip.name !== name);
-    
+
         saveSettings(); // Ensure settings still include the snippers
         sendSnipperUpdates();
     });
@@ -551,7 +552,6 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
             // ✅ Pass the selected region to the Snipper Window
             ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds });
-
         } catch (error) {
             console.error("⚠️ Error processing region selection:", error);
         }
@@ -588,12 +588,12 @@ ipcMain.on("update-snipper-settings", (event, { oldName, newName, x, y }) => {
 // Remove Snipper Window
 ipcMain.on("remove-snipper-window", (event, name) => {
     if (!snipperWindows[name]) return;
-    
+
     snipperWindows[name].close();
     delete snipperWindows[name];
 
     appSettings.snippers = appSettings.snippers.filter((snip) => snip.name !== name);
-    
+
     saveSettings();
     sendSnipperUpdates();
 });
@@ -637,14 +637,11 @@ function createSnipperDialogWindow() {
     });
 
     dialogWindow.loadFile(path.join(__dirname, "../renderer/snipper/dialog.html"));
-  
 
     // dialogWindow.webContents.openDevTools({ mode: "detach" });
 
     return dialogWindow;
 }
-
-
 
 // App Ready Event
 app.on("ready", () => {
@@ -708,7 +705,7 @@ app.on("ready", () => {
         appSettings.snippers.forEach((snip) => {
             ipcMain.emit("create-snipper-window", null, {
                 name: snip.name,
-                bounds: { x: snip.x, y: snip.y, width: snip.width, height: snip.height }
+                bounds: { x: snip.x, y: snip.y, width: snip.width, height: snip.height },
             });
         });
     }
