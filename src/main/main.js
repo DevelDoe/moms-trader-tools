@@ -583,8 +583,9 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
             saveSettings();
 
-            // Now create the Snipper window using the saved bounds
-            ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds });
+            // ✅ Ensure sourceId is passed correctly
+            ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds, sourceId: bounds.sourceId });
+
         } catch (error) {
             console.error("⚠️ Error processing region selection:", error);
         }
@@ -597,6 +598,7 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         regionWindow.close();
     });
 });
+
 
 // Update Snipper Settings (Rename & Move)
 ipcMain.on("update-snipper-settings", (event, { oldName, newName, x, y }) => {
