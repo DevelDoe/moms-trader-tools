@@ -479,6 +479,7 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
             if (sources.length === 0) {
                 console.error("❌ No screen sources found.");
+                regionWindow.close();
                 return;
             }
 
@@ -487,6 +488,7 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
             if (!source) {
                 console.error("❌ No matching source found for the selected region.");
+                regionWindow.close();
                 return;
             }
 
@@ -506,16 +508,19 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
         } catch (error) {
             console.error("⚠️ Error processing region selection:", error);
+        } finally {
+            regionWindow.close();
         }
-
-        regionWindow.close();
     });
 
     ipcMain.once("close-region-selection", () => {
         console.log("🛑 Region selection canceled.");
-        regionWindow.close();
+        if (!regionWindow.isDestroyed()) {
+            regionWindow.close();
+        }
     });
 });
+
 
 // Handle Region Selection
 ipcMain.on("start-region-selection", async (event, snipperName) => {
