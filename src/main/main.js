@@ -752,7 +752,7 @@ app.on("ready", () => {
     // Restore Snippers from saved settings
     if (Array.isArray(appSettings.snippers)) {
         console.log("🔄 Restoring Snippers from saved regions:", appSettings.snippers);
-
+    
         desktopCapturer
             .getSources({ types: ["screen"] })
             .then((sources) => {
@@ -760,19 +760,19 @@ app.on("ready", () => {
                     console.error("❌ No screen sources available for Snipper.");
                     return;
                 }
-
+    
                 appSettings.snippers.forEach((snip) => {
                     console.log(`🔍 Restoring Snipper: ${snip.name} with saved region bounds:`, snip);
-
+    
                     const source = sources.find((src) => snip.sourceId && src.id === snip.sourceId) || sources[0];
-
+    
                     if (!source) {
                         console.error(`❌ No matching source found for Snipper: ${snip.name}`);
                         return;
                     }
-
+    
                     console.log(`📸 Assigning sourceId: ${source.id} to Snipper: ${snip.name}`);
-
+    
                     ipcMain.emit("create-snipper-window", null, {
                         name: snip.name,
                         bounds: snip, // ✅ Use saved region bounds!
@@ -784,6 +784,7 @@ app.on("ready", () => {
                 console.error("❌ Error fetching screen sources:", error);
             });
     }
+    
 
     console.log("Snippers restored from settings:", appSettings.snippers);
 });
