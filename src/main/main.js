@@ -500,6 +500,56 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
 });
 
 // Handle Region Selection
+// Create Snipper Window
+ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
+    if (!name || !bounds || !sourceId) {
+        console.error("❌ Missing required data for creating Snipper window.");
+        return;
+    }
+
+    console.log(`📸 Creating Snipper window: "${name}" with bounds:`, bounds, "sourceId:", sourceId);
+
+    if (snipperWindows[name]) {
+        console.warn(`⚠️ Snipper "${name}" already exists.`);
+        return;
+    }
+
+    const snipperWindow = new BrowserWindow({
+        width: bounds.width,
+        height: bounds.height,
+        transparent: true,
+        frame: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            preload: path.join(__dirname, "../renderer/common/preload.js"),
+            contextIsolation: true,
+        },
+    });
+
+    snipperWindow.loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
+        .then(() => console.log(`✅ Snipper window "${name}" loaded`))
+        .catch((err) => console.error("❌ Error loading snipper HTML:", err));
+
+    // ✅ Send the correct `sourceId` to renderer
+    snipperWindow.webContents.once("dom-ready", () => {
+        snipperWindow.webContents.send("region-selected", { ...bounds, sourceId });
+    });
+
+    snipperWindows[name] = snipperWindow;
+
+    snipperWindow.on("closed", () => {
+        console.log(`❌ Snipper "${name}" closed.`);
+        delete snipperWindows[name];
+
+        saveSettings();
+        sendSnipperUpdates();
+    });
+
+    saveSettings();
+    sendSnipperUpdates();
+});
+
+// Handle Region Selection
 ipcMain.on("start-region-selection", async (event, snipperName) => {
     console.log(`🟢 Starting region selection for Snipper "${snipperName}".`);
 
@@ -544,8 +594,9 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
             console.log(`📸 Creating snipper window "${snipperName}" with bounds:`, bounds);
 
-            // ✅ Pass the selected region to the Snipper Window
-            ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds });
+            // ✅ FIXED: Now we pass `sourceId`
+            ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds, sourceId: bounds.sourceId });
+
         } catch (error) {
             console.error("⚠️ Error processing region selection:", error);
         }
@@ -558,6 +609,7 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         regionWindow.close();
     });
 });
+
 
 // Update Snipper Settings (Rename & Move)
 ipcMain.on("update-snipper-settings", (event, { oldName, newName, x, y }) => {
