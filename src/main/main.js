@@ -714,7 +714,7 @@ app.on("ready", () => {
                 appSettings.snippers.forEach((snip) => {
                     console.log(`🔍 Looking for source for Snipper: ${snip.name}`);
 
-                    // Pick the first available source as a fallback
+                    // Select a valid screen source, default to the first one
                     const source = sources.find((src) => src.id.includes("screen")) || sources[0];
 
                     if (!source) {
@@ -724,10 +724,16 @@ app.on("ready", () => {
 
                     console.log(`📸 Assigning sourceId: ${source.id} to Snipper: ${snip.name}`);
 
+                    // ✅ Fix: Pass sourceId correctly when creating Snipper window
                     ipcMain.emit("create-snipper-window", null, {
                         name: snip.name,
-                        bounds: { x: snip.x, y: snip.y, width: snip.width, height: snip.height },
-                        sourceId: source.id, // ✅ Now passing sourceId properly
+                        bounds: {
+                            x: snip.x,
+                            y: snip.y,
+                            width: snip.width,
+                            height: snip.height,
+                        },
+                        sourceId: source.id, // ✅ Ensure sourceId is included
                     });
                 });
             })
