@@ -7,52 +7,28 @@
         <title>Taskbar</title>
         <link rel="stylesheet" href="../../styles/styles.css" />
         <style>
-            body{
-                background-color: #1c1d2340;
-            }
-            .menu {
-                display: flex;
-                justify-content: space-around;
-                padding: 10px;
-                border: 1px solid rgba(128, 128, 128, 0.329);
-                border-radius: 1px;
-                height: 100%;
-            }
-
-            .menu-item {
-                cursor: pointer;
-                padding: 5px 10px;
-                color: rgb(206, 206, 206);
-                font-weight: bold;
-                border-radius: 1px;
-                transition: background-color 0.3s;
-            }
-
-            .menu-item:hover {
-                color: white;
-            }
-            #snipper-modal {
-                height: 100%;
-            }
-            #snipper-modal input {
-                font-size: 16px;
-                border: 1px solid #555;
-                background: #444;
-                color: white;
-                border-radius: 4px;
-            }
-
-            #snipper-modal button {
-                background: #555;
-                color: white;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-            }
-
-            #snipper-modal button:hover {
-                background: #666;
-            }
+            body {
+            background-color: #1c1d2340;
+        }
+        .menu {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            border: 1px solid rgba(128, 128, 128, 0.329);
+            border-radius: 1px;
+            height: 100%;
+        }
+        .menu-item {
+            cursor: pointer;
+            padding: 5px 10px;
+            color: rgb(206, 206, 206);
+            font-weight: bold;
+            border-radius: 1px;
+            transition: background-color 0.3s;
+        }
+        .menu-item:hover {
+            color: white;
+        }
         </style>
     </head>
     <body>
@@ -63,7 +39,7 @@
                 <div class="menu-item nodrag" onclick="window.electronAPI.toggleCountdown()">Countdown</div>
                 <div class="menu-item nodrag" onclick="window.electronAPI.toggleClock()">Clock</div>
                 <div class="menu-item nodrag" onclick="window.electronAPI.toggleResumption()">Resumption</div>
-                <div class="menu-item nodrag" onclick="window.createSnipper()">Snipper</div>
+                <div class="menu-item nodrag" onclick="window.electronAPI.openSnipperDialog()">Snipper</div>
                 <div class="menu-item nodrag" onclick="window.electronAPI.toggleSettings()">Settings</div>
                 <div class="menu-item nodrag" onclick="window.electronAPI.exitApp()">Exit</div>
             </div>

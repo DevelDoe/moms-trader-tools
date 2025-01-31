@@ -1,3 +1,150 @@
+//  ./src/renderer/common/preload.html -->
+
+const { contextBridge, ipcRenderer } = require("electron");
+
+console.log("Preload script loaded");
+
+contextBridge.exposeInMainWorld("electronAPI", {
+    // Settings functions
+    getSettings: () => ipcRenderer.invoke("get-settings"),
+    updateSettings: (settings) => ipcRenderer.send("update-settings", settings),
+
+    onSettingsUpdated: (callback) => {
+        ipcRenderer.on("settings-updated", (event, updatedSettings) => {
+            console.log("Settings updated:", updatedSettings);
+            callback(updatedSettings);
+        });
+    },
+
+    // Toggling windows
+    toggleSettings: () => ipcRenderer.send("toggle-settings"),
+    toggleReminder: () => {
+        console.log("🔄 Toggling Reminder...");
+        ipcRenderer.send("toggle-reminder");
+    },
+    toggleChecklist: () => ipcRenderer.send("toggle-checklist"),
+    toggleCountdown: () => ipcRenderer.send("toggle-countdown"),
+    toggleClock: () => ipcRenderer.send("toggle-clock"),
+    toggleResumption: () => ipcRenderer.send("toggle-resumption"),
+
+    // Reminder
+    onUpdateReminderItems: (callback) => {
+        ipcRenderer.on("update-reminder-items", (event, items) => {
+            console.log("Received updated reminder items:", items);
+            callback(items);
+        });
+    },
+    sendReminderReady: () => ipcRenderer.send("reminder-ready"),
+
+    // Checklist
+    loadChecklistState: () => ipcRenderer.invoke("load-checklist-state"),
+    addChecklistItem: (item) => ipcRenderer.send("add-checklist-item", item),
+    removeChecklistItem: (index) => ipcRenderer.send("remove-checklist-item", index),
+    resetChecklist: () => ipcRenderer.send("reset-checklist"),
+    toggleChecklistItem: (index, newState) => ipcRenderer.send("toggle-checklist-item", { index, newState }),
+    onChecklistUpdated: (callback) => {
+        ipcRenderer.on("update-checklist", (event, checklist) => callback(checklist));
+    },
+    resetToLegacyChecklist: () => ipcRenderer.send("reset-to-legacy-checklist"),
+
+    // Countdown
+    getTickSoundPath: async () => await ipcRenderer.invoke("get-tick-sound-path"),
+    setCountdownVolume: (volume) => ipcRenderer.send("countdown-volume-change", volume),
+    onCountdownVolumeUpdate: (callback) => {
+        ipcRenderer.on("update-countdown-volume", (event, volume) => callback(volume));
+    },
+
+    // Session countdowns
+    onUpdateSessionCountdowns: (callback) => {
+        ipcRenderer.on("update-session-countdowns", (event, updatedSessions) => {
+            callback(updatedSessions);
+            if (window.displayNextSessionCountdown) {
+                window.displayNextSessionCountdown();
+            }
+        });
+    },
+    setSessionVolume: (volume) => ipcRenderer.send("session-volume-change", volume),
+    onSessionVolumeUpdate: (callback) => {
+        ipcRenderer.on("update-session-volume", (event, volume) => callback(volume));
+    },
+    getBellSoundPath: async () => await ipcRenderer.invoke("get-bell-sound-path"),
+    resetToDefaultSessions: () => ipcRenderer.send("reset-to-default-sessions"),
+
+    // Resumption
+    getBeepSoundPath: async () => await ipcRenderer.invoke("get-beep-sound-path"),
+
+    // snipper management
+    createSnipperWindow: (name) => {
+        console.log("Preload: Sending request to create snipper window with name:", name);
+        ipcRenderer.send("create-snipper-window", name);
+    },
+    onSnipperSettingsUpdated: (callback) => {
+        ipcRenderer.on("snipper-settings-updated", (event, activeSnippers) => callback(activeSnippers));
+    },
+    getActiveSnippers: async () => await ipcRenderer.invoke("get-active-snippers"),
+    getSnipperSettings: async () => await ipcRenderer.invoke("get-snipper-settings"),
+    closeCurrentSnipper: () => ipcRenderer.send("close-current-snipper"),
+    onSnipperUpdated: (callback) => {
+        ipcRenderer.on("snipper-updated", (event, settings) => callback(settings));
+    },
+    startRegionSelection: (snipperName) => ipcRenderer.send("start-region-selection", snipperName),
+    openSnipperDialog: () => ipcRenderer.send("open-snipper-dialog"),
+
+    updateSnipperSettings: (oldName, newName, x, y) => ipcRenderer.send("update-snipper-settings", { oldName, newName, x, y }),
+    removeSnipperWindow: (name) => ipcRenderer.send("remove-snipper-window", name),
+
+    // Exit and restart
+    exitApp: () => ipcRenderer.send("exit-app"),
+    restartApp: () => ipcRenderer.send("restart-app"),
+
+    // Resize window
+    resizeWindowToContent: (width, height) => ipcRenderer.send("resize-window-to-content", { width, height }),
+});
+
+contextBridge.exposeInMainWorld("regionAPI", {
+    send: (channel, data) => {
+        const validChannels = ["region-selected", "close-region-selection"];
+        if (validChannels.includes(channel)) {
+            ipcRenderer.send(channel, data);
+        }
+    },
+    on: (channel, callback) => {
+        const validChannels = ["snipper-updated", "region-selected"]; // Add valid listeners here if needed
+        if (validChannels.includes(channel)) {
+            ipcRenderer.on(channel, (event, ...args) => callback(...args));
+        }
+    },
+});
+
+contextBridge.exposeInMainWorld("snipperAPI", {
+    readyToCapture: () => {
+        console.log("snipperAPI: readyToCapture called");
+        ipcRenderer.send("ready-to-capture");
+    },
+    onRegionSelected: (callback) => {
+        console.log("snipperAPI: Listening for region-selected");
+        ipcRenderer.on("region-selected", (event, bounds) => callback(bounds));
+    },
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ./src/main/main.js
 
 const { app, ipcMain, BrowserWindow } = require("electron");
@@ -31,6 +178,7 @@ function loadSettings() {
         if (!Array.isArray(settings.checklist)) settings.checklist = [];
         if (!Array.isArray(settings.sessionCountdowns)) settings.sessionCountdowns = [];
         if (!Array.isArray(settings.reminderItems)) settings.reminderItems = []; // Ensure this exists
+        if (!Array.isArray(settings.snippers)) settings.snippers = [];
 
         // Remove deprecated 'text' key if present
         if ("text" in settings) {
@@ -40,6 +188,7 @@ function loadSettings() {
         }
 
         return settings;
+
     } catch (error) {
         console.error("Error loading settings:", error);
         return {
@@ -54,12 +203,25 @@ function saveSettings() {
     if (!Array.isArray(appSettings.checklist)) appSettings.checklist = [];
     if (!Array.isArray(appSettings.sessionCountdowns)) appSettings.sessionCountdowns = [];
     if (!Array.isArray(appSettings.reminderItems)) appSettings.reminderItems = [];
+    if (!Array.isArray(appSettings.snippers)) appSettings.snippers = [];
 
-    // Remove `text` to ensure it never gets saved again
+    // Remove deprecated `text` field
     if ("text" in appSettings) {
-        console.log("Removing 'text' before saving...");
+        console.log("Removing deprecated 'text' from settings...");
         delete appSettings.text;
     }
+
+    // Store Snipper window positions
+    appSettings.snippers = Object.keys(snipperWindows).map((name) => {
+        const win = snipperWindows[name];
+        return {
+            name,
+            x: win.getBounds().x,
+            y: win.getBounds().y,
+            width: win.getBounds().width,
+            height: win.getBounds().height,
+        };
+    });
 
     console.log("Saving updated settings:", appSettings);
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
@@ -100,19 +262,33 @@ ipcMain.handle("get-settings", () => {
 });
 
 ipcMain.on("update-settings", (event, newSettings) => {
+    const previousReminderItems = JSON.stringify(appSettings.reminderItems);
+    const previousSessionVolume = appSettings.sessionVolume;
+
     appSettings = { ...appSettings, ...newSettings };
     saveSettings();
 
-    if (windows.clock) {
-        windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
-    }
-    if (windows.reminder) {
-        windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
+    // Only send reminder update if `reminderItems` changed
+    if (JSON.stringify(appSettings.reminderItems) !== previousReminderItems) {
+        console.log("📌 Reminder items changed, updating reminder window...");
+        if (windows.reminder) {
+            windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
+        }
     }
 
-    // Force a refresh in all relevant windows
+    // Only send session volume update separately
+    if (appSettings.sessionVolume !== previousSessionVolume) {
+        console.log("🔊 Session volume changed, updating session volume...");
+        Object.values(windows).forEach((window) => {
+            if (window && window.webContents) {
+                window.webContents.send("update-session-volume", appSettings.sessionVolume);
+            }
+        });
+    }
+
+    // Send full settings update only to windows that need everything
     Object.values(windows).forEach((window) => {
-        if (window && window.webContents) {
+        if (window && window.webContents && window !== windows.reminder) {
             window.webContents.send("settings-updated", appSettings);
         }
     });
@@ -129,7 +305,7 @@ ipcMain.on("toggle-reminder", () => {
             reminderWindow.show();
 
             setTimeout(() => {
-                console.log("📏 Sending reminder items after opening...");
+                console.log("Sending reminder items after opening...");
                 reminderWindow.webContents.send("update-reminder-items", appSettings.reminderItems);
             }, 10); // ✅ Give time for UI to load first
         }
@@ -143,7 +319,6 @@ ipcMain.on("reminder-ready", (event) => {
         windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
     }
 });
-
 
 // Checklist
 
@@ -300,16 +475,73 @@ ipcMain.on("countdown-volume-change", (event, volume) => {
 
 // Clock
 
-ipcMain.on("toggle-clock", () => {
+ipcMain.on("toggle-clock", async () => {
     const clockWindow = windows.clock;
     if (clockWindow) {
-        clockWindow.isVisible() ? clockWindow.hide() : clockWindow.show();
+        if (clockWindow.isVisible()) {
+            clockWindow.hide();
+            // Mute the session bell when clock is closed
+            console.log("Clock hidden, muting session volume.");
+            if (windows.clock) {
+                windows.clock.webContents.send("update-session-volume", 0);
+            }
+        } else {
+            clockWindow.show();
+
+            // Fetch the stored session volume from settings
+            const settings = await loadSettings(); // Ensure this function is async and correctly loads settings
+            const sessionVolume = settings.sessionVolume || 0.1; // Default to 0.1 if missing
+
+            console.log(`Clock opened, restoring session volume to ${sessionVolume}.`);
+            if (windows.clock) {
+                windows.clock.webContents.send("update-session-volume", sessionVolume);
+            }
+        }
     }
 });
 
 ipcMain.handle("get-bell-sound-path", () => {
     return path.join(app.getAppPath(), "assets/sounds/bell.mp3");
 });
+
+ipcMain.on("session-volume-change", (event, volume) => {
+    console.log("🔊 Session bell volume changed to:", volume);
+    appSettings.sessionVolume = volume;
+    saveSettings(); // Save to settings.json
+
+    // Broadcast the updated volume to all windows
+    Object.values(windows).forEach((window) => {
+        if (window && window.webContents) {
+            window.webContents.send("update-session-volume", volume);
+        }
+    });
+});
+
+ipcMain.on("reset-to-default-sessions", () => {
+    console.log("Resetting session countdowns to default settings...");
+
+    appSettings.sessionCountdowns = [
+        { start: "04:00", end: "09:30", title: "Pre Market" },
+        { start: "07:00", end: "09:30", title: "Breaking News" },
+        { start: "09:30", end: "16:00", title: "Open Market" },
+        { start: "15:00", end: "16:00", title: "Power Hour" },
+        { start: "16:00", end: "20:00", title: "Post Market" },
+    ];
+
+    saveSettings(); // Save to file
+    updateSessionWindows(); // Notify UI about the change
+});
+
+function updateSessionWindows() {
+    if (windows.clock) {
+        console.log("Updating clock window with session countdowns:", appSettings.sessionCountdowns);
+        windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
+    }
+    if (windows.settings) {
+        console.log("Updating settings window with session countdowns:", appSettings.sessionCountdowns);
+        windows.settings.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
+    }
+}
 
 // Resumption
 
@@ -324,45 +556,72 @@ ipcMain.handle("get-beep-sound-path", () => {
     return path.join(app.getAppPath(), "assets/sounds/beep.mp3");
 });
 
-//  Snipper
+// Open Snipper Dialog
+ipcMain.on("open-snipper-dialog", (event) => {
+    console.log("Opening Snipper Dialog...");
+    const dialogWindow = createSnipperDialogWindow();
 
-// Create a new snipper window
+    ipcMain.once("snipper-name-confirmed", (event, name) => {
+        console.log(`Snipper name confirmed: ${name}`);
+        dialogWindow.close();
+        ipcMain.emit("start-region-selection", event, name);
+    });
+
+    ipcMain.once("snipper-cancelled", () => {
+        console.log("Snipper creation canceled.");
+        dialogWindow.close();
+    });
+});
+
+ipcMain.on("snipper-name-confirmed", (event, name) => {
+    console.log(`✅ Snipper name confirmed: ${name}`);
+    
+    const senderWindow = BrowserWindow.fromWebContents(event.sender);
+    if (senderWindow) senderWindow.close(); // Close the dialog window
+
+    // Proceed with region selection
+    ipcMain.emit("start-region-selection", event, name);
+});
+
+ipcMain.on("snipper-cancelled", (event) => {
+    console.log("❌ Snipper creation cancelled.");
+    
+    const senderWindow = BrowserWindow.fromWebContents(event.sender);
+    if (senderWindow) senderWindow.close(); // Close the dialog window
+});
+
+// Create Snipper Window
 ipcMain.on("create-snipper-window", (event, { name, bounds }) => {
-    console.log(`Creating snipper window: "${name}" with bounds:`, bounds);
-
     if (!name || !bounds) {
-        console.error("Main process: snipper name and bounds are required.");
+        console.error("Snipper name and bounds are required.");
         return;
     }
 
     if (snipperWindows[name]) {
-        console.warn(`Main process: snipper window "${name}" already exists.`);
+        console.warn(`Snipper "${name}" already exists.`);
         return;
     }
+
+    console.log(`Creating snipper window: "${name}" with bounds:`, bounds);
 
     const snipperWindow = new BrowserWindow({
         width: bounds.width,
         height: bounds.height,
+        x: bounds.x,
+        y: bounds.y,
         transparent: true,
         frame: false,
         alwaysOnTop: true,
         webPreferences: {
-            preload: path.join(__dirname, "../renderer/common/preload.js"), // Path to your preload file
-            contextIsolation: true, // Required for contextBridge
-            enableRemoteModule: false,
-            nodeIntegration: false, // Must be false when using contextBridge
+            preload: path.join(__dirname, "../renderer/common/preload.js"),
+            contextIsolation: true,
         },
     });
 
-    // Automatically open DevTools when the window is created
-    // snipperWindow.webContents.openDevTools({ mode: "detach" });
-
-    snipperWindow
-        .loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
-        .then(() => console.log(`snipper window "${name}" loaded`))
+    snipperWindow.loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
+        .then(() => console.log(`Snipper window "${name}" loaded`))
         .catch((err) => console.error("Error loading snipper HTML:", err));
 
-    // Pass the bounds to the snipper window
     snipperWindow.webContents.once("dom-ready", () => {
         snipperWindow.webContents.send("region-selected", bounds);
     });
@@ -371,7 +630,45 @@ ipcMain.on("create-snipper-window", (event, { name, bounds }) => {
 
     snipperWindow.on("closed", () => {
         delete snipperWindows[name];
-        console.log(`Main process: snipper "${name}" closed.`);
+        console.log(`Snipper "${name}" closed.`);
+        saveSettings();
+        sendSnipperUpdates();
+    });
+
+    saveSettings();
+    sendSnipperUpdates();
+});
+
+// Handle Region Selection
+ipcMain.on("start-region-selection", async (event, snipperName) => {
+    console.log(`Starting region selection for Snipper "${snipperName}".`);
+
+    const regionWindow = new BrowserWindow({
+        fullscreen: true,
+        transparent: true,
+        frame: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            contextIsolation: true,
+            preload: path.join(__dirname, "../renderer/common/preload.js"),
+        },
+    });
+
+    regionWindow.loadFile(path.join(__dirname, "../renderer/snipper/region.html"));
+
+    // Listen for region selection event
+    ipcMain.once("region-selected", async (event, bounds) => {
+        console.log("Region selected:", bounds);
+
+        // Create the snipper window using the selected region bounds
+        ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds });
+
+        // Close the region selection window
+        regionWindow.close();
+    });
+
+    ipcMain.once("close-region-selection", () => {
+        regionWindow.close();
     });
 });
 
@@ -420,60 +717,85 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
     });
 });
 
-// Update snipper settings
-ipcMain.on("update-snipper-settings", (event, { name, settings }) => {
-    const snipper = snipperWindows[name];
-    if (!snipper) {
-        console.error(`No snipper window found with name "${name}"`);
-        return;
+// Update Snipper Settings (Rename & Move)
+ipcMain.on("update-snipper-settings", (event, { oldName, newName, x, y }) => {
+    if (!snipperWindows[oldName]) return;
+
+    const snipper = snipperWindows[oldName];
+
+    if (newName && newName !== oldName) {
+        snipperWindows[newName] = snipper;
+        delete snipperWindows[oldName];
+        snipper.setTitle(newName);
     }
 
-    // Update settings
-    Object.assign(snipper.settings, settings);
-
-    // Apply updates to the snipper window
-    if (settings.opacity !== undefined) {
-        snipper.window.setOpacity(settings.opacity);
+    if (x !== undefined && y !== undefined) {
+        snipper.setBounds({ x, y, width: snipper.getBounds().width, height: snipper.getBounds().height });
     }
 
-    sendSnipperUpdates(); // Notify renderer of changes
+    saveSettings();
+    sendSnipperUpdates();
 });
 
-// Remove a snipper window
+// Remove Snipper Window
 ipcMain.on("remove-snipper-window", (event, name) => {
-    const snipper = snipperWindows[name];
-    if (!snipper) {
-        console.error(`No snipper window found with name "${name}"`);
-        return;
-    }
-
-    // Close and remove the window
-    snipper.window.close();
+    if (!snipperWindows[name]) return;
+    
+    snipperWindows[name].close();
     delete snipperWindows[name];
-    sendSnipperUpdates(); // Notify renderer of changes
+
+    appSettings.snippers = appSettings.snippers.filter((snip) => snip.name !== name);
+    
+    saveSettings();
+    sendSnipperUpdates();
 });
 
-// Fetch active snippers
+// Fetch Active Snippers
 ipcMain.handle("get-active-snippers", () => {
     return Object.keys(snipperWindows).map((name) => ({
         name,
-        settings: snipperWindows[name].settings,
+        x: snipperWindows[name].getBounds().x,
+        y: snipperWindows[name].getBounds().y,
     }));
 });
 
-// Notify renderer of updates
+// Notify Renderer of Snipper Updates
 function sendSnipperUpdates() {
     const activeSnippers = Object.keys(snipperWindows).map((name) => ({
         name,
-        settings: snipperWindows[name].settings,
+        x: snipperWindows[name].getBounds().x,
+        y: snipperWindows[name].getBounds().y,
     }));
 
-    Object.values(windows).forEach((window) => {
-        if (window && window.webContents && window.webContents.send) {
+    Object.values(BrowserWindow.getAllWindows()).forEach((window) => {
+        if (window.webContents) {
             window.webContents.send("snipper-settings-updated", activeSnippers);
         }
     });
 }
+
+// Create Snipper Dialog Window
+function createSnipperDialogWindow() {
+    const dialogWindow = new BrowserWindow({
+        width: 300,
+        height: 250,
+        frame: false,
+        alwaysOnTop: true,
+        resizable: false,
+        webPreferences: {
+            preload: path.join(__dirname, "../renderer/common/preload.js"),
+            contextIsolation: true,
+        },
+    });
+
+    dialogWindow.loadFile(path.join(__dirname, "../renderer/snipper/dialog.html"));
+  
+    dialogWindow.webContents.openDevTools({ mode: "detach" });
+
+    return dialogWindow;
+}
+
+
 
 // App Ready Event
 app.on("ready", () => {
@@ -531,6 +853,18 @@ app.on("ready", () => {
             window.webContents.send("settings-updated", appSettings);
         }
     });
+
+    // Restore Snippers from saved settings
+    if (Array.isArray(appSettings.snippers)) {
+        appSettings.snippers.forEach((snip) => {
+            ipcMain.emit("create-snipper-window", null, {
+                name: snip.name,
+                bounds: { x: snip.x, y: snip.y, width: snip.width, height: snip.height }
+            });
+        });
+    }
+
+    console.log("Snippers restored from settings:", appSettings.snippers);
 });
 
 // Quit the app when all windows are closed

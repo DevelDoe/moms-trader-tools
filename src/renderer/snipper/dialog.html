@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="../../styles/styles.css" />
+        <title>Snipper Setup</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: #2b2b2b;
+                color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                text-align: center;
+            }
+            #title{
+                height: 40px;
+            }
+            input,
+            button {
+                padding: 10px;
+                margin: 8px;
+                font-size: 16px;
+                width: 80%;
+                max-width: 300px;
+                border-radius: 5px;
+            }
+            input {
+                background: #444;
+                color: white;
+                border: 1px solid #666;
+                text-align: center;
+            }
+            button {
+                background: #555;
+                color: white;
+                border: none;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            }
+            button:hover {
+                background: #777;
+            }
+            button:focus,
+            input:focus {
+                outline: 2px solid #999;
+            }
+        </style>
+    </head>
+    <body>
+        <h2 id="title" class="dragable">Enter Snipper Name</h2>
+        <input type="text" id="snipper-name" placeholder="Enter Snipper Name" autofocus />
+        <button id="confirm-btn">Continue</button>
+        <button id="cancel-btn">Cancel</button>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+    const { electronAPI } = window;
+
+    if (!electronAPI) {
+        console.error("❌ electronAPI is not available. Ensure preload.js is properly loaded.");
+        return;
+    }
+
+    const inputField = document.getElementById("snipper-name");
+    const confirmBtn = document.getElementById("confirm-btn");
+    const cancelBtn = document.getElementById("cancel-btn");
+
+    if (!inputField || !confirmBtn || !cancelBtn) {
+        console.error("❌ Missing elements in dialog.html. Check element IDs.");
+        return;
+    }
+
+    // Autofocus input field
+    inputField.focus();
+
+    // Handle confirm action
+    const confirmSnipper = () => {
+        const name = inputField.value.trim();
+        if (!name) {
+            alert("Please enter a name.");
+            return;
+        }
+        electronAPI.confirmSnipperName(name);
+    };
+
+    confirmBtn.addEventListener("click", confirmSnipper);
+    cancelBtn.addEventListener("click", () => electronAPI.cancelSnipper());
+
+    // Support 'Enter' key to confirm
+    inputField.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            confirmSnipper();
+        }
+    });
+
+    console.log("✅ Snipper dialog is ready.");
+});
+
+        </script>
+    </body>
+</html>

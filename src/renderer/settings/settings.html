@@ -78,7 +78,7 @@
             <section id="session-countdowns">
                 <h2>Session Countdowns</h2>
                 <button id="reset-default-sessions-btn">Reset to Default Sessions</button>
-                <br>
+                <br />
                 <div>
                     <label for="session-volume-slider">🔊 Session Bell Volume:</label>
                     <input id="session-volume-slider" type="range" min="0" max="1" step="0.01" value="0" />
@@ -102,10 +102,10 @@
                 <button id="restart-app-button" style="display: none">Restart App</button>
             </section>
 
-            <!-- Screen Management -->
-            <section id="screen-management">
-                <h2>Screen Management</h2>
-                <div id="screenControls"></div>
+            <!-- Snipper Management -->
+            <section id="snipper-management">
+                <h2>Snipper Windows</h2>
+                <ul id="snipper-list"></ul>
             </section>
 
             <br />
@@ -116,11 +116,14 @@
             document.addEventListener("DOMContentLoaded", async () => {
                 try {
                     const settings = await window.electronAPI.getSettings();
+                    const snippers = await window.electronAPI.getActiveSnippers();
+
                     initializeReminderSection(settings.reminderItems || []);
                     initializeChecklistSection(settings.checklist || []);
                     initializeCountdownSection(settings);
                     initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
                     initializeCountdownDuration();
+                    updateSnipperList(snippers);
 
                     // Event listeners
                     document.getElementById("restart-app-button").addEventListener("click", restartApp);
@@ -128,6 +131,12 @@
                     document.getElementById("add-item-btn").addEventListener("click", addChecklistItem);
                     document.getElementById("reset-legacy-checklist-btn").addEventListener("click", resetChecklist);
                     document.getElementById("reset-default-sessions-btn").addEventListener("click", resetDefaultSessions);
+
+                    // **🔄 Listen for Snipper updates from Electron**
+                    window.electronAPI.onSnipperSettingsUpdated((snippers) => {
+                        console.log("Snipper settings updated:", snippers);
+                        updateSnipperList(snippers);
+                    });
 
                     // Listen for global settings updates
                     window.electronAPI.onSettingsUpdated((updatedSettings) => {
@@ -314,8 +323,6 @@
                         sessionVolumeSlider.value = volume;
                     }
                 });
-
-                
             }
 
             function resetDefaultSessions() {
@@ -408,6 +415,48 @@
             function showRestartNotification() {
                 document.getElementById("restart-message").style.display = "block";
                 document.getElementById("restart-app-button").style.display = "block";
+            }
+
+            // Snipper
+
+            function updateSnipperList(snippers) {
+                const snipperList = document.getElementById("snipper-list");
+                snipperList.innerHTML = ""; // Clear list before updating
+
+                snippers.forEach((snipper) => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${snipper.name} (x: ${snipper.x}, y: ${snipper.y}) `;
+
+                    // Rename Button
+                    const renameBtn = document.createElement("button");
+                    renameBtn.textContent = "✏ Rename";
+                    renameBtn.style.marginRight = "8px";
+                    renameBtn.onclick = () => renameSnipper(snipper.name);
+
+                    // Remove Button
+                    const removeBtn = document.createElement("button");
+                    removeBtn.textContent = "❌ Delete";
+                    removeBtn.onclick = async () => {
+                        await window.electronAPI.removeSnipperWindow(snipper.name);
+                        loadSnippers(); // ✅ Refresh list after deletion
+                    };
+
+                    listItem.appendChild(renameBtn);
+                    listItem.appendChild(removeBtn);
+                    snipperList.appendChild(listItem);
+                });
+            }
+
+            async function renameSnipper(oldName) {
+                const newName = prompt("Enter a new name for Snipper:", oldName);
+                if (!newName || newName.trim() === "") return;
+
+                try {
+                    await window.electronAPI.updateSnipperSettings(oldName, { name: newName });
+                    loadSnippers(); // ✅ Refresh list after renaming
+                } catch (error) {
+                    console.error("Error renaming snipper:", error);
+                }
             }
 
             function saveSettings(newSettings) {

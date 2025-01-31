@@ -14,12 +14,12 @@
                 overflow: hidden;
                 padding: 0;
                 background-color: transparent;
+                position: relative;
             }
             #countdown {
                 font-size: 32px;
                 margin: 3px;
                 -webkit-app-region: drag; /* Makes the window draggable */
-                
             }
             .countdown-part {
                 display: inline-block; /* Makes the two parts stay next to each other */
@@ -31,9 +31,12 @@
                 font-weight: 700 !important;
                 font-size: 18px !important;
                 padding-bottom: 2px;
+                position: absolute;
+                top: 9px;
+                left: 0px;
             }
-            #one-minute-part{
-                margin-left: -4px;
+            #one-minute-part {
+                margin-left: 10px;
             }
             span {
                 margin-left: -4px;
@@ -55,8 +58,8 @@
     </head>
     <body>
         <div id="countdown">
-            <span id="five-minute-part" class="countdown-part"></span>
-            <span id="one-minute-part" class="countdown-part"></span>
+            <span id="five-minute-part" class="countdown-part dragable"></span>
+            <span id="one-minute-part" class="countdown-part dragable"></span>
         </div>
 
         <script>
@@ -98,8 +101,7 @@
                         const tensDigit = Math.floor(oneMinuteRemaining / 10);
                         const onesDigit = oneMinuteRemaining % 10;
 
-                        // Update five-minute countdown
-                        document.getElementById("five-minute-part").textContent = fiveMinuteRemaining + 1;
+                        document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
 
                         // Update one-minute countdown digits **separately** without removing span elements
                         document.getElementById("one-minute-part").innerHTML = `
