@@ -714,8 +714,8 @@ app.on("ready", () => {
                 appSettings.snippers.forEach((snip) => {
                     console.log(`🔍 Looking for source for Snipper: ${snip.name}`);
 
-                    // Pick the first available source (fallback)
-                    const source = sources[0];
+                    // Pick the first available source as a fallback
+                    const source = sources.find((src) => src.id.includes("screen")) || sources[0];
 
                     if (!source) {
                         console.error(`❌ No matching source found for Snipper: ${snip.name}`);
@@ -727,7 +727,7 @@ app.on("ready", () => {
                     ipcMain.emit("create-snipper-window", null, {
                         name: snip.name,
                         bounds: { x: snip.x, y: snip.y, width: snip.width, height: snip.height },
-                        sourceId: source.id, // ✅ Now sending a valid sourceId
+                        sourceId: source.id, // ✅ Now passing sourceId properly
                     });
                 });
             })
