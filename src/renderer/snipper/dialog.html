@@ -17,7 +17,7 @@
                 height: 100vh;
                 text-align: center;
             }
-            #title{
+            #title {
                 height: 40px;
             }
             input,
@@ -59,48 +59,54 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {
-    const { electronAPI } = window;
+                if (!window.electronAPI || typeof window.electronAPI.send !== "function") {
+                    console.error("❌ electronAPI is not available. Ensure preload.js is properly loaded.");
+                    return;
+                }
 
-    if (!electronAPI) {
-        console.error("❌ electronAPI is not available. Ensure preload.js is properly loaded.");
-        return;
-    }
+                const inputField = document.getElementById("snipper-name");
+                const confirmBtn = document.getElementById("confirm-btn");
+                const cancelBtn = document.getElementById("cancel-btn");
 
-    const inputField = document.getElementById("snipper-name");
-    const confirmBtn = document.getElementById("confirm-btn");
-    const cancelBtn = document.getElementById("cancel-btn");
+                if (!inputField || !confirmBtn || !cancelBtn) {
+                    console.error("❌ Missing elements in dialog.html. Check element IDs.");
+                    return;
+                }
 
-    if (!inputField || !confirmBtn || !cancelBtn) {
-        console.error("❌ Missing elements in dialog.html. Check element IDs.");
-        return;
-    }
+                inputField.focus();
 
-    // Autofocus input field
-    inputField.focus();
+                // Handle confirm action
+                const confirmSnipper = () => {
+                    const name = inputField.value.trim();
+                    if (!name) {
+                        alert("Please enter a name.");
+                        return;
+                    }
 
-    // Handle confirm action
-    const confirmSnipper = () => {
-        const name = inputField.value.trim();
-        if (!name) {
-            alert("Please enter a name.");
-            return;
-        }
-        electronAPI.confirmSnipperName(name);
-    };
+                    console.log(`🚀 Confirming snipper name: ${name}`);
 
-    confirmBtn.addEventListener("click", confirmSnipper);
-    cancelBtn.addEventListener("click", () => electronAPI.cancelSnipper());
+                    window.electronAPI.send("snipper-name-confirmed", name);
 
-    // Support 'Enter' key to confirm
-    inputField.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-            confirmSnipper();
-        }
-    });
+                    // ✅ Delay closing the window to ensure the event fires
+                    setTimeout(() => window.close(), 150);
+                };
 
-    console.log("✅ Snipper dialog is ready.");
-});
+                // Add event listeners (ensure they aren't duplicated)
+                confirmBtn.addEventListener("click", confirmSnipper);
+                cancelBtn.addEventListener("click", () => {
+                    console.log("❌ Snipper creation cancelled.");
+                    window.electronAPI.send("snipper-cancelled");
+                    setTimeout(() => window.close(), 150);
+                });
 
+                inputField.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                        confirmSnipper();
+                    }
+                });
+
+                console.log("✅ Snipper dialog is ready.");
+            });
         </script>
     </body>
 </html>

@@ -408,13 +408,9 @@ ipcMain.on("open-snipper-dialog", (event) => {
 
     ipcMain.once("snipper-name-confirmed", (event, name) => {
         console.log(`Snipper name confirmed: ${name}`);
-        dialogWindow.close();
-        ipcMain.emit("start-region-selection", event, name);
-    });
-
-    ipcMain.once("snipper-cancelled", () => {
-        console.log("Snipper creation canceled.");
-        dialogWindow.close();
+        if (dialogWindow) {
+            dialogWindow.close();
+        }
     });
 });
 
@@ -424,9 +420,14 @@ ipcMain.on("snipper-name-confirmed", (event, name) => {
     const senderWindow = BrowserWindow.fromWebContents(event.sender);
     if (senderWindow) senderWindow.close(); // Close the dialog window
 
-    // Proceed with region selection
-    ipcMain.emit("start-region-selection", event, name);
+    // 🚨 Ensure only one region selection starts
+    if (!windows.regionSelection) {
+        ipcMain.emit("start-region-selection", event, name);
+    } else {
+        console.warn("⚠️ Region selection is already open, ignoring duplicate request.");
+    }
 });
+
 
 ipcMain.on("snipper-cancelled", (event) => {
     console.log("❌ Snipper creation cancelled.");
@@ -488,9 +489,16 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
 
 // Handle Region Selection
 ipcMain.on("start-region-selection", async (event, snipperName) => {
-    console.log(`🟢 Starting region selection for Snipper "${snipperName}".`);
+    console.log(`🟢 Starting region selection for Snipper "${snipperName}". Called by:`, event.sender.getURL());
 
-    const regionWindow = new BrowserWindow({
+    // 🚨 Prevent multiple region selection windows from opening
+    if (windows.regionSelection) {
+        console.warn("⚠️ Region selection is already open. Ignoring duplicate request.");
+        return;
+    }
+
+
+    windows.regionSelection = new BrowserWindow({
         fullscreen: true,
         transparent: true,
         frame: false,
@@ -501,7 +509,13 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         },
     });
 
-    await regionWindow.loadFile(path.join(__dirname, "../renderer/snipper/region.html"));
+    await windows.regionSelection.loadFile(path.join(__dirname, "../renderer/snipper/region.html"));
+
+    console.log("✅ Region selection window loaded.");
+
+    windows.regionSelection.webContents.once("dom-ready", () => {
+        console.log("✅ region.html is ready for selection.");
+    });
 
     ipcMain.removeAllListeners("region-selected");
 
@@ -527,92 +541,30 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
             console.log(`📌 Saving selected region for "${snipperName}":`, bounds);
 
-            // ✅ Save the region bounds immediately!
-            appSettings.snippers = appSettings.snippers.filter((snip) => snip.name !== snipperName); // Remove existing entry if it exists
+            appSettings.snippers = appSettings.snippers.filter((snip) => snip.name !== snipperName);
             appSettings.snippers.push({ name: snipperName, ...bounds });
 
             saveSettings();
 
-            // ✅ Ensure sourceId is passed correctly
             ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds, sourceId: bounds.sourceId });
-
         } catch (error) {
             console.error("⚠️ Error processing region selection:", error);
         }
 
-        regionWindow.close();
-    });
-
-    ipcMain.once("close-region-selection", () => {
-        console.log("🛑 Region selection canceled.");
-        regionWindow.close();
-    });
-});
-
-
-// Handle Region Selection
-ipcMain.on("start-region-selection", async (event, snipperName) => {
-    console.log(`🟢 Starting region selection for Snipper "${snipperName}".`);
-
-    const regionWindow = new BrowserWindow({
-        fullscreen: true,
-        transparent: true,
-        frame: false,
-        alwaysOnTop: true,
-        webPreferences: {
-            contextIsolation: true,
-            preload: path.join(__dirname, "../renderer/common/preload.js"),
-        },
-    });
-
-    await regionWindow.loadFile(path.join(__dirname, "../renderer/snipper/region.html"));
-
-    ipcMain.removeAllListeners("region-selected");
-
-    ipcMain.once("region-selected", async (event, bounds) => {
-        console.log("✅ Region selected:", bounds);
-
-        try {
-            const sources = await desktopCapturer.getSources({ types: ["screen"] });
-
-            if (sources.length === 0) {
-                console.error("❌ No screen sources found.");
-                return;
-            }
-
-            const source = sources.find((src) => bounds.display_id && src.id.includes(bounds.display_id)) || sources[0];
-
-            if (!source) {
-                console.error("❌ No matching snipper source found.");
-                return;
-            }
-
-            bounds.sourceId = source.id;
-
-            console.log(`📌 Saving selected region for "${snipperName}":`, bounds);
-
-            // ✅ Save the region bounds immediately!
-            appSettings.snippers = appSettings.snippers.filter((snip) => snip.name !== snipperName); // Remove existing entry if it exists
-            appSettings.snippers.push({ name: snipperName, ...bounds });
-
-            saveSettings();
-
-            // ✅ Ensure sourceId is passed correctly
-            ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds, sourceId: bounds.sourceId });
-
-        } catch (error) {
-            console.error("⚠️ Error processing region selection:", error);
+        if (windows.regionSelection) {
+            windows.regionSelection.close();
+            windows.regionSelection = null; // ✅ Clear reference after closing
         }
-
-        regionWindow.close();
     });
 
     ipcMain.once("close-region-selection", () => {
         console.log("🛑 Region selection canceled.");
-        regionWindow.close();
+        if (windows.regionSelection) {
+            windows.regionSelection.close();
+            windows.regionSelection = null;
+        }
     });
 });
-
 
 // Update Snipper Settings (Rename & Move)
 ipcMain.on("update-snipper-settings", (event, { oldName, newName, x, y }) => {
@@ -752,7 +704,7 @@ app.on("ready", () => {
     // Restore Snippers from saved settings
     if (Array.isArray(appSettings.snippers)) {
         console.log("🔄 Restoring Snippers from saved regions:", appSettings.snippers);
-    
+
         desktopCapturer
             .getSources({ types: ["screen"] })
             .then((sources) => {
@@ -760,19 +712,19 @@ app.on("ready", () => {
                     console.error("❌ No screen sources available for Snipper.");
                     return;
                 }
-    
+
                 appSettings.snippers.forEach((snip) => {
                     console.log(`🔍 Restoring Snipper: ${snip.name} with saved region bounds:`, snip);
-    
+
                     const source = sources.find((src) => snip.sourceId && src.id === snip.sourceId) || sources[0];
-    
+
                     if (!source) {
                         console.error(`❌ No matching source found for Snipper: ${snip.name}`);
                         return;
                     }
-    
+
                     console.log(`📸 Assigning sourceId: ${source.id} to Snipper: ${snip.name}`);
-    
+
                     ipcMain.emit("create-snipper-window", null, {
                         name: snip.name,
                         bounds: snip, // ✅ Use saved region bounds!
@@ -784,7 +736,6 @@ app.on("ready", () => {
                 console.error("❌ Error fetching screen sources:", error);
             });
     }
-    
 
     console.log("Snippers restored from settings:", appSettings.snippers);
 });

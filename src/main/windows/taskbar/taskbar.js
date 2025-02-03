@@ -1,27 +1,30 @@
-// ./src/main/windows/taskbar/taskbar.js
-
-const { BrowserWindow, Menu } = require("electron");
+const { BrowserWindow, Menu, ipcMain } = require("electron");
 const path = require("path");
 
 function createTaskbarWindow(toggleReminder, toggleSettings) {
     const taskbarWindow = new BrowserWindow({
-        width: 690,
-        height: 52,
+        width: 80, // Initial size
+        height: 325,
         frame: false,
         alwaysOnTop: true,
         transparent: true,
+        resizable: true, // Allow resizing dynamically
         webPreferences: {
             preload: path.join(__dirname, "../../../renderer/common/preload.js"),
-            contextIsolation: true, // Required for contextBridge
-            enableRemoteModule: false, // Keep this disabled unless necessary
-            nodeIntegration: false, // Should be false for security
+            contextIsolation: true,
+            enableRemoteModule: false,
+            nodeIntegration: false,
         },
     });
 
     taskbarWindow.loadFile(path.join(__dirname, "../../../renderer/taskbar/taskbar.html"));
 
-    // taskbarWindow.webContents.openDevTools({ mode: "detach" }); 
+    taskbarWindow.webContents.openDevTools({ mode: "detach" });
 
+    // IPC Listener for resizing the taskbar
+    ipcMain.on("resize-taskbar", (event, width, height) => {
+        taskbarWindow.setBounds({ width, height });
+    });
 
     const menuTemplate = [
         {

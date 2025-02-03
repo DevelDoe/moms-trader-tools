@@ -1,5 +1,3 @@
-<!-- ./src/renderer/snipper/region.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,69 +12,87 @@
             width: 100%;
             height: 100%;
             cursor: crosshair;
+            overflow: hidden;
+            transition: background-color 0.2s ease-in-out;
         }
 
         #selection-box {
             position: absolute;
-            border: 2px dashed white;
-            background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent fill for better visibility */
+            border: 2px dashed red;
+            background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent fill */
             display: none;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        #debug-message {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
     <div id="selection-box"></div>
+    <div id="debug-message">Waiting for interaction...</div>
 
     <script>
-        let startX = 0, startY = 0, endX = 0, endY = 0;
-        const selectionBox = document.getElementById("selection-box");
-        let isSelecting = false; // Track the selection state
-
-        // Start selection on mousedown
-        document.addEventListener("mousedown", (e) => {
-            isSelecting = true;
-            startX = e.clientX;
-            startY = e.clientY;
-
-            selectionBox.style.left = `${startX}px`;
-            selectionBox.style.top = `${startY}px`;
-            selectionBox.style.width = "0px";
-            selectionBox.style.height = "0px";
-            selectionBox.style.display = "block";
-        });
-
-        // Update selection box dimensions on mousemove
-        document.addEventListener("mousemove", (e) => {
-            if (!isSelecting) return;
-
-            endX = e.clientX;
-            endY = e.clientY;
-
-            // Update box dimensions and position
-            selectionBox.style.left = `${Math.min(startX, endX)}px`;
-            selectionBox.style.top = `${Math.min(startY, endY)}px`;
-            selectionBox.style.width = `${Math.abs(endX - startX)}px`;
-            selectionBox.style.height = `${Math.abs(endY - startY)}px`;
-        });
-
-        // Finalize selection on mouseup
-        document.addEventListener("mouseup", () => {
-            if (!isSelecting) return;
-
-            isSelecting = false;
-            selectionBox.style.display = "none";
-
-            // Send the selected region back to the main process
-            window.regionAPI.send("region-selected", {
-                x: Math.min(startX, endX),
-                y: Math.min(startY, endY),
-                width: Math.abs(endX - startX),
-                height: Math.abs(endY - startY),
+        document.addEventListener("DOMContentLoaded", () => {
+            let startX = 0, startY = 0, endX = 0, endY = 0;
+            const selectionBox = document.getElementById("selection-box");
+            let isSelecting = false;
+        
+            document.addEventListener("mousedown", (e) => {
+                console.log("mousedown at:", e.clientX, e.clientY);
+                isSelecting = true;
+                startX = e.clientX;
+                startY = e.clientY;
+        
+                selectionBox.style.left = `${startX}px`;
+                selectionBox.style.top = `${startY}px`;
+                selectionBox.style.width = "0px";
+                selectionBox.style.height = "0px";
+                selectionBox.style.display = "block";
+                selectionBox.style.opacity = "1";
             });
-
-            // Close the region selection window
-            window.regionAPI.send("close-region-selection");
+        
+            document.addEventListener("mousemove", (e) => {
+                if (!isSelecting) return;
+                console.log("mousemove at:", e.clientX, e.clientY);
+        
+                endX = e.clientX;
+                endY = e.clientY;
+        
+                selectionBox.style.left = `${Math.min(startX, endX)}px`;
+                selectionBox.style.top = `${Math.min(startY, endY)}px`;
+                selectionBox.style.width = `${Math.abs(endX - startX)}px`;
+                selectionBox.style.height = `${Math.abs(endY - startY)}px`;
+            });
+        
+            document.addEventListener("mouseup", () => {
+                if (!isSelecting) return;
+        
+                isSelecting = false;
+                console.log("mouseup, selection done");
+        
+                setTimeout(() => {
+                    selectionBox.style.opacity = "0"; 
+                }, 500);
+        
+                window.regionAPI.send("region-selected", {
+                    x: Math.min(startX, endX),
+                    y: Math.min(startY, endY),
+                    width: Math.abs(endX - startX),
+                    height: Math.abs(endY - startY),
+                });
+        
+                window.regionAPI.send("close-region-selection");
+            });
         });
-    </script>
+        </script>
 </body>
 </html>

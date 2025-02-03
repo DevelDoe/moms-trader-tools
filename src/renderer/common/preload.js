@@ -3,6 +3,12 @@ const { contextBridge, ipcRenderer } = require("electron");
 console.log("Preload script loaded");
 
 contextBridge.exposeInMainWorld("electronAPI", {
+    send: (channel, data) => {
+        ipcRenderer.send(channel, data);
+    },
+    on: (channel, callback) => {
+        ipcRenderer.on(channel, (event, ...args) => callback(...args));
+    },
     // 🛠️ Settings Management
     getSettings: () => ipcRenderer.invoke("get-settings"),
     updateSettings: (settings) => ipcRenderer.send("update-settings", settings),
