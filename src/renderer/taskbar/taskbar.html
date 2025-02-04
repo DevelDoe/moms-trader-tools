@@ -20,14 +20,20 @@
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                border: 1px solid rgba(128, 128, 128, 0.329);
-                border-radius: 4px;
                 background-color: #2c2c2c;
                 width: 80px;
                 height: 40px; /* Initially collapsed */
                 transition: width 0.3s ease-in-out, height 0.3s ease-in-out;
                 overflow: hidden;
                 box-sizing: border-box;
+                /* From https://css.glass */
+                background: rgba(0, 0, 0, 0.85);
+                border-radius: 2px;
+                box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+                backdrop-filter: blur(5px);
+                -webkit-backdrop-filter: blur(5px);
+                
+                border-left: 1px solid cyan;
             }
             #title {
                 cursor: pointer;
@@ -36,8 +42,7 @@
                 color: white;
                 text-align: center;
                 width: 100%;
-                background-color: #444;
-                border-bottom: 1px solid rgba(128, 128, 128, 0.329);
+                /* background-color: #444; */
                 height: 20px;
             }
             .menu {
@@ -58,10 +63,12 @@
                 text-align: center;
                 width: 100%;
                 white-space: nowrap;
+                border-left: 1px solid cyan;
             }
             .menu-item:hover {
-                color: white;
-                background-color: rgba(255, 255, 255, 0.2);
+                color: lightcyan;
+                /* background-color: rgba(255, 255, 255, 0.2); */
+                border-left: 1px solid magenta;
             }
             #title-text {
                 -webkit-app-region: no-drag; /* Allow hover to be detected */
@@ -87,97 +94,96 @@
         </div>
 
         <script>
-           const taskbar = document.getElementById("taskbar");
-const menu = document.getElementById("menu");
-const title = document.getElementById("title");
+            const taskbar = document.getElementById("taskbar");
+            const menu = document.getElementById("menu");
+            const title = document.getElementById("title");
 
-let expandedWidth = 200;
-let collapsedWidth = 80;
-let expandedHeight = 350;
-let collapsedHeight = 40;
+            let expandedWidth = 200;
+            let collapsedWidth = 80;
+            let expandedHeight = 350;
+            let collapsedHeight = 40;
 
-let isHovering = false;
-let isMouseOverTitle = false;
-let isMouseInside = true;
-let collapseTimeout;
+            let isHovering = false;
+            let isMouseOverTitle = false;
+            let isMouseInside = true;
+            let collapseTimeout;
 
-// ✅ Expand Taskbar
-function expandTaskbar() {
-    console.log("[Expand] Expanding taskbar...");
-    isHovering = true;
-    isMouseInside = true;
-    clearTimeout(collapseTimeout);
-    taskbar.style.width = `${expandedWidth}px`;
-    taskbar.style.height = `${expandedHeight}px`;
-    menu.style.opacity = "1";
-    window.electronAPI.resizeWindowToContent(expandedWidth, expandedHeight);
-}
+            // ✅ Expand Taskbar
+            function expandTaskbar() {
+                console.log("[Expand] Expanding taskbar...");
+                isHovering = true;
+                isMouseInside = true;
+                clearTimeout(collapseTimeout);
+                taskbar.style.width = `${expandedWidth}px`;
+                taskbar.style.height = `${expandedHeight}px`;
+                menu.style.opacity = "1";
+                window.electronAPI.resizeWindowToContent(expandedWidth, expandedHeight);
+            }
 
-// ✅ Attempt to Collapse Taskbar
-function collapseTaskbar() {
-    console.log("[Collapse] Attempting to collapse...");
+            // ✅ Attempt to Collapse Taskbar
+            function collapseTaskbar() {
+                console.log("[Collapse] Attempting to collapse...");
 
-    collapseTimeout = setTimeout(() => {
-        if (!isHovering && !isMouseOverTitle && !isMouseInside) {
-            console.log("[Collapse] Taskbar is collapsing...");
-            taskbar.style.width = `${collapsedWidth}px`;
-            taskbar.style.height = `${collapsedHeight}px`;
-            menu.style.opacity = "0";
-            window.electronAPI.resizeWindowToContent(collapsedWidth, collapsedHeight);
-        } else {
-            console.log("[Collapse] Skipped: Mouse still inside app.");
-            console.log("[Debug] isHovering:", isHovering);
-            console.log("[Debug] isMouseOverTitle:", isMouseOverTitle);
-            console.log("[Debug] isMouseInside:", isMouseInside);
-        }
-    }, 1000); // ✅ Short delay to prevent flicker
-}
+                collapseTimeout = setTimeout(() => {
+                    if (!isHovering && !isMouseOverTitle && !isMouseInside) {
+                        console.log("[Collapse] Taskbar is collapsing...");
+                        taskbar.style.width = `${collapsedWidth}px`;
+                        taskbar.style.height = `${collapsedHeight}px`;
+                        menu.style.opacity = "0";
+                        window.electronAPI.resizeWindowToContent(collapsedWidth, collapsedHeight);
+                    } else {
+                        console.log("[Collapse] Skipped: Mouse still inside app.");
+                        console.log("[Debug] isHovering:", isHovering);
+                        console.log("[Debug] isMouseOverTitle:", isMouseOverTitle);
+                        console.log("[Debug] isMouseInside:", isMouseInside);
+                    }
+                }, 1000); // ✅ Short delay to prevent flicker
+            }
 
-// ✅ Prevent Collapse When Hovering Over Title
-title.addEventListener("mouseenter", () => {
-    console.log("[Hover] Title hovered - Preventing collapse.");
-    isMouseOverTitle = true;
-    expandTaskbar();
-});
+            // ✅ Prevent Collapse When Hovering Over Title
+            title.addEventListener("mouseenter", () => {
+                console.log("[Hover] Title hovered - Preventing collapse.");
+                isMouseOverTitle = true;
+                expandTaskbar();
+            });
 
-// ✅ Delay Collapse When Leaving Title
-title.addEventListener("mouseleave", () => {
-    console.log("[Hover] Title left - Allowing collapse.");
-    isMouseOverTitle = false;
-    setTimeout(() => {
-        if (!isHovering && !isMouseInside) {
-            collapseTaskbar();
-        }
-    }, 0); // ✅ Delay allows smooth movement
-});
+            // ✅ Delay Collapse When Leaving Title
+            title.addEventListener("mouseleave", () => {
+                console.log("[Hover] Title left - Allowing collapse.");
+                isMouseOverTitle = false;
+                setTimeout(() => {
+                    if (!isHovering && !isMouseInside) {
+                        collapseTaskbar();
+                    }
+                }, 0); // ✅ Delay allows smooth movement
+            });
 
-// ✅ Ensure Menu Also Prevents Collapse
-menu.addEventListener("mouseenter", () => {
-    console.log("[Hover] Menu hovered - Expanding.");
-    expandTaskbar();
-});
+            // ✅ Ensure Menu Also Prevents Collapse
+            menu.addEventListener("mouseenter", () => {
+                console.log("[Hover] Menu hovered - Expanding.");
+                expandTaskbar();
+            });
 
-// ✅ Ensure Taskbar Also Expands When Hovered
-taskbar.addEventListener("mouseenter", () => {
-    console.log("[Hover] Taskbar hovered - Preventing collapse.");
-    isHovering = true;
-    expandTaskbar();
-});
+            // ✅ Ensure Taskbar Also Expands When Hovered
+            taskbar.addEventListener("mouseenter", () => {
+                console.log("[Hover] Taskbar hovered - Preventing collapse.");
+                isHovering = true;
+                expandTaskbar();
+            });
 
-// ✅ Detect When Mouse Leaves Entire Window (Forces Collapse)
-document.addEventListener("mouseleave", () => {
-    console.log("[Window] Mouse left window - resetting hover state.");
-    isMouseInside = false;
-    isHovering = false;
-    collapseTaskbar();
-});
+            // ✅ Detect When Mouse Leaves Entire Window (Forces Collapse)
+            document.addEventListener("mouseleave", () => {
+                console.log("[Window] Mouse left window - resetting hover state.");
+                isMouseInside = false;
+                isHovering = false;
+                collapseTaskbar();
+            });
 
-// ✅ Detect When Mouse Enters Window (Prevents Collapse)
-document.addEventListener("mouseenter", () => {
-    console.log("[Window] Mouse entered window - Preventing collapse.");
-    isMouseInside = true;
-});
-
+            // ✅ Detect When Mouse Enters Window (Prevents Collapse)
+            document.addEventListener("mouseenter", () => {
+                console.log("[Window] Mouse entered window - Preventing collapse.");
+                isMouseInside = true;
+            });
         </script>
     </body>
 </html>

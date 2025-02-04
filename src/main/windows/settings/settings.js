@@ -23,6 +23,14 @@ function createSettingsWindow(taskbarWindow) {
 
         settingsWindow.loadFile(path.join(__dirname, "../../../renderer/settings/settings.html"));
 
+        // settingsWindow.webContents.openDevTools({ mode: "detach" });
+
+        // settingsWindow.once("ready-to-show", () => {
+        //     console.log("✅ Settings window is ready to show.");
+        //     console.log("📐 Window Dimensions:", settingsWindow.getBounds());
+        //     settingsWindow.show();
+        // });
+
         // Dynamically position the settings window relative to the taskbar
         if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {
             const taskbarBounds = taskbarWindow.getBounds();
@@ -45,6 +53,8 @@ function createSettingsWindow(taskbarWindow) {
     } else {
         settingsWindow.show();
     }
+
+    
 
     return settingsWindow;
 }

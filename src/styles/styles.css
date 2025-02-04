@@ -7,6 +7,8 @@ body {
     font-size: 16px;
     color: #fff;
     background-color: rgba(28, 29, 35, 1);
+    width: 100vw;
+    height: 100vh;
 }
 
 li {
@@ -15,8 +17,8 @@ li {
 
 .dragable {
     -webkit-app-region: drag; /* Makes the entire window draggable */
-    width: 100vw;
-    height: 100vh;
+    /* width: 100vw;
+    height: 100vh; */
 }
 .nodrag {
     -webkit-app-region: no-drag; /* Prevent drag on interactive elements */

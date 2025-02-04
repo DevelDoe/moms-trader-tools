@@ -34,7 +34,7 @@
     <body>
         <div class="settings-container">
             <h1 class="dragable">Settings</h1>
-
+            <p>add check for background or trasparent.</p>
             <!-- Reminder Settings -->
             <section id="reminder-settings">
                 <h2>Reminder Items</h2>
@@ -115,9 +115,15 @@
 
         <script>
             document.addEventListener("DOMContentLoaded", async () => {
+                console.log("⚡ DOMContentLoaded event fired!");
                 try {
+                    console.log("🔄 Fetching settings...");
                     const settings = await window.electronAPI.getSettings();
+                    console.log("✅ Retrieved settings:", settings);
+
+                    console.log("🔄 Fetching active snippers...");
                     const snippers = await window.electronAPI.getActiveSnippers();
+                    console.log("✅ Retrieved snippers:", snippers);
 
                     initializeReminderSection(settings.reminderItems || []);
                     initializeChecklistSection(settings.checklist || []);
