@@ -141,8 +141,25 @@ ipcMain.on("update-settings", (event, newSettings) => {
 
 // reminder
 
+// ipcMain.on("toggle-reminder", () => {
+//     const reminderWindow = windows.reminder;
+//     if (reminderWindow) {
+//         if (reminderWindow.isVisible()) {
+//             reminderWindow.hide();
+//         } else {
+//             reminderWindow.show();
+
+//             setTimeout(() => {
+//                 console.log("Sending reminder items after opening...");
+//                 reminderWindow.webContents.send("update-reminder-items", appSettings.reminderItems);
+//             }, 10); // ✅ Give time for UI to load first
+//         }
+//     }
+// });
+
 ipcMain.on("toggle-reminder", () => {
-    const reminderWindow = windows.reminder;
+    let reminderWindow = windows.reminder;
+
     if (reminderWindow) {
         if (reminderWindow.isVisible()) {
             reminderWindow.hide();
@@ -150,12 +167,15 @@ ipcMain.on("toggle-reminder", () => {
             reminderWindow.show();
 
             setTimeout(() => {
-                console.log("Sending reminder items after opening...");
-                reminderWindow.webContents.send("update-reminder-items", appSettings.reminderItems);
-            }, 10); // ✅ Give time for UI to load first
+                console.log("Sending reminder settings after opening...");
+                reminderWindow.webContents.send("update-reminder-settings", {
+                    reminderTransparent: appSettings.reminderTransparent ?? true, // Default to true
+                });
+            }, 10); // ✅ Ensure UI loads before sending data
         }
     }
 });
+
 
 ipcMain.on("reminder-ready", (event) => {
     console.log("Reminder window is ready!");
@@ -163,6 +183,18 @@ ipcMain.on("reminder-ready", (event) => {
     if (windows.reminder) {
         windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
     }
+});
+
+ipcMain.on("refresh-reminder-window", async () => {
+    console.log("🔄 Refreshing Reminder window due to settings change...");
+
+    if (windows.reminder) {
+        windows.reminder.close(); // Close the old window
+    }
+
+    // ✅ Recreate the window with updated settings
+    windows.reminder = await createReminderWindow(windows.taskbar);
+    windows.reminder.show();
 });
 
 // Checklist
@@ -349,6 +381,10 @@ ipcMain.handle("get-bell-sound-path", () => {
     return path.join(app.getAppPath(), "assets/sounds/bell.mp3");
 });
 
+ipcMain.handle("get-5min-sound-path", () => {
+    return path.join(app.getAppPath(), "assets/sounds/5min.mp3");
+});
+
 ipcMain.on("session-volume-change", (event, volume) => {
     console.log("🔊 Session bell volume changed to:", volume);
     appSettings.sessionVolume = volume;
@@ -361,6 +397,19 @@ ipcMain.on("session-volume-change", (event, volume) => {
         }
     });
 });
+
+// ipcMain.on("session-5min-warrning-volume-change", (event, volume) => {
+//     console.log("🔊 Session 5 min warrning volume changed to:", volume);
+//     appSettings.5minVolume = volume;
+//     saveSettings(); // Save to settings.json
+
+//     // Broadcast the updated volume to all windows
+//     Object.values(windows).forEach((window) => {
+//         if (window && window.webContents) {
+//             window.webContents.send("update-5min-volume", volume);
+//         }
+//     });
+// });
 
 ipcMain.on("reset-to-default-sessions", () => {
     console.log("Resetting session countdowns to default settings...");

@@ -1,5 +1,3 @@
-<!-- ./src/renderer/reminder/reminder.html -->
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -12,7 +10,7 @@
                 margin: 0px;
                 margin-right: 20px;
                 padding: 0px;
-                background-color: #1c1d23;
+                background-color: transparent; /* ✅ Default to transparent */
                 overflow: hidden; /* Prevents scrollbars */
                 min-width: 100px;
                 max-width: 600px; /* Prevent extreme resizing */
@@ -52,8 +50,30 @@
     <body>
         <div id="reminder" class="dragable"></div>
         <script>
-            document.addEventListener("DOMContentLoaded", () => {
+            document.addEventListener("DOMContentLoaded", async () => {
                 const reminderContainer = document.getElementById("reminder");
+
+                // ✅ Fetch the transparency setting on load
+                const settings = await window.electronAPI.getSettings();
+                updateBackground(settings.reminderTransparent);
+
+                // ✅ Listen for setting changes
+                window.electronAPI.onSettingsUpdated((updatedSettings) => {
+                    console.log("📩 Received updated settings:", updatedSettings);
+                    if (updatedSettings.reminderTransparent !== undefined) {
+                        updateBackground(updatedSettings.reminderTransparent);
+                    }
+                });
+
+                // ✅ Listen for direct updates from settings UI
+                window.electronAPI.on("update-reminder-transparency", (isTransparent) => {
+                    updateBackground(isTransparent);
+                });
+
+                function updateBackground(isTransparent) {
+                    document.body.style.backgroundColor = isTransparent ? "transparent" : "#1c1d23";
+                    console.log(`🎨 Updated background color: ${isTransparent ? "Transparent" : "#1c1d23"}`);
+                }
 
                 window.electronAPI.onUpdateReminderItems((items) => {
                     console.log("📩 Received reminder items:", items);
@@ -80,9 +100,7 @@
                     requestAnimationFrame(() => {
                         requestAnimationFrame(() => {
                             adjustReminderWindowSize();
-
-                            // **Trigger Fade-In (CSS handles transition)**
-                            reminderContainer.style.opacity = "1";
+                            reminderContainer.style.opacity = "1"; // Fade-in effect
                         });
                     });
                 });
@@ -125,6 +143,9 @@
                         }
                     }, 150);
                 }
+
+                // 🛠️ Force a Resize on Load
+                setTimeout(adjustReminderWindowSize, 50);
 
                 window.electronAPI.sendReminderReady();
             });

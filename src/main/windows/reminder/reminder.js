@@ -1,13 +1,17 @@
-// ./src/main/windows/reminder/reminder.js
-
-const { BrowserWindow } = require("electron");
+const { BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 
-function createReminderWindow(taskbarWindow) {
-    const reminderWindow = new BrowserWindow({
-        width: 10, // Initial size
-        height: 10, // Adjusted for multiple items
-        transparent: true,
+let reminderWindow = null; // Store reference to the reminder window
+
+function createReminderWindow(taskbarWindow, transparent = true) {
+    if (reminderWindow) {
+        reminderWindow.close(); // Close the existing window if open
+    }
+
+    reminderWindow = new BrowserWindow({
+        width: 10,
+        height: 10,
+        transparent, // ✅ Set based on user settings
         frame: false,
         resizable: true,
         alwaysOnTop: true,
@@ -35,7 +39,6 @@ function createReminderWindow(taskbarWindow) {
     } else {
         console.warn("Taskbar window is undefined or does not support getBounds. Positioning skipped.");
     }
-
 
     return reminderWindow;
 }

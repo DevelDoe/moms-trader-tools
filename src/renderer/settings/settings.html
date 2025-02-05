@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="../../styles/styles.css" />
         <style>
             .settings-container {
+                background-color: rgba(28, 29, 35, 1);
                 padding: 20px;
                 max-width: 400px;
                 margin: 0 auto;
@@ -34,7 +35,6 @@
     <body>
         <div class="settings-container">
             <h1 class="dragable">Settings</h1>
-            <p>add check for background or trasparent.</p>
             <!-- Reminder Settings -->
             <section id="reminder-settings">
                 <h2>Reminder Items</h2>
@@ -48,6 +48,13 @@
                     <button id="add-reminder-btn">Add Item</button>
                 </div>
                 <ul id="reminder-items"></ul>
+
+                <section id="reminder-appearance">
+                    <label>
+                        <input type="checkbox" id="reminder-transparent-toggle" />
+                        Enable Transparent Background
+                    </label>
+                </section>
             </section>
 
             <!-- Checklist Settings -->
@@ -151,6 +158,24 @@
                         initializeReminderSection(updatedSettings.reminderItems || []);
                         initializeChecklistSection(updatedSettings.checklist || []);
                         initializeSessionCountdowns(updatedSettings.sessionCountdowns || [], updatedSettings.sessionVolume);
+                    });
+
+                    // Reminder Transparency
+
+                    // ✅ Load the saved setting (default to true)
+                    const transparentToggle = document.getElementById("reminder-transparent-toggle");
+                    transparentToggle.checked = settings.reminderTransparent ?? true;
+
+                    // ✅ Listen for changes and save setting
+                    transparentToggle.addEventListener("change", () => {
+                        const isTransparent = transparentToggle.checked;
+                        window.electronAPI.updateSettings({ reminderTransparent: isTransparent });
+
+                        // ✅ Notify Electron to update the Reminder window
+                        window.electronAPI.refreshReminderWindow();
+
+                        // ✅ Send an event to `reminder.html` to update the CSS dynamically
+                        window.electronAPI.send("update-reminder-transparency", isTransparent);
                     });
                 } catch (error) {
                     console.error("Initialization error:", error);
@@ -433,8 +458,6 @@
                 snippers.forEach((snipper) => {
                     const listItem = document.createElement("li");
                     listItem.textContent = `${snipper.name}  `;
-
-
 
                     // Remove Button
                     const removeBtn = document.createElement("button");

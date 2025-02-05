@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     // 📌 Reminder
     sendReminderReady: () => ipcRenderer.send("reminder-ready"),
     onUpdateReminderItems: (callback) => ipcRenderer.on("update-reminder-items", (_, items) => callback(items)),
+    refreshReminderWindow: () => ipcRenderer.send("refresh-reminder-window"),
 
     // ✅ Checklist
     loadChecklistState: () => ipcRenderer.invoke("load-checklist-state"),
@@ -43,6 +44,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     // ⏰ Session Countdowns
     setSessionVolume: (volume) => ipcRenderer.send("session-volume-change", volume),
     getBellSoundPath: async () => await ipcRenderer.invoke("get-bell-sound-path"),
+    get5minSoundPath: async () => await ipcRenderer.invoke("get-5min-sound-path"),
     resetToDefaultSessions: () => ipcRenderer.send("reset-to-default-sessions"),
     onUpdateSessionCountdowns: (callback) => ipcRenderer.on("update-session-countdowns", (_, updatedSessions) => callback(updatedSessions)),
     onSessionVolumeUpdate: (callback) => ipcRenderer.on("update-session-volume", (_, volume) => callback(volume)),

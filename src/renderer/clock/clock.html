@@ -15,7 +15,7 @@
                 margin: 0;
                 font-size: 2rem;
                 color: #ffffff;
-            background-color: transparent;
+                background-color: transparent;
             }
 
             #clock {
@@ -58,37 +58,62 @@
             let activeInterval = null;
             let activeSessionTitle = null;
             let bellSound = null; // 🔔 Bell sound instance
+            let warningSound = null; // ⚠️ 5-minute warning sound instance
             let lastSessionTitle = null; // Track last played session to avoid duplicate bell sounds
-        
+            let fiveMinuteWarningPlayed = false; // Ensure warning plays once per session
+
+            function syncClock() {
+                updateClock(); // Update immediately to avoid delay
+
+                const now = new Date();
+                const msUntilNextSecond = 1000 - now.getMilliseconds(); // Calculate the time until next second
+
+                setTimeout(() => {
+                    updateClock();
+                    setInterval(updateClock, 1000); // Now we run precisely every second
+                }, msUntilNextSecond);
+            }
+
             // Load bell sound when the page loads
             document.addEventListener("DOMContentLoaded", async () => {
                 listenForSessionUpdates(); // Set up listener for session updates
-                setInterval(updateClock, 1000); // Update the clock every second
+                syncClock(); // Start the synced clock
                 console.log("Clock initialized.");
-        
+
                 // 🔔 Load bell sound
                 try {
                     const bellSoundPath = await window.electronAPI.getBellSoundPath();
                     bellSound = new Audio(bellSoundPath);
                     bellSound.volume = 0; // Start muted
-        
+
                     // Listen for volume updates from Electron main process
                     window.electronAPI.onSessionVolumeUpdate((volume) => {
                         console.log("Session Bell Volume updated:", volume);
                         bellSound.volume = volume;
                     });
-        
+
                     console.log("Bell sound loaded:", bellSoundPath);
                 } catch (error) {
                     console.error("Error loading bell sound:", error);
                 }
+
+                // ⚠️ Load 5-minute warning sound
+                try {
+                    const warningSoundPath = await window.electronAPI.get5minSoundPath();
+                    warningSound = new Audio(warningSoundPath);
+                    warningSound.volume = 0.8; // Adjust volume if needed
+
+                    console.log("5-minute warning sound loaded:", warningSoundPath);
+                } catch (error) {
+                    console.error("Error loading 5-minute warning sound:", error);
+                }
             });
-        
+
             // Get New York time
             function getNYTime() {
                 return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
             }
-        
+
             // Update the clock display
             function updateClock() {
                 const nyTime = getNYTime();
@@ -102,37 +127,37 @@
                 document.getElementById("clock").textContent = formatter.format(nyTime);
                 checkActiveSession(nyTime);
             }
-        
+
             // Check if a session is currently active
             function checkActiveSession(now) {
                 // Sort sessions by start time (descending order, prioritize most recent)
                 const sortedSessions = [...sessionCountdowns].sort((a, b) => {
                     const [aHours, aMinutes] = a.start.split(":").map(Number);
                     const [bHours, bMinutes] = b.start.split(":").map(Number);
-        
+
                     const aStart = new Date(now);
                     aStart.setHours(aHours, aMinutes, 0, 0);
-        
+
                     const bStart = new Date(now);
                     bStart.setHours(bHours, bMinutes, 0, 0);
-        
+
                     return bStart - aStart;
                 });
-        
+
                 // Find the most recent active session
                 const activeSession = sortedSessions.find((session) => {
                     const [startHours, startMinutes] = session.start.split(":").map(Number);
                     const [endHours, endMinutes] = session.end.split(":").map(Number);
-        
+
                     const sessionStart = new Date(now);
                     sessionStart.setHours(startHours, startMinutes, 0, 0);
-        
+
                     const sessionEnd = new Date(now);
                     sessionEnd.setHours(endHours, endMinutes, 0, 0);
-        
+
                     return sessionStart <= now && now <= sessionEnd;
                 });
-        
+
                 if (activeSession) {
                     if (activeSessionTitle !== activeSession.title) {
                         activateSession(activeSession, now);
@@ -141,57 +166,66 @@
                     clearActiveSession();
                 }
             }
-        
-            // Activate a session and start its countdown
+
             function activateSession(session, now) {
                 console.log(`Activating session: "${session.title}"`);
                 document.getElementById("session-title").textContent = session.title.toUpperCase();
-        
-                // ✅ Play bell **only if this is a new session**
+
                 if (bellSound && session.title !== lastSessionTitle) {
-                    lastSessionTitle = session.title; // Mark this session to prevent multiple rings
+                    lastSessionTitle = session.title;
                     bellSound.currentTime = 0;
                     bellSound.play().catch((error) => {
                         console.warn("🔔 Bell sound playback failed:", error);
                     });
                 }
-        
+
                 const [endHours, endMinutes] = session.end.split(":").map(Number);
                 const sessionEnd = new Date(now);
                 sessionEnd.setHours(endHours, endMinutes, 0, 0);
-        
-                let timeLeft = sessionEnd - now;
+
                 activeSessionTitle = session.title;
-        
-                if (activeInterval) {
-                    clearInterval(activeInterval);
-                }
-        
-                activeInterval = setInterval(() => {
+                fiveMinuteWarningPlayed = false; // Reset for new session
+
+                function updateCountdown() {
+                    const now = getNYTime(); // Get real-time synced clock
+                    let timeLeft = sessionEnd - now;
+
                     if (timeLeft <= 0) {
                         console.log(`Session "${session.title}" ended.`);
                         clearActiveSession();
-                    } else {
-                        const remainingHours = Math.floor(timeLeft / 3600000);
-                        const remainingMinutes = Math.floor((timeLeft % 3600000) / 60000);
-                        const remainingSeconds = Math.floor((timeLeft % 60000) / 1000);
-        
-                        const timeString = [
-                            remainingHours > 0 ? `${remainingHours}h` : "",
-                            remainingMinutes > 0 ? `${remainingMinutes}m` : "",
-                            remainingSeconds > 0 ? `${remainingSeconds}s` : "",
-                        ]
-                            .filter(Boolean)
-                            .join(" ");
-        
-                        document.getElementById("session-timer").textContent = timeString;
-                        console.log(`Time left for session "${session.title}": ${timeString}`);
-        
-                        timeLeft -= 1000;
+                        return;
                     }
-                }, 1000);
+
+                    const remainingHours = Math.floor(timeLeft / 3600000);
+                    const remainingMinutes = Math.floor((timeLeft % 3600000) / 60000);
+                    const remainingSeconds = Math.floor((timeLeft % 60000) / 1000);
+
+                    const timeString = [remainingHours > 0 ? `${remainingHours}h` : "", remainingMinutes > 0 ? `${remainingMinutes}m` : "", remainingSeconds > 0 ? `${remainingSeconds}s` : ""]
+                        .filter(Boolean)
+                        .join(" ");
+
+                    document.getElementById("session-timer").textContent = timeString;
+                    console.log(`Time left for session "${session.title}": ${timeString}`);
+
+                    // ⚠️ Play 5-minute warning sound when exactly 5 minutes left
+                    if (remainingHours === 0 && remainingMinutes === 5 && remainingSeconds === 0 && !fiveMinuteWarningPlayed) {
+                        fiveMinuteWarningPlayed = true;
+                        if (warningSound) {
+                            warningSound.currentTime = 0;
+                            warningSound.play().catch((error) => {
+                                console.warn("⚠️ 5-minute warning sound playback failed:", error);
+                            });
+                        }
+                    }
+
+                    // **Sync next update with the exact start of the next second**
+                    const msUntilNextSecond = 1000 - now.getMilliseconds();
+                    setTimeout(updateCountdown, msUntilNextSecond);
+                }
+
+                updateCountdown(); // Start countdown with precise sync
             }
-        
+
             // Clear the active session display
             function clearActiveSession() {
                 if (activeInterval) {
@@ -203,7 +237,7 @@
                 document.getElementById("session-timer").textContent = "";
                 console.log("No active sessions.");
             }
-        
+
             // Listen for session updates from the Electron app
             function listenForSessionUpdates() {
                 window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
@@ -212,6 +246,5 @@
                 });
             }
         </script>
-        
     </body>
 </html>
