@@ -8,11 +8,13 @@ let settingsWindow;
 function createSettingsWindow(taskbarWindow) {
     if (!settingsWindow) {
         settingsWindow = new BrowserWindow({
-            width: 450,
-            height: 780,
+            width: 640,
+            height: 500,
             frame: false,
             show: false,
             alwaysOnTop: true,
+            resizable: false,
+
             webPreferences: {
                 preload: path.join(__dirname, "../../../renderer/common/preload.js"),
                 contextIsolation: true,
@@ -23,7 +25,7 @@ function createSettingsWindow(taskbarWindow) {
 
         settingsWindow.loadFile(path.join(__dirname, "../../../renderer/settings/settings.html"));
 
-        // settingsWindow.webContents.openDevTools({ mode: "detach" });
+        settingsWindow.webContents.openDevTools({ mode: "detach" });
 
         // settingsWindow.once("ready-to-show", () => {
         //     console.log("✅ Settings window is ready to show.");
@@ -40,8 +42,8 @@ function createSettingsWindow(taskbarWindow) {
             settingsWindow.setBounds({
                 x: settingsX,
                 y: settingsY,
-                width: 450,
-                height: 780,
+                width: 640,
+                height: 600,
             });
         } else {
             console.warn("Taskbar window is undefined or does not support getBounds. Positioning skipped.");

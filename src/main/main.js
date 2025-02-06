@@ -213,10 +213,8 @@ function getLegacyChecklistItems() {
         { text: "Volume", type: "critical", state: "default" },
         { text: "Extended", type: "optional", state: "state-yellow" },
         { text: "Candles", type: "reminder", state: "default" },
-        { text: "Alignment", type: "reminder", state: "default" },
         { text: "Spread", type: "critical", state: "default" },
         { text: "Orders", type: "reminder", state: "default" },
-        { text: "Price", type: "reminder", state: "default" },
         { text: "9 ema", type: "reminder", state: "default" },
         { text: "Time", type: "reminder", state: "default" },
         { text: "50%", type: "reminder", state: "default" },
@@ -675,11 +673,12 @@ function sendSnipperUpdates() {
 // Create Snipper Dialog Window
 function createSnipperDialogWindow() {
     const dialogWindow = new BrowserWindow({
-        width: 300,
-        height: 250,
+        width: 130,
+        height: 100,
         frame: false,
         alwaysOnTop: true,
         resizable: false,
+        transparent: true,
         webPreferences: {
             preload: path.join(__dirname, "../renderer/common/preload.js"),
             contextIsolation: true,

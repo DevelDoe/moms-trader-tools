@@ -6,12 +6,12 @@ const path = require("path");
 function createResumptionWindow(taskbarWindow) {
     const resumptionWindow = new BrowserWindow({
         width: 313, // Initial size
-        height: 150, // Initial size
+        height: 50, // Initial size
         show: false,
         frame: false,
         transparent: true,
         alwaysOnTop: true,
-        resizable: true,
+        resizable: false,
         webPreferences: {
             preload: path.join(__dirname, "../../../renderer/common/preload.js"),
             contextIsolation: true,
@@ -33,8 +33,8 @@ function createResumptionWindow(taskbarWindow) {
         resumptionWindow.setBounds({
             x: resumptionX,
             y: resumptionY,
-            width: 313,
-            height: 150,
+            width: 295,
+            height: 75,
         });
     } else {
         console.warn("Taskbar window is undefined or does not support getBounds. Positioning skipped.");

@@ -8,7 +8,7 @@
         <style>
             body {
                 font-family: Arial, sans-serif;
-                background: #2b2b2b;
+                background: transparent;
                 color: white;
                 display: flex;
                 flex-direction: column;
@@ -30,16 +30,20 @@
                 border-radius: 5px;
             }
             input {
-                background: #444;
-                color: white;
-                border: 1px solid #666;
+                background: rgb(22 26 26);
+                color: white !important;
+                border: none;
                 text-align: center;
+                margin: 0;
             }
             button {
-                background: #555;
+                background-color: #089981;
                 color: white;
                 border: none;
+                padding: 0 20px;
+                font-size: 16px;
                 cursor: pointer;
+                height: 36px;
                 transition: background 0.3s ease;
             }
             button:hover {
@@ -47,15 +51,14 @@
             }
             button:focus,
             input:focus {
-                outline: 2px solid #999;
+                outline: 1px solid #ff9800;
             }
         </style>
     </head>
     <body>
-        <h2 id="title" class="dragable">Enter Snipper Name</h2>
-        <input type="text" id="snipper-name" placeholder="Enter Snipper Name" autofocus />
+        <input type="text" id="snipper-name" placeholder="Snipper Name" autofocus />
         <button id="confirm-btn">Continue</button>
-        <button id="cancel-btn">Cancel</button>
+        <!-- <button id="cancel-btn">Cancel</button> -->
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {
@@ -66,9 +69,14 @@
 
                 const inputField = document.getElementById("snipper-name");
                 const confirmBtn = document.getElementById("confirm-btn");
-                const cancelBtn = document.getElementById("cancel-btn");
+                // const cancelBtn = document.getElementById("cancel-btn");
 
-                if (!inputField || !confirmBtn || !cancelBtn) {
+                // if (!inputField || !confirmBtn || !cancelBtn) {
+                //     console.error("❌ Missing elements in dialog.html. Check element IDs.");
+                //     return;
+                // }
+
+                if (!inputField || !confirmBtn ) {
                     console.error("❌ Missing elements in dialog.html. Check element IDs.");
                     return;
                 }
@@ -93,11 +101,11 @@
 
                 // Add event listeners (ensure they aren't duplicated)
                 confirmBtn.addEventListener("click", confirmSnipper);
-                cancelBtn.addEventListener("click", () => {
-                    console.log("❌ Snipper creation cancelled.");
-                    window.electronAPI.send("snipper-cancelled");
-                    setTimeout(() => window.close(), 150);
-                });
+                // cancelBtn.addEventListener("click", () => {
+                //     console.log("❌ Snipper creation cancelled.");
+                //     window.electronAPI.send("snipper-cancelled");
+                //     setTimeout(() => window.close(), 150);
+                // });
 
                 inputField.addEventListener("keydown", (event) => {
                     if (event.key === "Enter") {

@@ -1,17 +1,57 @@
 <!DOCTYPE html>
-<html lang="en-G">
+<html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Settings</title>
         <link rel="stylesheet" href="../../styles/styles.css" />
         <style>
-            .settings-container {
+            body {
                 background-color: rgba(28, 29, 35, 1);
-                padding: 20px;
-                max-width: 400px;
+            }
+            body::-webkit-scrollbar {
+                display: none;
+            }
+
+            .settings-container {
+                max-width: 600px;
                 margin: 0 auto;
                 color: #fff;
+                position: relative;
+            }
+            .settings-container li {
+                font-size: 16px;
+            }
+            .tab {
+                overflow: hidden;
+                border-bottom: 1px solid #ccc;
+                display: flex;
+                justify-content: space-around;
+            }
+            .tab button {
+                background-color: inherit;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                padding: 14px 16px;
+                transition: 0.3s;
+                color: #fff;
+                font-size: 16px;
+            }
+            .tab button:hover {
+                background-color: #575757;
+            }
+            .tab button.active {
+                background-color: #333;
+                font-weight: bold;
+            }
+            .tabcontent {
+                display: none;
+                padding: 20px 0;
+                border-top: none;
+            }
+            .tabcontent.active {
+                display: block;
             }
             .remove-btn {
                 background: none;
@@ -20,107 +60,292 @@
                 padding: 5px;
                 margin-left: 5px;
             }
-
             .trash-icon {
-                width: 16px; /* Adjust size as needed */
+                width: 16px;
                 height: 16px;
                 filter: brightness(0.5);
             }
-
             .remove-btn:hover .trash-icon {
-                filter: brightness(1); /* Darken icon on hover */
+                filter: brightness(1);
+            }
+            .close-btn {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 24px;
+                height: 24px;
+                background: none;
+                border: none;
+                cursor: pointer;
+
+                z-index: 99;
+            }
+
+            .close-btn::before,
+            .close-btn::after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 16px;
+                height: 2px;
+                background-color: #fff;
+            }
+
+            .close-btn::before {
+                transform: translate(-50%, -50%) rotate(45deg);
+            }
+
+            .close-btn::after {
+                transform: translate(-50%, -50%) rotate(-45deg);
+            }
+
+            .close-btn:hover::before,
+            .close-btn:hover::after {
+                background-color: #ff0000; /* Change color on hover */
+            }
+
+            .scrollable-list {
+                height: 200px;
+                overflow-y: scroll; /* Enables vertical scrolling */
+                scrollbar-width: none; /* Hides scrollbar in Firefox */
+                -ms-overflow-style: none; /* Hides scrollbar in Internet Explorer and Edge */
+            }
+
+            /* Hides scrollbar in WebKit-based browsers (Chrome, Safari, Opera) */
+            .scrollable-list::-webkit-scrollbar {
+                display: none;
+            }
+            .tabcontent {
+                position: relative;
+            }
+
+            .controls {
+                width: 100%;
+            }
+            #clock-bell-volume {
+                margin: 10px 0px;
+            }
+            .form-container {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 1rem;
+                background-color: #1c1d23;
+                border-radius: 8px;
+                color: #fff;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .form-row {
+                display: flex;
+                gap: 1rem;
+            }
+
+            .form-label {
+                font-size: 1rem;
+                font-weight: 500;
+            }
+
+            .form-input,
+            .form-select {
+                padding: 0.5rem;
+                border: 1px solid #575757;
+                border-radius: 4px;
+                background-color: #2a2b32;
+                color: #fff;
+                font-size: 1rem;
+            }
+
+            .form-input:focus,
+            .form-select:focus {
+                border-color: #ff9800;
+                outline: none;
+            }
+
+            .duration-selects {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .form-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+
+            .form-button {
+                padding: 0.75rem 1.5rem;
+                background-color: #ff9800;
+                border: none;
+                border-radius: 4px;
+                color: #fff;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            .form-button:hover {
+                background-color: #e68900;
+            }
+
+            .form-message {
+                font-size: 0.875rem;
+                color: #ffeb3b;
+            }
+            .controls button {
+                padding: 0.75rem 1.5rem;
+                background-color: #f23645;
+                border: none;
+                border-radius: 4px;
+                color: #fff;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            .extra-margin-top {
+                margin-top: 20px;
             }
         </style>
     </head>
     <body>
+        <button class="close-btn" onclick="window.electronAPI.toggleSettings()" aria-label="Close"></button>
         <div class="settings-container">
             <h1 class="dragable">Settings</h1>
+            
+            <!-- <button onclick="window.electronAPI.toggleSettings()">Close</button> -->
+
+            <!-- Tab navigation -->
+            <div class="tab">
+                <button class="tablinks active" onclick="openTab(event, 'reminder-settings')">Reminder</button>
+                <button class="tablinks" onclick="openTab(event, 'checklist-settings')">Checklist</button>
+                <button class="tablinks" onclick="openTab(event, 'countdown')">Countdown</button>
+                <button class="tablinks" onclick="openTab(event, 'session-countdowns')">Clock</button>
+                <button class="tablinks" onclick="openTab(event, 'snipper-management')">Snipper</button>
+            </div>
+
             <!-- Reminder Settings -->
-            <section id="reminder-settings">
-                <h2>Reminder Items</h2>
-                <div>
-                    <input type="text" id="new-reminder-text" placeholder="Reminder text" />
-                    <select id="new-reminder-type">
+            <div id="reminder-settings" class="tabcontent active">
+                <div class="form-group">
+                    <input type="text" id="new-reminder-text" placeholder="Reminder text" class="form-input" />
+                    <select id="new-reminder-type" class="form-select">
                         <option value="critical">Critical</option>
                         <option value="optional">Optional</option>
                         <option value="reminder">Reminder</option>
                     </select>
-                    <button id="add-reminder-btn">Add Item</button>
+                    <button id="add-reminder-btn" class="form-button">Add Item</button>
                 </div>
-                <ul id="reminder-items"></ul>
-
-                <section id="reminder-appearance">
+                <ul id="reminder-items" class="scrollable-list" style="height: 253px"></ul>
+                <div class="controls">
                     <label>
                         <input type="checkbox" id="reminder-transparent-toggle" />
                         Enable Transparent Background
                     </label>
-                </section>
-            </section>
+                </div>
+            </div>
 
             <!-- Checklist Settings -->
-            <section id="checklist-settings">
-                <h2>Checklist</h2>
-                <button id="reset-legacy-checklist-btn">Reset to Legacy Checklist</button>
-                <div>
-                    <input type="text" id="new-item-text" placeholder="Checklist item text" />
-                    <select id="new-item-type">
+            <div id="checklist-settings" class="tabcontent">
+                <div class="form-group">
+                    <input type="text" id="new-item-text" placeholder="Checklist item text" class="form-input" />
+                    <select id="new-item-type" class="form-select">
                         <option value="critical">Critical</option>
                         <option value="optional">Optional</option>
                         <option value="reminder">Reminder</option>
                     </select>
-                    <button id="add-item-btn">Add Item</button>
+                    <button id="add-item-btn" class="form-button">Add Item</button>
                 </div>
-                <ul id="checklist-items"></ul>
-            </section>
+                <div>
+                    <ul id="checklist-items" class="scrollable-list" style="height: 231px"></ul>
+                </div>
+
+                <div class="controls extra-margin-top">
+                    <button id="reset-legacy-checklist-btn">Reset to Legacy Checklist</button>
+                </div>
+            </div>
 
             <!-- Countdown Settings -->
-            <section id="countdown">
-                <h2>Bar Countdown</h2>
-                <div>
-                    <label for="volume-slider">Volume:</label>
+            <div id="countdown" class="tabcontent">
+                <div class="controls">
+                    <label for="volume-slider">🔊 Countdown Volume:</label>
                     <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.5" />
                 </div>
-            </section>
+            </div>
 
-            <!-- Session Countdowns -->
-            <section id="session-countdowns">
-                <h2>Session Countdowns</h2>
-                <button id="reset-default-sessions-btn">Reset to Default Sessions</button>
-                <br />
-                <div>
-                    <label for="session-volume-slider">🔊 Session Bell Volume:</label>
-                    <input id="session-volume-slider" type="range" min="0" max="1" step="0.01" value="0" />
+            <!-- Clock -->
+            <div id="session-countdowns" class="tabcontent">
+                <div class="form-container">
+                    <div class="form-group">
+                        <label for="session-title" class="form-label">Countdown Title:</label>
+                        <input type="text" id="session-title" placeholder="Countdown Title" class="form-input" />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="session-time" class="form-label">Session Time:</label>
+                            <input type="time" id="session-time" step="60" class="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <label for="countdown-hours" class="form-label">Countdown Duration:</label>
+                            <div class="duration-selects">
+                                <select id="countdown-hours" class="form-select"></select>
+                                <select id="countdown-minutes" class="form-select"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button id="add-session-btn" class="form-button">Add Session Countdown</button>
+                        <p id="restart-message" class="form-message" style="display: none; color: #f23645">Restart the app for changes to take effect.</p>
+                        <button id="restart-app-button" class="form-button" style="display: none; background-color: #f23645">Restart App</button>
+                    </div>
                 </div>
+
                 <div>
-                    <label for="session-time">Session Time:</label>
-                    <input type="time" id="session-time" step="60" />
+                    <ul id="session-list" class="scrollable-list" style="margin-top: 0; height: 118px"></ul>
                 </div>
-                <div>
-                    <label for="session-title">Countdown Title:</label>
-                    <input type="text" id="session-title" placeholder="Countdown Title" />
+
+                <div class="controls">
+                    <div id="clock-bell-volume">
+                        <label for="session-volume-slider">🔊 Session Bell Volume:</label>
+                        <input id="session-volume-slider" type="range" min="0" max="1" step="0.01" value="0" />
+                    </div>
+                    <button id="reset-default-sessions-btn">Reset to Default Sessions</button>
                 </div>
-                <div>
-                    <label for="session-countdown">Countdown Duration:</label>
-                    <select id="countdown-hours"></select>
-                    <select id="countdown-minutes"></select>
-                </div>
-                <button id="add-session-btn">Add Session Countdown</button>
-                <ul id="session-list"></ul>
-                <p id="restart-message" style="display: none; color: yellow; font-size: 14px; margin-top: 5px">Restart the app for changes to take effect.</p>
-                <button id="restart-app-button" style="display: none">Restart App</button>
-            </section>
+            </div>
 
             <!-- Snipper Management -->
-            <section id="snipper-management">
-                <h2>Snipper Windows</h2>
-                <ul id="snipper-list"></ul>
-            </section>
-
-            <br />
-            <button onclick="window.electronAPI.toggleSettings()">Close</button>
+            <div id="snipper-management" class="tabcontent">
+                <ul id="snipper-list" class="scrollable-list"></ul>
+            </div>
         </div>
 
         <script>
+            function openTab(evt, tabId) {
+                // Get all elements with class="tabcontent" and hide them
+                const tabContents = document.getElementsByClassName("tabcontent");
+                for (let i = 0; i < tabContents.length; i++) {
+                    tabContents[i].style.display = "none";
+                    tabContents[i].classList.remove("active");
+                }
+
+                // Get all elements with class="tablinks" and remove the class "active"
+                const tabLinks = document.getElementsByClassName("tablinks");
+                for (let i = 0; i < tabLinks.length; i++) {
+                    tabLinks[i].classList.remove("active");
+                }
+
+                // Show the current tab, and add an "active" class to the button that opened the tab
+                document.getElementById(tabId).style.display = "block";
+                document.getElementById(tabId).classList.add("active");
+                evt.currentTarget.classList.add("active");
+            }
             document.addEventListener("DOMContentLoaded", async () => {
                 console.log("⚡ DOMContentLoaded event fired!");
                 try {
@@ -143,8 +368,24 @@
                     document.getElementById("restart-app-button").addEventListener("click", restartApp);
                     document.getElementById("add-reminder-btn").addEventListener("click", addReminderItem);
                     document.getElementById("add-item-btn").addEventListener("click", addChecklistItem);
-                    document.getElementById("reset-legacy-checklist-btn").addEventListener("click", resetChecklist);
-                    document.getElementById("reset-default-sessions-btn").addEventListener("click", resetDefaultSessions);
+                    document.getElementById("reset-legacy-checklist-btn").addEventListener("click", function (event) {
+                        var userConfirmed = confirm("Are you sure you want to reset to the legacy checklist? This action cannot be undone.");
+                        if (!userConfirmed) {
+                            event.preventDefault(); // Prevents the default action if user cancels
+                        } else {
+                            // Proceed with the reset action
+                            resetChecklist();
+                        }
+                    });
+                    document.getElementById("reset-default-sessions-btn").addEventListener("click", function (event) {
+                        var userConfirmed = confirm("Are you sure you want to reset to the default sessions? This action cannot be undone.");
+                        if (!userConfirmed) {
+                            event.preventDefault(); // Prevents the default action if user cancels
+                        } else {
+                            // Proceed with the reset action
+                            resetDefaultSessions();
+                        }
+                    });
 
                     // **🔄 Listen for Snipper updates from Electron**
                     window.electronAPI.onSnipperSettingsUpdated((snippers) => {
@@ -177,6 +418,15 @@
                         // ✅ Send an event to `reminder.html` to update the CSS dynamically
                         window.electronAPI.send("update-reminder-transparency", isTransparent);
                     });
+                    // Set the default active tab
+                    const defaultTab = document.querySelector(".tablinks.active");
+                    if (defaultTab) {
+                        defaultTab.click();
+                    } else {
+                        // If no tab is marked as active, activate the first one
+                        const firstTab = document.querySelector(".tablinks");
+                        if (firstTab) firstTab.click();
+                    }
                 } catch (error) {
                     console.error("Initialization error:", error);
                 }
@@ -289,12 +539,13 @@
             }
 
             // Session Countdowns
+            // Session Countdowns
             function initializeSessionCountdowns(sessions, sessionVolume) {
                 const sessionList = document.getElementById("session-list");
                 const sessionVolumeSlider = document.getElementById("session-volume-slider");
                 const addSessionButton = document.getElementById("add-session-btn");
 
-                // ✅ Ensure the button event listener is attached once
+                // Ensure the button event listener is attached once
                 if (!addSessionButton.dataset.listener) {
                     addSessionButton.addEventListener("click", addSessionCountdown);
                     addSessionButton.dataset.listener = "true"; // Prevent duplicate listeners
@@ -302,28 +553,39 @@
 
                 sessionList.innerHTML = "";
 
-                // ✅ Populate session list
+                // Populate session list
                 sessions.forEach((session, index) => {
                     const listItem = document.createElement("li");
                     listItem.textContent = `${session.start} - ${session.end} | ${session.title}`;
 
+                    // Create the remove button
                     const removeButton = document.createElement("button");
-                    removeButton.textContent = "Remove";
+                    removeButton.className = "remove-btn";
+                    removeButton.setAttribute("aria-label", "Remove item");
+
+                    // Create the trash icon image
+                    const trashIcon = document.createElement("img");
+                    trashIcon.src = "../../../assets/images/delete.svg"; // Ensure this path is correct
+                    trashIcon.alt = "Remove";
+                    trashIcon.className = "trash-icon";
+
+                    removeButton.appendChild(trashIcon);
+
                     removeButton.addEventListener("click", () => {
                         sessions.splice(index, 1);
                         saveSettings({ sessionCountdowns: sessions });
                         initializeSessionCountdowns(sessions, sessionVolume); // Refresh UI
-                        showRestartNotification(); // ✅ Show restart message when a session is removed
+                        showRestartNotification(); // Show restart message when a session is removed
                     });
 
                     listItem.appendChild(removeButton);
                     sessionList.appendChild(listItem);
                 });
 
-                // ✅ Restore the last saved volume
+                // Restore the last saved volume
                 sessionVolumeSlider.value = sessionVolume || 0.1; // Default to 0.1 if no saved value
 
-                // ✅ Update volume on change with a delay to avoid spamming updates
+                // Update volume on change with a delay to avoid spamming updates
                 let isUserAdjusting = false;
                 let volumeUpdateTimeout = null;
 
@@ -348,7 +610,7 @@
                     }, 500); // Prevent excessive updates while dragging
                 });
 
-                // ✅ Ensure UI updates when Electron sends volume updates
+                // Ensure UI updates when Electron sends volume updates
                 window.electronAPI.onSessionVolumeUpdate((volume) => {
                     if (!isUserAdjusting) {
                         console.log(`🔊 Electron updated session volume: ${volume}`);
