@@ -130,7 +130,7 @@
 
             // Check if a session is currently active
             function checkActiveSession(now) {
-                // Sort sessions by start time (descending order, prioritize most recent)
+                // Sort sessions by start time in descending order
                 const sortedSessions = [...sessionCountdowns].sort((a, b) => {
                     const [aHours, aMinutes] = a.start.split(":").map(Number);
                     const [bHours, bMinutes] = b.start.split(":").map(Number);
@@ -141,7 +141,7 @@
                     const bStart = new Date(now);
                     bStart.setHours(bHours, bMinutes, 0, 0);
 
-                    return bStart - aStart;
+                    return bStart - aStart; // Sort in descending order
                 });
 
                 // Find the most recent active session

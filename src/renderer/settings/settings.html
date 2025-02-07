@@ -118,6 +118,7 @@
             }
             .tabcontent {
                 position: relative;
+                padding-bottom: 16px !important;
             }
 
             .controls {
@@ -146,7 +147,9 @@
 
             .form-row {
                 display: flex;
-                gap: 1rem;
+                gap: 0.5rem;
+                align-items: center;
+                justify-content: flex-start;
             }
 
             .form-label {
@@ -183,12 +186,12 @@
             }
 
             .form-button {
-                padding: 0.75rem 1.5rem;
+                padding: 0.6rem 1rem;
                 background-color: #ff9800;
                 border: none;
                 border-radius: 4px;
                 color: #fff;
-                font-size: 1rem;
+                font-size: 0.9rem;
                 cursor: pointer;
                 transition: background-color 0.3s ease;
             }
@@ -202,12 +205,12 @@
                 color: #ffeb3b;
             }
             .controls button {
-                padding: 0.75rem 1.5rem;
+                padding: 0.6rem 1rem;
                 background-color: #f23645;
                 border: none;
                 border-radius: 4px;
                 color: #fff;
-                font-size: 1rem;
+                font-size: 0.9rem;
                 cursor: pointer;
                 transition: background-color 0.3s ease;
             }
@@ -219,31 +222,46 @@
     <body>
         <button class="close-btn" onclick="window.electronAPI.toggleSettings()" aria-label="Close"></button>
         <div class="settings-container">
-            <h1 class="dragable">Settings</h1>
-            
+            <h1 class="dragable" style="width: 90%;">Settings</h1>
+
             <!-- <button onclick="window.electronAPI.toggleSettings()">Close</button> -->
 
             <!-- Tab navigation -->
             <div class="tab">
-                <button class="tablinks active" onclick="openTab(event, 'reminder-settings')">Reminder</button>
+                <button class="tablinks active" onclick="openTab(event, 'general')">General</button>
+                <button class="tablinks" onclick="openTab(event, 'reminder-settings')">Notes</button>
                 <button class="tablinks" onclick="openTab(event, 'checklist-settings')">Checklist</button>
-                <button class="tablinks" onclick="openTab(event, 'countdown')">Countdown</button>
                 <button class="tablinks" onclick="openTab(event, 'session-countdowns')">Clock</button>
                 <button class="tablinks" onclick="openTab(event, 'snipper-management')">Snipper</button>
+            </div>
+
+            <!-- General Settings -->
+            <div id="general" class="tabcontent">
+                <section id="audio">
+                    <h2>Adudio</h2>
+                    <label for="volume-slider">🔊 Countdown Volume:</label>
+                    <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.5" />
+                    <div id="clock-bell-volume">
+                        <label for="session-volume-slider">🔊 Session Bell Volume:</label>
+                        <input id="session-volume-slider" type="range" min="0" max="1" step="0.01" value="0" />
+                    </div>
+                </section>
             </div>
 
             <!-- Reminder Settings -->
             <div id="reminder-settings" class="tabcontent active">
                 <div class="form-group">
-                    <input type="text" id="new-reminder-text" placeholder="Reminder text" class="form-input" />
-                    <select id="new-reminder-type" class="form-select">
-                        <option value="critical">Critical</option>
-                        <option value="optional">Optional</option>
-                        <option value="reminder">Reminder</option>
-                    </select>
-                    <button id="add-reminder-btn" class="form-button">Add Item</button>
+                    <textarea id="new-reminder-text" placeholder="Reminder text" class="form-input" rows="4"></textarea>
+                    <div class="form-row">
+                        <button id="add-reminder-btn" class="form-button">Add Item</button>
+                        <select id="new-reminder-type" class="form-select">
+                            <option value="critical">Critical</option>
+                            <option value="optional">Optional</option>
+                            <option value="reminder">Reminder</option>
+                        </select>
+                    </div>
                 </div>
-                <ul id="reminder-items" class="scrollable-list" style="height: 253px"></ul>
+                <ul id="reminder-items" class="scrollable-list" style="height: 257px"></ul>
                 <div class="controls">
                     <label>
                         <input type="checkbox" id="reminder-transparent-toggle" />
@@ -256,15 +274,17 @@
             <div id="checklist-settings" class="tabcontent">
                 <div class="form-group">
                     <input type="text" id="new-item-text" placeholder="Checklist item text" class="form-input" />
-                    <select id="new-item-type" class="form-select">
-                        <option value="critical">Critical</option>
-                        <option value="optional">Optional</option>
-                        <option value="reminder">Reminder</option>
-                    </select>
-                    <button id="add-item-btn" class="form-button">Add Item</button>
+                    <div class="form-row">
+                        <button id="add-item-btn" class="form-button">Add Item</button>
+                        <select id="new-item-type" class="form-select">
+                            <option value="critical">Critical</option>
+                            <option value="optional">Optional</option>
+                            <option value="reminder">Reminder</option>
+                        </select>
+                    </div>
                 </div>
                 <div>
-                    <ul id="checklist-items" class="scrollable-list" style="height: 231px"></ul>
+                    <ul id="checklist-items" class="scrollable-list" style="height: 288px"></ul>
                 </div>
 
                 <div class="controls extra-margin-top">
@@ -272,17 +292,11 @@
                 </div>
             </div>
 
-            <!-- Countdown Settings -->
-            <div id="countdown" class="tabcontent">
-                <div class="controls">
-                    <label for="volume-slider">🔊 Countdown Volume:</label>
-                    <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.5" />
-                </div>
-            </div>
+            
 
             <!-- Clock -->
-            <div id="session-countdowns" class="tabcontent">
-                <div class="form-container">
+            <div id="session-countdowns" class="tabcontent" >
+                <div class="form-container" style="padding-top: 0;">
                     <div class="form-group">
                         <label for="session-title" class="form-label">Countdown Title:</label>
                         <input type="text" id="session-title" placeholder="Countdown Title" class="form-input" />
@@ -308,14 +322,10 @@
                 </div>
 
                 <div>
-                    <ul id="session-list" class="scrollable-list" style="margin-top: 0; height: 118px"></ul>
+                    <ul id="session-list" class="scrollable-list" style="margin-top: 0; height: 177px"></ul>
                 </div>
 
                 <div class="controls">
-                    <div id="clock-bell-volume">
-                        <label for="session-volume-slider">🔊 Session Bell Volume:</label>
-                        <input id="session-volume-slider" type="range" min="0" max="1" step="0.01" value="0" />
-                    </div>
                     <button id="reset-default-sessions-btn">Reset to Default Sessions</button>
                 </div>
             </div>
@@ -465,8 +475,10 @@
             }
 
             function addReminderItem() {
-                const text = document.getElementById("new-reminder-text").value.trim();
-                const type = document.getElementById("new-reminder-type").value;
+                const textArea = document.getElementById("new-reminder-text");
+                const typeSelect = document.getElementById("new-reminder-type");
+                const text = textArea.value.trim();
+                const type = typeSelect.value;
 
                 if (!text) {
                     alert("Enter reminder text.");
@@ -476,6 +488,9 @@
                 window.electronAPI.getSettings().then((settings) => {
                     const updatedItems = [...(settings.reminderItems || []), { text, type }];
                     saveSettings({ reminderItems: updatedItems });
+
+                    // Clear textarea after adding
+                    textArea.value = "";
                 });
             }
 
@@ -514,13 +529,22 @@
             }
 
             function addChecklistItem() {
-                const text = document.getElementById("new-item-text").value.trim();
-                const type = document.getElementById("new-item-type").value;
-                if (!text) return alert("Enter checklist item text.");
+                const inputField = document.getElementById("new-item-text");
+                const typeSelect = document.getElementById("new-item-type");
+                const text = inputField.value.trim();
+                const type = typeSelect.value;
+
+                if (!text) {
+                    alert("Enter checklist item text.");
+                    return;
+                }
 
                 window.electronAPI.addChecklistItem({ text, type });
                 window.electronAPI.getSettings().then((settings) => {
                     initializeChecklistSection(settings.checklist || []);
+
+                    // Clear input field after adding
+                    inputField.value = "";
                 });
             }
 

@@ -23,3 +23,11 @@ li {
 .nodrag {
     -webkit-app-region: no-drag; /* Prevent drag on interactive elements */
 }
+
+/* Disable text selection across the entire application */
+* {
+    user-select: none; /* Standard */
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+}

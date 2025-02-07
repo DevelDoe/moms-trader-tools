@@ -25,7 +25,7 @@ function createSettingsWindow(taskbarWindow) {
 
         settingsWindow.loadFile(path.join(__dirname, "../../../renderer/settings/settings.html"));
 
-        settingsWindow.webContents.openDevTools({ mode: "detach" });
+        // settingsWindow.webContents.openDevTools({ mode: "detach" });
 
         // settingsWindow.once("ready-to-show", () => {
         //     console.log("✅ Settings window is ready to show.");
@@ -43,7 +43,7 @@ function createSettingsWindow(taskbarWindow) {
                 x: settingsX,
                 y: settingsY,
                 width: 640,
-                height: 600,
+                height: 610,
             });
         } else {
             console.warn("Taskbar window is undefined or does not support getBounds. Positioning skipped.");

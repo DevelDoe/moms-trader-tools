@@ -137,21 +137,21 @@
                     if (isOneMinutePart) {
                         // Apply new color rules for the one-minute countdown
                         if (remaining >= 40) {
-                            element.style.color = "#089981"; // Red (40-60)
+                            element.style.color = "#006666"; 
                         } else if (remaining >= 20) {
-                            element.style.color = "yellow"; // Yellow (20-39)
+                            element.style.color = "orange"; 
                         } else {
-                            element.style.color = "#f23645"; // Green (0-19)
+                            element.style.color = "#FF2800";
                         }
                     } else {
                         // Keep five-minute part unchanged
                         const colorMap = {
-                            5: "#089981",
-                            4: "#089981",
-                            3: "yellow",
-                            2: "yellow",
-                            1: "#f23645",
-                            0: "#f23645",
+                            5: "#006666",
+                            4: "#006666",
+                            3: "orange",
+                            2: "orange",
+                            1: "#FF2800",
+                            0: "#FF2800",
                         };
                         element.style.color = colorMap[remaining] || "transparent";
                     }
