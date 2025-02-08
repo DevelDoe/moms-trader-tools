@@ -31,7 +31,10 @@
             "output": "dist"
         },
         "files": [
-            "dist/**/*"
+            "src/**/*",
+            "assets/**/*",
+            "node_modules/**/*",
+            "package.json"
         ],
         "win": {
             "target": "nsis",
@@ -45,13 +48,18 @@
             "target": "AppImage",
             "icon": "assets/icon.png"
         },
-        "publish": {
-            "provider": "github",
-            "owner": "DevelDoe",
-            "repo": "moms-trader-tools",
-            "releaseType": "prerelease",
-            "releaseNotes": "Latest version available",
-            "vPrefixedTagName": true
-        }
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "shortcutName": "Moms Trader Tools"
+        },
+        "publish": [
+            {
+                "provider": "github",
+                "owner": "DevelDoe",
+                "repo": "moms-trader-tools",
+                "releaseType": "release"
+            }
+        ]
     }
 }
