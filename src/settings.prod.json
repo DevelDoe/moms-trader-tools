@@ -1,8 +1,0 @@
-{
-    "checklist": [],
-    "sessionCountdowns": [],
-    "reminderItems": [],
-    "devMode": false,
-    "apiEndpoint": "https://api.yourapp.com",
-    "debug": false
-}
