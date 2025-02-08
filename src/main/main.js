@@ -554,7 +554,7 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
     }
 
     const { x: screenX, y: screenY } = matchedDisplay.bounds;
-    log(`🖥 Snipper should appear at screen (${screenX}, ${screenY})`);
+    log(`Snipper should appear at screen `);
 
     // Adjust for multi-screen layout
     const snipperWindow = new BrowserWindow({
