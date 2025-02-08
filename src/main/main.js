@@ -377,7 +377,7 @@ ipcMain.handle("get-5min-sound-path", () => {
 });
 
 ipcMain.on("session-volume-change", (event, volume) => {
-    log("Session bell volume changed to:", volume);
+    log.log("Session bell volume changed to:", volume);
     appSettings.sessionVolume = volume;
     saveSettings(); // Save to settings.json
 
