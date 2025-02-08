@@ -70,7 +70,20 @@ const DEFAULT_SETTINGS = {
             title: "Post Market",
         },
     ],
-    reminderItems: [],
+    reminderItems: [
+        {
+            text: "Reminder",
+            type: "critical",
+        },
+        {
+            text: "Jot down important insights, ideas and observations.",
+            type: "optional",
+        },
+        {
+            text: "inform your trading decisions.",
+            type: "reminder",
+        },
+    ],
     snippers: [],
 };
 
