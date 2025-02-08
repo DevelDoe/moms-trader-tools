@@ -19,6 +19,7 @@
         "ignore": "^7.0.3"
     },
     "devDependencies": {
+        "cross-env": "^7.0.3",
         "electron": "^26.1.0",
         "electron-builder": "^23.6.0",
         "electron-packager": "^17.1.2"
