@@ -850,7 +850,7 @@ app.on("ready", () => {
                 }
 
                 appSettings.snippers.forEach((snip) => {
-                    log(`🔍 Restoring Snipper: ${snip.name} with saved region bounds:`, snip);
+                    log(`Restoring Snipper with saved region bounds:`);
 
                     const source = sources.find((src) => snip.sourceId && src.id === snip.sourceId) || sources[0];
 
