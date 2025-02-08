@@ -4,7 +4,7 @@ const path = require("path");
 function createTaskbarWindow(toggleReminder, toggleSettings) {
     const taskbarWindow = new BrowserWindow({
         width: 50, // Initial size
-        height: 70,
+        height: 73,
         frame: false,
         alwaysOnTop: true,
         transparent: true,
