@@ -5,10 +5,10 @@
     "main": "src/main/main.js",
     "scripts": {
         "start": "electron .",
-        "package": "electron-packager . Moms_Trader_Suit --platform=win32 --arch=x64 --out=dist --overwrite",
-        "package-all": "electron-packager . Moms_Trader_Suit --all --out=dist --overwrite",
-        "package-mac": "electron-packager . Moms_Trader_Suit --platform=darwin --arch=x64 --out=dist --overwrite",
-        "package-linux": "electron-packager . Moms_Trader_Suit --platform=linux --arch=x64 --out=dist --overwrite",
+        "package": "electron-packager . Moms_Trader_Tools --platform=win32 --arch=x64 --out=dist --overwrite",
+        "package-all": "electron-packager . Moms_Trader_Tools --all --out=dist --overwrite",
+        "package-mac": "electron-packager . Moms_Trader_Tools --platform=darwin --arch=x64 --out=dist --overwrite",
+        "package-linux": "electron-packager . Moms_Trader_Tools --platform=linux --arch=x64 --out=dist --overwrite",
         "publish": "electron-builder -p always"
     },
     "author": "Morgan A Ray",
