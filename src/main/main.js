@@ -8,7 +8,7 @@ const { createChecklistWindow } = require("./windows/checklist/checklist");
 const { createCountdownWindow } = require("./windows/countdown/countdown");
 const { createClockWindow } = require("./windows/clock/clock");
 const { createResumptionWindow } = require("./windows/resumption/resumption");
-const createLogger = require("../hlps/logger");
+const createLogger = require("../../hlps/logger");
 const { autoUpdater } = require("electron-updater");
 
 const path = require("path");
