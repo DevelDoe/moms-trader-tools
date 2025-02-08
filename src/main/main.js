@@ -35,7 +35,7 @@ function loadSettings() {
         if (!Array.isArray(settings.sessionCountdowns)) settings.sessionCountdowns = [];
         if (!Array.isArray(settings.reminderItems)) settings.reminderItems = []; // Ensure this exists
         if (!Array.isArray(settings.snippers)) settings.snippers = [];
-        
+
         // Remove deprecated 'text' key if present
         if ("text" in settings) {
             console.log("Removing deprecated 'text' attribute from settings...");
@@ -460,14 +460,17 @@ ipcMain.handle("get-screens", async () => {
 
 ipcMain.handle("get-selected-screen", async () => {
     console.log("🔎 Looking for selected screen:", selectedScreenId);
-    
+
     if (!selectedScreenId) {
         console.warn("⚠️ No screen has been selected yet. Returning default.");
         return { id: "default", name: "Unknown", display_id: null, bounds: { x: 0, y: 0, width: 1920, height: 1080 } };
     }
 
     const sources = await desktopCapturer.getSources({ types: ["screen"] });
-    console.log("📺 All available sources:", sources.map(src => ({ id: src.id, name: src.name })));
+    console.log(
+        "📺 All available sources:",
+        sources.map((src) => ({ id: src.id, name: src.name }))
+    );
 
     const selectedScreen = sources.find((src) => src.id === selectedScreenId);
 
@@ -481,7 +484,7 @@ ipcMain.handle("get-selected-screen", async () => {
         id: selectedScreen.id,
         name: selectedScreen.name,
         display_id: selectedScreen.display_id,
-        bounds: selectedScreen.bounds || { x: 0, y: 0, width: 1920, height: 1080 }
+        bounds: selectedScreen.bounds || { x: 0, y: 0, width: 1920, height: 1080 },
     };
 });
 
@@ -534,8 +537,8 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
 
     // Adjust for multi-screen layout
     const snipperWindow = new BrowserWindow({
-        x: screenX + bounds.x ,  // Ensure it appears on the right screen
-        y: screenY + bounds.y ,
+        x: screenX + bounds.x, // Ensure it appears on the right screen
+        y: screenY + bounds.y,
         width: bounds.width,
         height: bounds.height,
         transparent: true,
@@ -584,7 +587,10 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
     try {
         // Fetch selected screen details
         const sources = await desktopCapturer.getSources({ types: ["screen"] });
-        console.log("📺 Available screens:", sources.map(src => ({ id: src.id, name: src.name })));
+        console.log(
+            "📺 Available screens:",
+            sources.map((src) => ({ id: src.id, name: src.name }))
+        );
 
         if (!selectedScreenId) {
             console.error("❌ No screen has been selected. Defaulting to primary screen.");
@@ -669,13 +675,10 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
                 windows.regionSelection = null;
             }
         });
-
     } catch (error) {
         console.error("❌ Error starting region selection:", error);
     }
 });
-
-
 
 // Update Snipper Settings (Rename & Move)
 ipcMain.on("update-snipper-settings", (event, { oldName, newName, x, y }) => {
@@ -866,3 +869,9 @@ ipcMain.on("restart-app", () => {
     app.relaunch();
     app.exit(0);
 });
+
+// UPDATES
+
+function checkForUpdates() {
+    autoUpdater.checkForUpdatesAndNotify();
+}
