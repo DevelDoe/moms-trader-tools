@@ -839,7 +839,7 @@ app.on("ready", () => {
 
     // Restore Snippers from saved settings
     if (Array.isArray(appSettings.snippers)) {
-        log("🔄 Restoring Snippers from saved regions:", appSettings.snippers);
+        log("Restoring Snippers from saved regions");
 
         desktopCapturer
             .getSources({ types: ["screen"] })
