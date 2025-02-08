@@ -152,6 +152,10 @@
     {
       "text": "Icon",
       "type": "critical"
+    },
+    {
+      "text": "Spash screen with pre release info",
+      "type": "critical"
     }
   ],
   "sessionVolume": 0,
