@@ -144,6 +144,10 @@
     {
       "text": "This is a test note in dev mode",
       "type": "critical"
+    },
+    {
+      "text": "this is in dev mode",
+      "type": "critical"
     }
   ],
   "sessionVolume": 0,
