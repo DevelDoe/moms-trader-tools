@@ -888,4 +888,8 @@ function checkForUpdates() {
             buttons: ["OK"],
         });
     });
+
+    autoUpdater.on("update-not-available", () => {
+        console.log("No update available.");
+    });
 }
