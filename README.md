@@ -14,10 +14,3 @@ Moms Trader Tools is a comprehensive suite designed to enhance the trading exper
 Designed with a minimalistic user interface, Moms Trader Tools ensures that essential features are readily accessible without cluttering your workspace. This approach is beneficial for beginners and more seasoned traders alike, facilitating a smoother learning curve, accelerating progress and optimizing work flow. 
 
 By integrating these tools into your trading routine, you can enhance efficiency, stay organized, and gain a competitive edge in the dynamic world of day trading.
-
-### Developers
-```
-npm i 
-npm run start
-
-```
