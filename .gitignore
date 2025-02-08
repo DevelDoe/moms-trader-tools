@@ -85,4 +85,4 @@ reports/
 !src/**/*.json
 
 # temp files
-dump.*
+dump.* 
