@@ -124,7 +124,7 @@ ipcMain.handle("get-settings", () => {
         appSettings.reminderItems = [];
     }
 
-    log("Returning settings:", appSettings);
+    log("Returning settings");
     return appSettings;
 });
 
