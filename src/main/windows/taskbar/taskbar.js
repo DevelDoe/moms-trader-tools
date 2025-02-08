@@ -19,7 +19,7 @@ function createTaskbarWindow(toggleReminder, toggleSettings) {
 
     taskbarWindow.loadFile(path.join(__dirname, "../../../renderer/taskbar/taskbar.html"));
 
-    // taskbarWindow.webContents.openDevTools({ mode: "detach" });
+    taskbarWindow.webContents.openDevTools({ mode: "detach" });
 
     // IPC Listener for resizing the taskbar
     ipcMain.on("resize-taskbar", (event, width, height) => {
