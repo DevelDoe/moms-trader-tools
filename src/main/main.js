@@ -124,7 +124,7 @@ ipcMain.handle("get-settings", () => {
         appSettings.reminderItems = [];
     }
 
-    console.log("Returning settings:", appSettings);
+    log("Returning settings:", appSettings);
     return appSettings;
 });
 
@@ -137,7 +137,7 @@ ipcMain.on("update-settings", (event, newSettings) => {
 
     // Only send reminder update if `reminderItems` changed
     if (JSON.stringify(appSettings.reminderItems) !== previousReminderItems) {
-        console.log("📌 Reminder items changed, updating reminder window...");
+        log("📌 Reminder items changed, updating reminder window...");
         if (windows.reminder) {
             windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
         }
@@ -145,7 +145,7 @@ ipcMain.on("update-settings", (event, newSettings) => {
 
     // Only send session volume update separately
     if (appSettings.sessionVolume !== previousSessionVolume) {
-        console.log("🔊 Session volume changed, updating session volume...");
+        log("🔊 Session volume changed, updating session volume...");
         Object.values(windows).forEach((window) => {
             if (window && window.webContents) {
                 window.webContents.send("update-session-volume", appSettings.sessionVolume);
@@ -173,7 +173,7 @@ ipcMain.on("toggle-reminder", () => {
             reminderWindow.show();
 
             setTimeout(() => {
-                console.log("Sending reminder settings after opening...");
+                log("Sending reminder settings after opening...");
                 reminderWindow.webContents.send("update-reminder-settings", {
                     reminderTransparent: appSettings.reminderTransparent ?? true, // Default to true
                 });
@@ -183,7 +183,7 @@ ipcMain.on("toggle-reminder", () => {
 });
 
 ipcMain.on("reminder-ready", (event) => {
-    console.log("Reminder window is ready!");
+    log("Reminder window is ready!");
 
     if (windows.reminder) {
         windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
@@ -191,7 +191,7 @@ ipcMain.on("reminder-ready", (event) => {
 });
 
 ipcMain.on("refresh-reminder-window", async () => {
-    console.log("🔄 Refreshing Reminder window due to settings change...");
+    log("🔄 Refreshing Reminder window due to settings change...");
 
     if (windows.reminder) {
         windows.reminder.close(); // Close the old window
@@ -230,14 +230,13 @@ function getLegacyChecklistItems() {
 }
 
 ipcMain.on("reset-to-legacy-checklist", () => {
-    console.log("Resetting checklist to legacy default items...");
+    log("Resetting checklist to legacy default items...");
     appSettings.checklist = getLegacyChecklistItems(); // Replace current checklist
     saveSettings(); // Save to file
     updateChecklistWindows(); // Update all windows
 });
 
 ipcMain.handle("load-checklist-state", () => {
-    // console.log("Checklist state being sent to checklist window:", appSettings.checklist); // Debug log
     return appSettings.checklist;
 });
 
@@ -883,7 +882,7 @@ app.on("window-all-closed", () => {
 });
 
 ipcMain.on("exit-app", () => {
-    console.log("Exiting the app...");
+    log("Exiting the app...");
     app.quit();
 });
 
@@ -898,11 +897,11 @@ function checkForUpdates() {
     autoUpdater.checkForUpdatesAndNotify();
 
     autoUpdater.on("checking-for-update", () => {
-        console.log("Checking for update...");
+        log("Checking for update...");
     });
 
     autoUpdater.on("update-available", (info) => {
-        console.log("Update available:", info);
+        log("Update available:", info);
         dialog.showMessageBox({
             type: "info",
             title: "Update Available",
@@ -912,7 +911,7 @@ function checkForUpdates() {
     });
 
     autoUpdater.on("update-not-available", () => {
-        console.log("No update available.");
+        log("No update available.");
     });
 
     autoUpdater.on("error", (err) => {
@@ -922,7 +921,7 @@ function checkForUpdates() {
     autoUpdater.on("download-progress", (progressObj) => {
         let logMessage = `Download speed: ${progressObj.bytesPerSecond} - `;
         logMessage += `Downloaded ${progressObj.percent}% (${progressObj.transferred} / ${progressObj.total})`;
-        console.log(logMessage);
+        log(logMessage);
     });
 
     autoUpdater.on("update-downloaded", () => {
