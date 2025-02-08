@@ -874,47 +874,53 @@ ipcMain.on("restart-app", () => {
 
 // UPDATES
 
-autoUpdater.checkForUpdatesAndNotify();
+// UPDATES - Only runs in production mode
+if (!isDevelopment) {
+    log.log("Production mode detected, checking for updates...");
+    autoUpdater.checkForUpdatesAndNotify();
 
-autoUpdater.on("checking-for-update", () => {
-    log.log("Checking for update...");
-});
-
-autoUpdater.on("update-available", (info) => {
-    log.log("Update available:", info);
-    dialog.showMessageBox({
-        type: "info",
-        title: "Update Available",
-        message: "A new update is available. Downloading now...",
-        buttons: ["OK"],
+    autoUpdater.on("checking-for-update", () => {
+        log.log("Checking for update...");
     });
-});
 
-autoUpdater.on("update-not-available", () => {
-    log.log("No update available.");
-});
-
-autoUpdater.on("error", (err) => {
-    log.error("Update error:", err);
-});
-
-autoUpdater.on("download-progress", (progressObj) => {
-    let logMessage = `Download speed: ${progressObj.bytesPerSecond} - `;
-    logMessage += `Downloaded ${progressObj.percent}% (${progressObj.transferred} / ${progressObj.total})`;
-    log.log(logMessage);
-});
-
-autoUpdater.on("update-downloaded", () => {
-    dialog
-        .showMessageBox({
+    autoUpdater.on("update-available", (info) => {
+        log.log("Update available:", info);
+        dialog.showMessageBox({
             type: "info",
-            title: "Update Ready",
-            message: "The update has been downloaded. Restart the app to install it?",
-            buttons: ["Restart", "Later"],
-        })
-        .then((result) => {
-            if (result.response === 0) {
-                autoUpdater.quitAndInstall();
-            }
+            title: "Update Available",
+            message: "A new update is available. Downloading now...",
+            buttons: ["OK"],
         });
-});
+    });
+
+    autoUpdater.on("update-not-available", () => {
+        log.log("No update available.");
+    });
+
+    autoUpdater.on("error", (err) => {
+        log.error("Update error:", err);
+    });
+
+    autoUpdater.on("download-progress", (progressObj) => {
+        let logMessage = `Download speed: ${progressObj.bytesPerSecond} - `;
+        logMessage += `Downloaded ${progressObj.percent}% (${progressObj.transferred} / ${progressObj.total})`;
+        log.log(logMessage);
+    });
+
+    autoUpdater.on("update-downloaded", () => {
+        dialog
+            .showMessageBox({
+                type: "info",
+                title: "Update Ready",
+                message: "The update has been downloaded. Restart the app to install it?",
+                buttons: ["Restart", "Later"],
+            })
+            .then((result) => {
+                if (result.response === 0) {
+                    autoUpdater.quitAndInstall();
+                }
+            });
+    });
+} else {
+    log.log("Skipping auto-updates in development mode.");
+}
