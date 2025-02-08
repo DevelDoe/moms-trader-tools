@@ -1,193 +1,193 @@
 {
-    "checklist": [
-      {
-        "text": "Hijacked",
-        "type": "critical",
-        "state": "default"
-      },
-      {
-        "text": "MACD",
-        "type": "critical",
-        "state": "default"
-      },
-      {
-        "text": "Volume",
-        "type": "critical",
-        "state": "default"
-      },
-      {
-        "text": "Extended",
-        "type": "optional",
-        "state": "state-yellow"
-      },
-      {
-        "text": "Candles",
-        "type": "reminder",
-        "state": "default"
-      },
-      {
-        "text": "Spread",
-        "type": "critical",
-        "state": "default"
-      },
-      {
-        "text": "Orders",
-        "type": "reminder",
-        "state": "default"
-      },
-      {
-        "text": "9 ema",
-        "type": "reminder",
-        "state": "default"
-      },
-      {
-        "text": "Time",
-        "type": "reminder",
-        "state": "default"
-      },
-      {
-        "text": "VWAP",
-        "type": "critical",
-        "state": "default"
-      },
-      {
-        "text": "Float",
-        "type": "optional",
-        "state": "state-yellow"
-      },
-      {
-        "text": "Cat",
-        "type": "optional",
-        "state": "state-yellow"
-      }
-    ],
-    "sessionCountdowns": [
-      {
-        "start": "04:00",
-        "end": "09:30",
-        "title": "Pre Market"
-      },
-      {
-        "start": "09:30",
-        "end": "16:00",
-        "title": "Open Market"
-      },
-      {
-        "start": "15:00",
-        "end": "16:00",
-        "title": "Power Hour"
-      },
-      {
-        "start": "16:00",
-        "end": "20:00",
-        "title": "Post Market"
-      },
-      {
-        "start": "07:00",
-        "end": "07:30",
-        "title": "Breaking News A"
-      },
-      {
-        "start": "07:30",
-        "end": "08:00",
-        "title": "Breaking News B"
-      },
-      {
-        "start": "08:00",
-        "end": "08:30",
-        "title": "Breaking News C"
-      },
-      {
-        "start": "08:30",
-        "end": "09:00",
-        "title": "Breaking News D"
-      },
-      {
-        "start": "09:00",
-        "end": "09:30",
-        "title": "Breaking News E"
-      }
-    ],
-    "reminderItems": [
-      {
-        "text": "Thorough Documentation: Ensure all aspects of your project are well-documented, including code comments, user manuals, and technical specifications. This will facilitate future maintenance and provide clarity for end-users.",
-        "type": "optional"
-      },
-      {
-        "text": "Celebrate Achievements: Take the time to acknowledge and celebrate the hard work and dedication that went into the project. Recognizing the team's efforts boosts morale and fosters a positive work environment.",
-        "type": "critical"
-      },
-      {
-        "text": "Se if clock is fixed",
-        "type": "optional"
-      },
-      {
-        "text": "add a tooltip to checklist items.",
-        "type": "reminder"
-      },
-      {
-        "text": "CLOCK YELLOW",
-        "type": "optional"
-      },
-      {
-        "text": "sell cant be yellow....",
-        "type": "critical"
-      },
-      {
-        "text": "CLOCK IS MOVING, FLOAT TO LEFT MAYBE...",
-        "type": "optional"
-      },
-      {
-        "text": "Never take entries, only go on already going stock",
-        "type": "critical"
-      }
-    ],
-    "sessionVolume": 0,
-    "snippers": [
-      {
-        "name": "TAPE",
-        "x": 3281,
-        "y": 1287,
-        "width": 43,
-        "height": 46,
-        "sourceId": "screen:0:0"
-      },
-      {
-        "name": "L2",
-        "x": 1066,
-        "y": 403,
-        "width": 363,
-        "height": 237,
-        "display_id": "1133551107",
-        "sourceId": "screen:1:0"
-      },
-      {
-        "name": "Positions",
-        "x": 1064,
-        "y": 794,
-        "width": 369,
-        "height": 16,
-        "display_id": "1133551107",
-        "sourceId": "screen:1:0"
-      },
-      {
-        "name": "tape",
-        "x": 991,
-        "y": 96,
-        "width": 40,
-        "height": 760,
-        "display_id": "1133551107",
-        "sourceId": "screen:1:0"
-      },
-      {
-        "name": "e",
-        "x": 1103,
-        "y": 195,
-        "width": 308,
-        "height": 16,
-        "display_id": "1133551107",
-        "sourceId": "screen:1:0"
-      }
-    ],
-    "reminderTransparent": true
-  }
+  "checklist": [
+    {
+      "text": "Hijacked",
+      "type": "critical",
+      "state": "default"
+    },
+    {
+      "text": "MACD",
+      "type": "critical",
+      "state": "default"
+    },
+    {
+      "text": "Volume",
+      "type": "critical",
+      "state": "default"
+    },
+    {
+      "text": "Extended",
+      "type": "optional",
+      "state": "state-yellow"
+    },
+    {
+      "text": "Candles",
+      "type": "reminder",
+      "state": "default"
+    },
+    {
+      "text": "Spread",
+      "type": "critical",
+      "state": "default"
+    },
+    {
+      "text": "Orders",
+      "type": "reminder",
+      "state": "default"
+    },
+    {
+      "text": "9 ema",
+      "type": "reminder",
+      "state": "default"
+    },
+    {
+      "text": "Time",
+      "type": "reminder",
+      "state": "default"
+    },
+    {
+      "text": "VWAP",
+      "type": "critical",
+      "state": "default"
+    },
+    {
+      "text": "Float",
+      "type": "optional",
+      "state": "state-yellow"
+    },
+    {
+      "text": "Cat",
+      "type": "optional",
+      "state": "state-yellow"
+    }
+  ],
+  "sessionCountdowns": [
+    {
+      "start": "04:00",
+      "end": "09:30",
+      "title": "Pre Market"
+    },
+    {
+      "start": "09:30",
+      "end": "16:00",
+      "title": "Open Market"
+    },
+    {
+      "start": "15:00",
+      "end": "16:00",
+      "title": "Power Hour"
+    },
+    {
+      "start": "16:00",
+      "end": "20:00",
+      "title": "Post Market"
+    },
+    {
+      "start": "07:00",
+      "end": "07:30",
+      "title": "Breaking News A"
+    },
+    {
+      "start": "07:30",
+      "end": "08:00",
+      "title": "Breaking News B"
+    },
+    {
+      "start": "08:00",
+      "end": "08:30",
+      "title": "Breaking News C"
+    },
+    {
+      "start": "08:30",
+      "end": "09:00",
+      "title": "Breaking News D"
+    },
+    {
+      "start": "09:00",
+      "end": "09:30",
+      "title": "Breaking News E"
+    }
+  ],
+  "reminderItems": [
+    {
+      "text": "Thorough Documentation: Ensure all aspects of your project are well-documented, including code comments, user manuals, and technical specifications. This will facilitate future maintenance and provide clarity for end-users.",
+      "type": "optional"
+    },
+    {
+      "text": "Celebrate Achievements: Take the time to acknowledge and celebrate the hard work and dedication that went into the project. Recognizing the team's efforts boosts morale and fosters a positive work environment.",
+      "type": "critical"
+    },
+    {
+      "text": "Se if clock is fixed",
+      "type": "optional"
+    },
+    {
+      "text": "add a tooltip to checklist items.",
+      "type": "reminder"
+    },
+    {
+      "text": "CLOCK YELLOW",
+      "type": "optional"
+    },
+    {
+      "text": "sell cant be yellow....",
+      "type": "critical"
+    },
+    {
+      "text": "CLOCK IS MOVING, FLOAT TO LEFT MAYBE...",
+      "type": "optional"
+    },
+    {
+      "text": "Never take entries, only go on already going stock",
+      "type": "critical"
+    }
+  ],
+  "sessionVolume": 0,
+  "snippers": [
+    {
+      "name": "TAPE",
+      "x": 3281,
+      "y": 1287,
+      "width": 43,
+      "height": 46,
+      "sourceId": "screen:0:0"
+    },
+    {
+      "name": "L2",
+      "x": 1066,
+      "y": 403,
+      "width": 363,
+      "height": 237,
+      "display_id": "1133551107",
+      "sourceId": "screen:1:0"
+    },
+    {
+      "name": "Positions",
+      "x": 1064,
+      "y": 794,
+      "width": 369,
+      "height": 16,
+      "display_id": "1133551107",
+      "sourceId": "screen:1:0"
+    },
+    {
+      "name": "tape",
+      "x": 991,
+      "y": 96,
+      "width": 40,
+      "height": 760,
+      "display_id": "1133551107",
+      "sourceId": "screen:1:0"
+    },
+    {
+      "name": "e",
+      "x": 1103,
+      "y": 195,
+      "width": 308,
+      "height": 16,
+      "display_id": "1133551107",
+      "sourceId": "screen:1:0"
+    }
+  ],
+  "reminderTransparent": true
+}
