@@ -180,7 +180,7 @@ ipcMain.on("reminder-ready", (event) => {
 });
 
 ipcMain.on("refresh-reminder-window", async () => {
-    log("Refreshing Reminder window due to settings change...");
+    log.log("Refreshing Reminder window due to settings change...");
 
     if (windows.reminder) {
         windows.reminder.close(); // Close the old window
