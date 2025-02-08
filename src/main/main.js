@@ -25,7 +25,7 @@ const isDebug = process.env.DEBUG === "true";
 
 // Use system settings file for production, separate file for development
 const SETTINGS_FILE = isDevelopment
-    ? path.join(__dirname, "../config/settings.dev.json") // Dev settings (inside project)
+    ? path.join(__dirname, "../settings.dev.json") // Dev settings (inside project)
     : path.join(app.getPath("userData"), "settings.json"); // Prod settings (persistent)
 
 
@@ -37,30 +37,38 @@ let appSettings = loadSettings(); // Load app settings from file
 app.commandLine.appendSwitch("disable-gpu-shader-disk-cache");
 app.commandLine.appendSwitch("disable-gpu-process-crash-limit");
 
+// Function to load settings from a file
 function loadSettings() {
     try {
-        if (!fs.existsSync(SETTINGS_FILE)) {
-            log.log(`⚠️ Settings file not found, creating default: ${SETTINGS_FILE}`);
-            const defaultSettings = { checklist: [], sessionCountdowns: [], reminderItems: [] };
-            fs.writeFileSync(SETTINGS_FILE, JSON.stringify(defaultSettings, null, 2));
-        }
-
         const data = fs.readFileSync(SETTINGS_FILE, "utf-8");
         const settings = JSON.parse(data);
 
-        log.log(`✅ Loaded settings from: ${SETTINGS_FILE}`);
+        log.log("Settings loaded", settings);
 
-        // Ensure default structure
+        // Ensure all settings properties exist
         if (!Array.isArray(settings.checklist)) settings.checklist = [];
         if (!Array.isArray(settings.sessionCountdowns)) settings.sessionCountdowns = [];
-        if (!Array.isArray(settings.reminderItems)) settings.reminderItems = [];
+        if (!Array.isArray(settings.reminderItems)) settings.reminderItems = []; // Ensure this exists
+        if (!Array.isArray(settings.snippers)) settings.snippers = [];
+
+        // Remove deprecated 'text' key if present
+        if ("text" in settings) {
+            log.log("Removing deprecated 'text' attribute from settings...");
+            delete settings.text;
+            fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2)); // Save the cleaned settings
+        }
 
         return settings;
     } catch (err) {
-        log.error("❌ Error loading settings:", err);
-        return { checklist: [], sessionCountdowns: [], reminderItems: [] };
+        log.error("log.error loading settings:", err);
+        return {
+            checklist: [],
+            sessionCountdowns: [],
+            reminderItems: [],
+        };
     }
 }
+
 function saveSettings() {
     if (!Array.isArray(appSettings.checklist)) appSettings.checklist = [];
     if (!Array.isArray(appSettings.sessionCountdowns)) appSettings.sessionCountdowns = [];
