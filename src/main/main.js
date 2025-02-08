@@ -896,4 +896,10 @@ function checkForUpdates() {
     autoUpdater.on("error", (err) => {
         console.error("Update error:", err);
     });
+
+    autoUpdater.on("download-progress", (progressObj) => {
+        let logMessage = `Download speed: ${progressObj.bytesPerSecond} - `;
+        logMessage += `Downloaded ${progressObj.percent}% (${progressObj.transferred} / ${progressObj.total})`;
+        console.log(logMessage);
+    });
 }
