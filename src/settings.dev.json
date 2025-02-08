@@ -140,6 +140,10 @@
     {
       "text": "Never take entries, only go on already going stock",
       "type": "critical"
+    },
+    {
+      "text": "This is a test note in dev mode",
+      "type": "critical"
     }
   ],
   "sessionVolume": 0,
