@@ -35,7 +35,7 @@ function loadSettings() {
         const data = fs.readFileSync(SETTINGS_FILE, "utf-8");
         const settings = JSON.parse(data);
 
-        log("Settings loaded");
+        log.log("Settings loaded");
 
         // Ensure all settings properties exist
         if (!Array.isArray(settings.checklist)) settings.checklist = [];
@@ -45,14 +45,14 @@ function loadSettings() {
 
         // Remove deprecated 'text' key if present
         if ("text" in settings) {
-            log("Removing deprecated 'text' attribute from settings...");
+            log.log("Removing deprecated 'text' attribute from settings...");
             delete settings.text;
             fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2)); // Save the cleaned settings
         }
 
         return settings;
     } catch (err) {
-        error("Error loading settings:", err);
+        error.error("error.error loading settings:", err);
         return {
             checklist: [],
             sessionCountdowns: [],
@@ -68,11 +68,11 @@ function saveSettings() {
     if (!Array.isArray(appSettings.snippers)) appSettings.snippers = [];
 
     if ("text" in appSettings) {
-        log("Removing deprecated 'text' from settings...");
+        log.log("Removing deprecated 'text' from settings...");
         delete appSettings.text;
     }
 
-    log("Final settings before writing:");
+    log.log("Final settings before writing:");
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
 }
 
@@ -103,11 +103,11 @@ ipcMain.on("toggle-settings", () => {
 
 ipcMain.handle("get-settings", () => {
     if (!Array.isArray(appSettings.reminderItems)) {
-        error("Fixing reminderItems array issue...");
+        error.error("Fixing reminderItems array issue...");
         appSettings.reminderItems = [];
     }
 
-    log("Returning settings");
+    log.log("Returning settings");
     return appSettings;
 });
 
@@ -120,7 +120,7 @@ ipcMain.on("update-settings", (event, newSettings) => {
 
     // Only send reminder update if `reminderItems` changed
     if (JSON.stringify(appSettings.reminderItems) !== previousReminderItems) {
-        log("📌 Reminder items changed, updating reminder window...");
+        log("Reminder items changed, updating reminder window...");
         if (windows.reminder) {
             windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
         }
@@ -128,7 +128,7 @@ ipcMain.on("update-settings", (event, newSettings) => {
 
     // Only send session volume update separately
     if (appSettings.sessionVolume !== previousSessionVolume) {
-        log("🔊 Session volume changed, updating session volume...");
+        log("Session volume changed, updating session volume...");
         Object.values(windows).forEach((window) => {
             if (window && window.webContents) {
                 window.webContents.send("update-session-volume", appSettings.sessionVolume);
@@ -156,7 +156,7 @@ ipcMain.on("toggle-reminder", () => {
             reminderWindow.show();
 
             setTimeout(() => {
-                log("Sending reminder settings after opening...");
+                log.log("Sending reminder settings after opening...");
                 reminderWindow.webContents.send("update-reminder-settings", {
                     reminderTransparent: appSettings.reminderTransparent ?? true, // Default to true
                 });
@@ -166,7 +166,7 @@ ipcMain.on("toggle-reminder", () => {
 });
 
 ipcMain.on("reminder-ready", (event) => {
-    log("Reminder window is ready!");
+    log.log("Reminder window is ready!");
 
     if (windows.reminder) {
         windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
@@ -174,7 +174,7 @@ ipcMain.on("reminder-ready", (event) => {
 });
 
 ipcMain.on("refresh-reminder-window", async () => {
-    log("🔄 Refreshing Reminder window due to settings change...");
+    log("Refreshing Reminder window due to settings change...");
 
     if (windows.reminder) {
         windows.reminder.close(); // Close the old window
@@ -213,7 +213,7 @@ function getLegacyChecklistItems() {
 }
 
 ipcMain.on("reset-to-legacy-checklist", () => {
-    log("Resetting checklist to legacy default items...");
+    log.log("Resetting checklist to legacy default items...");
     appSettings.checklist = getLegacyChecklistItems(); // Replace current checklist
     saveSettings(); // Save to file
     updateChecklistWindows(); // Update all windows
@@ -231,7 +231,7 @@ ipcMain.on("toggle-checklist-item", (event, { index, newState }) => {
         saveSettings();
         updateChecklistWindows();
     } else {
-        error("Checklist item not found at index:", index);
+        error.error("Checklist item not found at index:", index);
     }
 });
 ipcMain.on("add-checklist-item", (event, item) => {
@@ -239,19 +239,19 @@ ipcMain.on("add-checklist-item", (event, item) => {
         appSettings.checklist = [];
     }
     appSettings.checklist.push(item);
-    log("Checklist item added:", appSettings.checklist); // Debug log
+    log.log("Checklist item added:", appSettings.checklist); 
     saveSettings(appSettings);
     updateChecklistWindows();
 });
 
 ipcMain.on("remove-checklist-item", (event, index) => {
     if (appSettings.checklist[index]) {
-        log("Removing item:", appSettings.checklist[index]); // Debug log
+        log.log("Removing item:", appSettings.checklist[index]); 
         appSettings.checklist.splice(index, 1);
         saveSettings(appSettings);
         updateChecklistWindows();
     } else {
-        error("Item not found at index:", index); // Debug log
+        error.error("Item not found at index:", index); 
     }
 });
 
@@ -274,11 +274,11 @@ function getDefaultChecklistItems() {
 
 function updateChecklistWindows() {
     if (windows.checklist) {
-        log("Updating checklist window with state:", appSettings.checklist);
+        log.log("Updating checklist window with state:", appSettings.checklist);
         windows.checklist.webContents.send("update-checklist", appSettings.checklist);
     }
     if (windows.settings) {
-        log("Updating settings window with state:", appSettings.checklist);
+        log.log("Updating settings window with state:", appSettings.checklist);
         windows.settings.webContents.send("update-checklist", appSettings.checklist);
     }
 }
@@ -315,7 +315,7 @@ ipcMain.on("toggle-countdown", () => {
 });
 
 ipcMain.on("countdown-volume-change", (event, volume) => {
-    log("Received volume change:", volume);
+    log.log("Received volume change:", volume);
     if (windows.countdown) {
         windows.countdown.webContents.send("update-countdown-volume", volume);
     }
@@ -326,7 +326,7 @@ ipcMain.handle("get-tick-sound-path", () => {
 });
 
 ipcMain.on("countdown-volume-change", (event, volume) => {
-    log("Main process received volume change:", volume);
+    log.log("Main process received volume change:", volume);
     // Broadcast the volume update to all renderer processes
     Object.values(windows).forEach((window) => {
         if (window && window.webContents) {
@@ -343,7 +343,7 @@ ipcMain.on("toggle-clock", async () => {
         if (clockWindow.isVisible()) {
             clockWindow.hide();
             // Mute the session bell when clock is closed
-            log("Clock hidden, muting session volume.");
+            log.log("Clock hidden, muting session volume.");
             if (windows.clock) {
                 windows.clock.webContents.send("update-session-volume", 0);
             }
@@ -354,7 +354,7 @@ ipcMain.on("toggle-clock", async () => {
             const settings = await loadSettings(); // Ensure this function is async and correctly loads settings
             const sessionVolume = settings.sessionVolume || 0.1; // Default to 0.1 if missing
 
-            log(`Clock opened, restoring session volume to ${sessionVolume}.`);
+            log.log(`Clock opened, restoring session volume to ${sessionVolume}.`);
             if (windows.clock) {
                 windows.clock.webContents.send("update-session-volume", sessionVolume);
             }
@@ -371,7 +371,7 @@ ipcMain.handle("get-5min-sound-path", () => {
 });
 
 ipcMain.on("session-volume-change", (event, volume) => {
-    log("🔊 Session bell volume changed to:", volume);
+    log("Session bell volume changed to:", volume);
     appSettings.sessionVolume = volume;
     saveSettings(); // Save to settings.json
 
@@ -384,7 +384,7 @@ ipcMain.on("session-volume-change", (event, volume) => {
 });
 
 ipcMain.on("reset-to-default-sessions", () => {
-    log("Resetting session countdowns to default settings...");
+    log.log("Resetting session countdowns to default settings...");
 
     appSettings.sessionCountdowns = [
         { start: "04:00", end: "09:30", title: "Pre Market" },
@@ -400,11 +400,11 @@ ipcMain.on("reset-to-default-sessions", () => {
 
 function updateSessionWindows() {
     if (windows.clock) {
-        log("Updating clock window with session countdowns:", appSettings.sessionCountdowns);
+        log.log("Updating clock window with session countdowns:", appSettings.sessionCountdowns);
         windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
     }
     if (windows.settings) {
-        log("Updating settings window with session countdowns:", appSettings.sessionCountdowns);
+        log.log("Updating settings window with session countdowns:", appSettings.sessionCountdowns);
         windows.settings.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
     }
 }
@@ -426,11 +426,11 @@ ipcMain.handle("get-beep-sound-path", () => {
 
 // Open Snipper Dialog
 ipcMain.on("open-snipper-dialog", (event) => {
-    log("Opening Snipper Dialog...");
+    log.log("Opening Snipper Dialog...");
     const dialogWindow = createSnipperDialogWindow();
 
     ipcMain.once("snipper-name-confirmed", (event, name) => {
-        log(`Snipper name confirmed: ${name}`);
+        log.log(`Snipper name confirmed: ${name}`);
         if (dialogWindow) {
             dialogWindow.close();
         }
@@ -439,31 +439,31 @@ ipcMain.on("open-snipper-dialog", (event) => {
 
 ipcMain.on("screen-selected", (event, sourceId) => {
     if (!sourceId) {
-        error("❌ Invalid screen ID received!");
+        error.error("❌ Invalid screen ID received!");
         return;
     }
-    log(`✅ User selected screen: ${sourceId}`);
+    log.log(`✅ User selected screen: ${sourceId}`);
     selectedScreenId = sourceId; // ✅ Ensure it gets saved
 });
 
 ipcMain.handle("get-screens", async () => {
     try {
-        log("🖥 Fetching available screens...");
+        log.log("🖥 Fetching available screens...");
         const sources = await desktopCapturer.getSources({ types: ["screen"] });
-        log("📺 Available screens:", sources);
+        log.log("📺 Available screens:", sources);
 
         return sources.map((source) => ({
             id: source.id,
             name: source.name || `Screen ${source.id}`,
         }));
     } catch (error) {
-        error("❌ Error fetching screens:", error);
+        error.error("❌ Error fetching screens:", error);
         return [];
     }
 });
 
 ipcMain.handle("get-selected-screen", async () => {
-    log("🔎 Looking for selected screen:", selectedScreenId);
+    log.log("🔎 Looking for selected screen:", selectedScreenId);
 
     if (!selectedScreenId) {
         console.warn("⚠️ No screen has been selected yet. Returning default.");
@@ -471,7 +471,7 @@ ipcMain.handle("get-selected-screen", async () => {
     }
 
     const sources = await desktopCapturer.getSources({ types: ["screen"] });
-    log(
+    log.log(
         "📺 All available sources:",
         sources.map((src) => ({ id: src.id, name: src.name }))
     );
@@ -479,11 +479,11 @@ ipcMain.handle("get-selected-screen", async () => {
     const selectedScreen = sources.find((src) => src.id === selectedScreenId);
 
     if (!selectedScreen) {
-        error("❌ No matching screen found for ID:", selectedScreenId);
+        error.error("❌ No matching screen found for ID:", selectedScreenId);
         return { id: "default", name: "Unknown", display_id: null, bounds: { x: 0, y: 0, width: 1920, height: 1080 } };
     }
 
-    log("✅ Found selected screen:", selectedScreen);
+    log.log("✅ Found selected screen:", selectedScreen);
     return {
         id: selectedScreen.id,
         name: selectedScreen.name,
@@ -493,7 +493,7 @@ ipcMain.handle("get-selected-screen", async () => {
 });
 
 ipcMain.on("snipper-name-confirmed", (event, name) => {
-    log(`✅ Snipper name confirmed: ${name}`);
+    log.log(`✅ Snipper name confirmed: ${name}`);
 
     const senderWindow = BrowserWindow.fromWebContents(event.sender);
     if (senderWindow) senderWindow.close(); // Close the dialog window
@@ -507,7 +507,7 @@ ipcMain.on("snipper-name-confirmed", (event, name) => {
 });
 
 ipcMain.on("snipper-cancelled", (event) => {
-    log("❌ Snipper creation cancelled.");
+    log.log("❌ Snipper creation cancelled.");
 
     const senderWindow = BrowserWindow.fromWebContents(event.sender);
     if (senderWindow) senderWindow.close(); // Close the dialog window
@@ -516,11 +516,11 @@ ipcMain.on("snipper-cancelled", (event) => {
 // Create Snipper Window
 ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
     if (!name || !bounds || !sourceId) {
-        error("❌ Missing required data for creating Snipper window.", { name, bounds, sourceId });
+        error.error("❌ Missing required data for creating Snipper window.", { name, bounds, sourceId });
         return;
     }
 
-    log(`Creating Snipper window`);
+    log.log(`Creating Snipper window`);
 
     if (snipperWindows[name]) {
         console.warn(`⚠️ Snipper "${name}" already exists.`);
@@ -532,12 +532,12 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
     const matchedDisplay = displays.find((d) => d.id === parseInt(bounds.display_id));
 
     if (!matchedDisplay) {
-        error(`❌ No matching display found for screen ID: ${bounds.display_id}`);
+        error.error(`❌ No matching display found for screen ID: ${bounds.display_id}`);
         return;
     }
 
     const { x: screenX, y: screenY } = matchedDisplay.bounds;
-    log(`Snipper should appear at screen `);
+    log.log(`Snipper should appear at screen `);
 
     // Adjust for multi-screen layout
     const snipperWindow = new BrowserWindow({
@@ -557,8 +557,8 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
 
     snipperWindow
         .loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
-        .then(() => log(`✅ Snipper window "${name}" loaded`))
-        .catch((err) => error("❌ Error loading snipper HTML:", err));
+        .then(() => log.log(`✅ Snipper window "${name}" loaded`))
+        .catch((err) => error.error("❌ Error loading snipper HTML:", err));
 
     // ✅ Send the correct `sourceId` to renderer
     snipperWindow.webContents.once("dom-ready", () => {
@@ -568,7 +568,7 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
     snipperWindows[name] = snipperWindow;
 
     snipperWindow.on("closed", () => {
-        log(`❌ Snipper "${name}" closed.`);
+        log.log(`❌ Snipper "${name}" closed.`);
         delete snipperWindows[name];
 
         saveSettings();
@@ -581,7 +581,7 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
 
 // Handle Region Selection
 ipcMain.on("start-region-selection", async (event, snipperName) => {
-    log(`🟢 Starting region selection for Snipper "${snipperName}". Called by:`, event.sender.getURL());
+    log.log(`🟢 Starting region selection for Snipper "${snipperName}". Called by:`, event.sender.getURL());
 
     if (windows.regionSelection) {
         console.warn("⚠️ Region selection is already open. Ignoring duplicate request.");
@@ -591,20 +591,20 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
     try {
         // Fetch selected screen details
         const sources = await desktopCapturer.getSources({ types: ["screen"] });
-        log(
+        log.log(
             "📺 Available screens:",
             sources.map((src) => ({ id: src.id, name: src.name }))
         );
 
         if (!selectedScreenId) {
-            error("❌ No screen has been selected. Defaulting to primary screen.");
+            error.error("❌ No screen has been selected. Defaulting to primary screen.");
             selectedScreenId = sources[0]?.id; // Set to first screen if none selected
         }
 
         const selectedScreen = sources.find((src) => src.id === selectedScreenId);
 
         if (!selectedScreen) {
-            error(`❌ No matching screen found for ID: ${selectedScreenId}`);
+            error.error(`❌ No matching screen found for ID: ${selectedScreenId}`);
             return;
         }
 
@@ -613,12 +613,12 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         const matchedDisplay = displays.find((d) => d.id === parseInt(selectedScreen.display_id));
 
         if (!matchedDisplay) {
-            error(`❌ Could not retrieve display bounds for screen ID: ${selectedScreen.display_id}`);
+            error.error(`❌ Could not retrieve display bounds for screen ID: ${selectedScreen.display_id}`);
             return;
         }
 
         const { x, y, width, height } = matchedDisplay.bounds;
-        log(`🖥 Opening region selection window on: ${selectedScreen.name} at (${x}, ${y}) [${width}x${height}]`);
+        log.log(`🖥 Opening region selection window on: ${selectedScreen.name} at (${x}, ${y}) [${width}x${height}]`);
 
         // Create the region selection window at the correct position
         windows.regionSelection = new BrowserWindow({
@@ -638,23 +638,23 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
         await windows.regionSelection.loadFile(path.join(__dirname, "../renderer/snipper/region.html"));
 
-        log("✅ Region selection window loaded on the correct screen.");
+        log.log("✅ Region selection window loaded on the correct screen.");
 
         windows.regionSelection.webContents.once("dom-ready", () => {
-            log("✅ `region.html` is ready for selection.");
+            log.log("✅ `region.html` is ready for selection.");
         });
 
         ipcMain.removeAllListeners("region-selected");
 
         ipcMain.once("region-selected", async (event, bounds) => {
-            log("✅ Region selected:", bounds);
-            log("🔎 Using selected screen ID:", selectedScreenId);
+            log.log("✅ Region selected:", bounds);
+            log.log("🔎 Using selected screen ID:", selectedScreenId);
 
             try {
                 bounds.sourceId = selectedScreen.id;
                 bounds.display_id = selectedScreen.display_id; // Store display ID
 
-                log(`📌 Saving selected region for "${snipperName}" on screen ${selectedScreen.name}:`, bounds);
+                log.log(`📌 Saving selected region for "${snipperName}" on screen ${selectedScreen.name}:`, bounds);
 
                 appSettings.snippers = appSettings.snippers.filter((snip) => snip.name !== snipperName);
                 appSettings.snippers.push({ name: snipperName, ...bounds });
@@ -663,7 +663,7 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
                 ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds, sourceId: bounds.sourceId });
             } catch (error) {
-                error("⚠️ Error processing region selection:", error);
+                error.error("⚠️ Error processing region selection:", error);
             }
 
             if (windows.regionSelection) {
@@ -673,14 +673,14 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         });
 
         ipcMain.once("close-region-selection", () => {
-            log("🛑 Region selection canceled.");
+            log.log("🛑 Region selection canceled.");
             if (windows.regionSelection) {
                 windows.regionSelection.close();
                 windows.regionSelection = null;
             }
         });
     } catch (error) {
-        error("❌ Error starting region selection:", error);
+        error.error("❌ Error starting region selection:", error);
     }
 });
 
@@ -777,7 +777,7 @@ app.on("ready", () => {
 
     // Ensure the taskbar window is created before passing
     if (!windows.taskbar) {
-        error("Taskbar window could not be created.");
+        error.error("Taskbar window could not be created.");
         return;
     }
 
@@ -822,27 +822,27 @@ app.on("ready", () => {
 
     // Restore Snippers from saved settings
     if (Array.isArray(appSettings.snippers)) {
-        log("Restoring Snippers from saved regions");
+        log.log("Restoring Snippers from saved regions");
 
         desktopCapturer
             .getSources({ types: ["screen"] })
             .then((sources) => {
                 if (sources.length === 0) {
-                    error("❌ No screen sources available for Snipper.");
+                    error.error("❌ No screen sources available for Snipper.");
                     return;
                 }
 
                 appSettings.snippers.forEach((snip) => {
-                    log(`Restoring Snipper with saved region bounds`);
+                    log.log(`Restoring Snipper with saved region bounds`);
 
                     const source = sources.find((src) => snip.sourceId && src.id === snip.sourceId) || sources[0];
 
                     if (!source) {
-                        error(`❌ No matching source found for Snipper: ${snip.name}`);
+                        error.error(`❌ No matching source found for Snipper: ${snip.name}`);
                         return;
                     }
 
-                    log(`Assigning sourceId`);
+                    log.log(`Assigning sourceId`);
 
                     ipcMain.emit("create-snipper-window", null, {
                         name: snip.name,
@@ -852,11 +852,11 @@ app.on("ready", () => {
                 });
             })
             .catch((error) => {
-                error("❌ Error fetching screen sources:", error);
+                error.error("❌ Error fetching screen sources:", error);
             });
     }
 
-    log("Snippers restored from settings");
+    log.log("Snippers restored from settings");
 });
 
 // Quit the app when all windows are closed
@@ -865,7 +865,7 @@ app.on("window-all-closed", () => {
 });
 
 ipcMain.on("exit-app", () => {
-    log("Exiting the app...");
+    log.log("Exiting the app...");
     app.quit();
 });
 
@@ -880,11 +880,11 @@ function checkForUpdates() {
     autoUpdater.checkForUpdatesAndNotify();
 
     autoUpdater.on("checking-for-update", () => {
-        log("Checking for update...");
+        log.log("Checking for update...");
     });
 
     autoUpdater.on("update-available", (info) => {
-        log("Update available:", info);
+        log.log("Update available:", info);
         dialog.showMessageBox({
             type: "info",
             title: "Update Available",
@@ -894,17 +894,17 @@ function checkForUpdates() {
     });
 
     autoUpdater.on("update-not-available", () => {
-        log("No update available.");
+        log.log("No update available.");
     });
 
     autoUpdater.on("error", (err) => {
-        error("Update error:", err);
+        error.error("Update error:", err);
     });
 
     autoUpdater.on("download-progress", (progressObj) => {
         let logMessage = `Download speed: ${progressObj.bytesPerSecond} - `;
         logMessage += `Downloaded ${progressObj.percent}% (${progressObj.transferred} / ${progressObj.total})`;
-        log(logMessage);
+        log.log(logMessage);
     });
 
     autoUpdater.on("update-downloaded", () => {
