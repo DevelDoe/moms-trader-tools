@@ -24,8 +24,8 @@
         "electron-packager": "^17.1.2"
     },
     "build": {
-        "appId": "com.moms.trader.suit",
-        "productName": "Moms Trader Suit",
+        "appId": "com.moms.trader.tools",
+        "productName": "Moms Trader Tools",
         "directories": {
             "output": "dist"
         },
