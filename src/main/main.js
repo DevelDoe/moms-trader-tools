@@ -99,15 +99,15 @@ function saveSettings() {
 ipcMain.on("resize-window-to-content", (event, { width, height }) => {
     const senderWindow = BrowserWindow.fromWebContents(event.sender);
     if (senderWindow) {
-        console.log(`Resizing window to: ${width}x${height}`);
         senderWindow.setBounds({
             x: senderWindow.getBounds().x,
             y: senderWindow.getBounds().y,
-            width: Math.max(width, 1), // Set a minimum width
-            height: Math.max(height, 1), // Set a minimum height
+            width: Math.max(width, 1),
+            height: Math.max(height, 1),
         });
     }
 });
+
 
 // Settings
 
