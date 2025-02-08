@@ -8,15 +8,20 @@ const { createChecklistWindow } = require("./windows/checklist/checklist");
 const { createCountdownWindow } = require("./windows/countdown/countdown");
 const { createClockWindow } = require("./windows/clock/clock");
 const { createResumptionWindow } = require("./windows/resumption/resumption");
-const createLogger = require("../hlps/logger");
+const createLogger = require("../../hlps/logger");
 const { autoUpdater } = require("electron-updater");
+
+autoUpdater.autoDownload = false; // Prevent auto-downloading
+autoUpdater.allowPrerelease = true; // Allow pre-releases (if used)
+autoUpdater.forceDevUpdateConfig = true; // ✅ Force update check in development mod
 
 const path = require("path");
 const fs = require("fs");
 
 const log = createLogger(__filename);
 
-const isDevelopment = false //process.env.NODE_ENV === "development";
+const isDevelopment = process.env.NODE_ENV === "development";
+const isDebug = process.env.DEBUG === "true";
 
 const SETTINGS_FILE = path.join(app.getPath("userData"), "settings.json");
 
@@ -873,53 +878,47 @@ ipcMain.on("restart-app", () => {
 
 // UPDATES
 
-// UPDATES - Only runs in production mode
-if (!isDevelopment) {
-    log.log("Production mode detected, checking for updates...");
-    autoUpdater.checkForUpdatesAndNotify();
+autoUpdater.checkForUpdatesAndNotify();
 
-    autoUpdater.on("checking-for-update", () => {
-        log.log("Checking for update...");
+autoUpdater.on("checking-for-update", () => {
+    log.log("Checking for update...");
+});
+
+autoUpdater.on("update-available", (info) => {
+    log.log("Update available:", info);
+    dialog.showMessageBox({
+        type: "info",
+        title: "Update Available",
+        message: "A new update is available. Downloading now...",
+        buttons: ["OK"],
     });
+});
 
-    autoUpdater.on("update-available", (info) => {
-        log.log("Update available:", info);
-        dialog.showMessageBox({
+autoUpdater.on("update-not-available", () => {
+    log.log("No update available.");
+});
+
+autoUpdater.on("error", (err) => {
+    log.error("Update error:", err);
+});
+
+autoUpdater.on("download-progress", (progressObj) => {
+    let logMessage = `Download speed: ${progressObj.bytesPerSecond} - `;
+    logMessage += `Downloaded ${progressObj.percent}% (${progressObj.transferred} / ${progressObj.total})`;
+    log.log(logMessage);
+});
+
+autoUpdater.on("update-downloaded", () => {
+    dialog
+        .showMessageBox({
             type: "info",
-            title: "Update Available",
-            message: "A new update is available. Downloading now...",
-            buttons: ["OK"],
+            title: "Update Ready",
+            message: "The update has been downloaded. Restart the app to install it?",
+            buttons: ["Restart", "Later"],
+        })
+        .then((result) => {
+            if (result.response === 0) {
+                autoUpdater.quitAndInstall();
+            }
         });
-    });
-
-    autoUpdater.on("update-not-available", () => {
-        log.log("No update available.");
-    });
-
-    autoUpdater.on("error", (err) => {
-        log.error("Update error:", err);
-    });
-
-    autoUpdater.on("download-progress", (progressObj) => {
-        let logMessage = `Download speed: ${progressObj.bytesPerSecond} - `;
-        logMessage += `Downloaded ${progressObj.percent}% (${progressObj.transferred} / ${progressObj.total})`;
-        log.log(logMessage);
-    });
-
-    autoUpdater.on("update-downloaded", () => {
-        dialog
-            .showMessageBox({
-                type: "info",
-                title: "Update Ready",
-                message: "The update has been downloaded. Restart the app to install it?",
-                buttons: ["Restart", "Later"],
-            })
-            .then((result) => {
-                if (result.response === 0) {
-                    autoUpdater.quitAndInstall();
-                }
-            });
-    });
-} else {
-    log.log("Skipping auto-updates in development mode.");
-}
+});
