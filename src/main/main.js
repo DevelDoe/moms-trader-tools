@@ -17,7 +17,6 @@ const fs = require("fs");
 const log = createLogger(__filename);
 
 const isDevelopment = process.env.NODE_ENV === "development";
-const isDebug = process.env.DEBUG === "true";
 
 const SETTINGS_FILE = path.join(app.getPath("userData"), "settings.json");
 
