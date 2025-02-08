@@ -537,7 +537,7 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
         return;
     }
 
-    log(`📸 Creating Snipper window: "${name}" with bounds:`, bounds, "sourceId:", sourceId);
+    log(`Creating Snipper window`);
 
     if (snipperWindows[name]) {
         console.warn(`⚠️ Snipper "${name}" already exists.`);
