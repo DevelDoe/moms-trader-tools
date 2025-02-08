@@ -878,4 +878,14 @@ function checkForUpdates() {
     autoUpdater.on("checking-for-update", () => {
         console.log("Checking for update...");
     });
+
+    autoUpdater.on("update-available", (info) => {
+        console.log("Update available:", info);
+        dialog.showMessageBox({
+            type: "info",
+            title: "Update Available",
+            message: "A new update is available. Downloading now...",
+            buttons: ["OK"],
+        });
+    });
 }
