@@ -97,6 +97,13 @@ function initializeSettings() {
     if (isFirstInstall()) {
         log.log("Fresh install detected! Creating default settings...");
 
+        // Ensure the userData directory exists
+        const settingsDir = path.dirname(SETTINGS_FILE);
+        if (!fs.existsSync(settingsDir)) {
+            log.log(`Creating settings directory: ${settingsDir}`);
+            fs.mkdirSync(settingsDir, { recursive: true }); // ✅ Ensure all parent folders exist
+        }
+
         // Write default settings
         fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2));
 
