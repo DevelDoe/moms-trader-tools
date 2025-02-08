@@ -1,5 +1,5 @@
 const { contextBridge, ipcRenderer, desktopCapturer } = require("electron");
-const createLogger = require("../../hlps/logger");
+const createLogger = require("../hlps/logger");
 
 const log = createLogger(__filename); 
 
