@@ -23,7 +23,11 @@ const log = createLogger(__filename);
 const isDevelopment = process.env.NODE_ENV === "development";
 const isDebug = process.env.DEBUG === "true";
 
-const SETTINGS_FILE = path.join(app.getPath("userData"), "settings.json");
+// Use system settings file for production, separate file for development
+const SETTINGS_FILE = isDevelopment
+    ? path.join(__dirname, "../settings.dev.json") // Dev settings (inside project)
+    : path.join(app.getPath("userData"), "settings.json"); // Prod settings (persistent)
+
 
 let windows = {}; // To store references to all windows
 let snipperWindows = {}; // Store references to dynamically created snipper windows
