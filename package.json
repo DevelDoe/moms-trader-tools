@@ -1,7 +1,7 @@
 {
-    "name": "Moms_Trader_Suit",
-    "version": "0.1.0",
-    "description": "An Electron app with a transparent background displaying specific words.",
+    "name": "Moms_Trader_Tools",
+    "version": "0.9.0",
+    "description": "Moms Trader Tools is a comprehensive suite designed to enhance the trading experience for both novice and experienced day traders. With a focus on efficiency and user-friendliness, this toolset aims to streamline your trading process and provide a competitive edge.",
     "main": "src/main/main.js",
     "scripts": {
         "start": "electron .",
@@ -10,7 +10,7 @@
         "package-mac": "electron-packager . Moms_Trader_Suit --platform=darwin --arch=x64 --out=dist --overwrite",
         "package-linux": "electron-packager . Moms_Trader_Suit --platform=linux --arch=x64 --out=dist --overwrite"
     },
-    "author": "ChatGPT & M Ray",
+    "author": "Morgan A Ray",
     "license": "MIT",
     "dependencies": {
         "chokidar": "^4.0.3",
