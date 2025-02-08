@@ -1,6 +1,6 @@
 // ./src/main/main.js
 
-const { app, ipcMain, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain, desktopCapturer } = require("electron");
 const { createReminderWindow } = require("./windows/reminder/reminder");
 const { createSettingsWindow } = require("./windows/settings/settings");
 const { createTaskbarWindow } = require("./windows/taskbar/taskbar");
@@ -8,7 +8,6 @@ const { createChecklistWindow } = require("./windows/checklist/checklist");
 const { createCountdownWindow } = require("./windows/countdown/countdown");
 const { createClockWindow } = require("./windows/clock/clock");
 const { createResumptionWindow } = require("./windows/resumption/resumption"); // Import
-const { desktopCapturer } = require("electron");
 
 const path = require("path");
 const fs = require("fs");
@@ -17,6 +16,7 @@ const SETTINGS_FILE = path.join(app.getPath("userData"), "settings.json");
 
 let windows = {}; // To store references to all windows
 let snipperWindows = {}; // Store references to dynamically created snipper windows
+let selectedScreenId = null;
 let appSettings = loadSettings(); // Load app settings from file
 
 app.commandLine.appendSwitch("disable-gpu-shader-disk-cache");
@@ -35,7 +35,7 @@ function loadSettings() {
         if (!Array.isArray(settings.sessionCountdowns)) settings.sessionCountdowns = [];
         if (!Array.isArray(settings.reminderItems)) settings.reminderItems = []; // Ensure this exists
         if (!Array.isArray(settings.snippers)) settings.snippers = [];
-
+        
         // Remove deprecated 'text' key if present
         if ("text" in settings) {
             console.log("Removing deprecated 'text' attribute from settings...");
@@ -141,22 +141,6 @@ ipcMain.on("update-settings", (event, newSettings) => {
 
 // reminder
 
-// ipcMain.on("toggle-reminder", () => {
-//     const reminderWindow = windows.reminder;
-//     if (reminderWindow) {
-//         if (reminderWindow.isVisible()) {
-//             reminderWindow.hide();
-//         } else {
-//             reminderWindow.show();
-
-//             setTimeout(() => {
-//                 console.log("Sending reminder items after opening...");
-//                 reminderWindow.webContents.send("update-reminder-items", appSettings.reminderItems);
-//             }, 10); // ✅ Give time for UI to load first
-//         }
-//     }
-// });
-
 ipcMain.on("toggle-reminder", () => {
     let reminderWindow = windows.reminder;
 
@@ -175,7 +159,6 @@ ipcMain.on("toggle-reminder", () => {
         }
     }
 });
-
 
 ipcMain.on("reminder-ready", (event) => {
     console.log("Reminder window is ready!");
@@ -396,19 +379,6 @@ ipcMain.on("session-volume-change", (event, volume) => {
     });
 });
 
-// ipcMain.on("session-5min-warrning-volume-change", (event, volume) => {
-//     console.log("🔊 Session 5 min warrning volume changed to:", volume);
-//     appSettings.5minVolume = volume;
-//     saveSettings(); // Save to settings.json
-
-//     // Broadcast the updated volume to all windows
-//     Object.values(windows).forEach((window) => {
-//         if (window && window.webContents) {
-//             window.webContents.send("update-5min-volume", volume);
-//         }
-//     });
-// });
-
 ipcMain.on("reset-to-default-sessions", () => {
     console.log("Resetting session countdowns to default settings...");
 
@@ -448,6 +418,8 @@ ipcMain.handle("get-beep-sound-path", () => {
     return path.join(app.getAppPath(), "assets/sounds/beep.mp3");
 });
 
+// Snipper
+
 // Open Snipper Dialog
 ipcMain.on("open-snipper-dialog", (event) => {
     console.log("Opening Snipper Dialog...");
@@ -459,6 +431,58 @@ ipcMain.on("open-snipper-dialog", (event) => {
             dialogWindow.close();
         }
     });
+});
+
+ipcMain.on("screen-selected", (event, sourceId) => {
+    if (!sourceId) {
+        console.error("❌ Invalid screen ID received!");
+        return;
+    }
+    console.log(`✅ User selected screen: ${sourceId}`);
+    selectedScreenId = sourceId; // ✅ Ensure it gets saved
+});
+
+ipcMain.handle("get-screens", async () => {
+    try {
+        console.log("🖥 Fetching available screens...");
+        const sources = await desktopCapturer.getSources({ types: ["screen"] });
+        console.log("📺 Available screens:", sources);
+
+        return sources.map((source) => ({
+            id: source.id,
+            name: source.name || `Screen ${source.id}`,
+        }));
+    } catch (error) {
+        console.error("❌ Error fetching screens:", error);
+        return [];
+    }
+});
+
+ipcMain.handle("get-selected-screen", async () => {
+    console.log("🔎 Looking for selected screen:", selectedScreenId);
+    
+    if (!selectedScreenId) {
+        console.warn("⚠️ No screen has been selected yet. Returning default.");
+        return { id: "default", name: "Unknown", display_id: null, bounds: { x: 0, y: 0, width: 1920, height: 1080 } };
+    }
+
+    const sources = await desktopCapturer.getSources({ types: ["screen"] });
+    console.log("📺 All available sources:", sources.map(src => ({ id: src.id, name: src.name })));
+
+    const selectedScreen = sources.find((src) => src.id === selectedScreenId);
+
+    if (!selectedScreen) {
+        console.error("❌ No matching screen found for ID:", selectedScreenId);
+        return { id: "default", name: "Unknown", display_id: null, bounds: { x: 0, y: 0, width: 1920, height: 1080 } };
+    }
+
+    console.log("✅ Found selected screen:", selectedScreen);
+    return {
+        id: selectedScreen.id,
+        name: selectedScreen.name,
+        display_id: selectedScreen.display_id,
+        bounds: selectedScreen.bounds || { x: 0, y: 0, width: 1920, height: 1080 }
+    };
 });
 
 ipcMain.on("snipper-name-confirmed", (event, name) => {
@@ -474,7 +498,6 @@ ipcMain.on("snipper-name-confirmed", (event, name) => {
         console.warn("⚠️ Region selection is already open, ignoring duplicate request.");
     }
 });
-
 
 ipcMain.on("snipper-cancelled", (event) => {
     console.log("❌ Snipper creation cancelled.");
@@ -497,12 +520,28 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
         return;
     }
 
+    // Get correct screen bounds from Electron's screen API
+    const displays = require("electron").screen.getAllDisplays();
+    const matchedDisplay = displays.find((d) => d.id === parseInt(bounds.display_id));
+
+    if (!matchedDisplay) {
+        console.error(`❌ No matching display found for screen ID: ${bounds.display_id}`);
+        return;
+    }
+
+    const { x: screenX, y: screenY } = matchedDisplay.bounds;
+    console.log(`🖥 Snipper should appear at screen (${screenX}, ${screenY})`);
+
+    // Adjust for multi-screen layout
     const snipperWindow = new BrowserWindow({
+        x: screenX + bounds.x ,  // Ensure it appears on the right screen
+        y: screenY + bounds.y ,
         width: bounds.width,
         height: bounds.height,
         transparent: true,
         frame: false,
         alwaysOnTop: true,
+        resizable: false,
         webPreferences: {
             preload: path.join(__dirname, "../renderer/common/preload.js"),
             contextIsolation: true,
@@ -533,85 +572,110 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
     sendSnipperUpdates();
 });
 
-
 // Handle Region Selection
 ipcMain.on("start-region-selection", async (event, snipperName) => {
     console.log(`🟢 Starting region selection for Snipper "${snipperName}". Called by:`, event.sender.getURL());
 
-    // 🚨 Prevent multiple region selection windows from opening
     if (windows.regionSelection) {
         console.warn("⚠️ Region selection is already open. Ignoring duplicate request.");
         return;
     }
 
+    try {
+        // Fetch selected screen details
+        const sources = await desktopCapturer.getSources({ types: ["screen"] });
+        console.log("📺 Available screens:", sources.map(src => ({ id: src.id, name: src.name })));
 
-    windows.regionSelection = new BrowserWindow({
-        fullscreen: true,
-        transparent: true,
-        frame: false,
-        alwaysOnTop: true,
-        webPreferences: {
-            contextIsolation: true,
-            preload: path.join(__dirname, "../renderer/common/preload.js"),
-        },
-    });
+        if (!selectedScreenId) {
+            console.error("❌ No screen has been selected. Defaulting to primary screen.");
+            selectedScreenId = sources[0]?.id; // Set to first screen if none selected
+        }
 
-    await windows.regionSelection.loadFile(path.join(__dirname, "../renderer/snipper/region.html"));
+        const selectedScreen = sources.find((src) => src.id === selectedScreenId);
 
-    console.log("✅ Region selection window loaded.");
+        if (!selectedScreen) {
+            console.error(`❌ No matching screen found for ID: ${selectedScreenId}`);
+            return;
+        }
 
-    windows.regionSelection.webContents.once("dom-ready", () => {
-        console.log("✅ region.html is ready for selection.");
-    });
+        // Electron does not provide bounds from `desktopCapturer`, so get it another way
+        const displays = require("electron").screen.getAllDisplays();
+        const matchedDisplay = displays.find((d) => d.id === parseInt(selectedScreen.display_id));
 
-    ipcMain.removeAllListeners("region-selected");
+        if (!matchedDisplay) {
+            console.error(`❌ Could not retrieve display bounds for screen ID: ${selectedScreen.display_id}`);
+            return;
+        }
 
-    ipcMain.once("region-selected", async (event, bounds) => {
-        console.log("✅ Region selected:", bounds);
+        const { x, y, width, height } = matchedDisplay.bounds;
+        console.log(`🖥 Opening region selection window on: ${selectedScreen.name} at (${x}, ${y}) [${width}x${height}]`);
 
-        try {
-            const sources = await desktopCapturer.getSources({ types: ["screen"] });
+        // Create the region selection window at the correct position
+        windows.regionSelection = new BrowserWindow({
+            x: x,
+            y: y,
+            width: width,
+            height: height,
+            transparent: true,
+            frame: false,
+            alwaysOnTop: true,
+            fullscreen: true, // ✅ Takes full screen on the selected monitor
+            webPreferences: {
+                contextIsolation: true,
+                preload: path.join(__dirname, "../renderer/common/preload.js"),
+            },
+        });
 
-            if (sources.length === 0) {
-                console.error("❌ No screen sources found.");
-                return;
+        await windows.regionSelection.loadFile(path.join(__dirname, "../renderer/snipper/region.html"));
+
+        console.log("✅ Region selection window loaded on the correct screen.");
+
+        windows.regionSelection.webContents.once("dom-ready", () => {
+            console.log("✅ `region.html` is ready for selection.");
+        });
+
+        ipcMain.removeAllListeners("region-selected");
+
+        ipcMain.once("region-selected", async (event, bounds) => {
+            console.log("✅ Region selected:", bounds);
+            console.log("🔎 Using selected screen ID:", selectedScreenId);
+
+            try {
+                bounds.sourceId = selectedScreen.id;
+                bounds.display_id = selectedScreen.display_id; // Store display ID
+
+                console.log(`📌 Saving selected region for "${snipperName}" on screen ${selectedScreen.name}:`, bounds);
+
+                appSettings.snippers = appSettings.snippers.filter((snip) => snip.name !== snipperName);
+                appSettings.snippers.push({ name: snipperName, ...bounds });
+
+                saveSettings();
+
+                ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds, sourceId: bounds.sourceId });
+            } catch (error) {
+                console.error("⚠️ Error processing region selection:", error);
             }
 
-            const source = sources.find((src) => bounds.display_id && src.id.includes(bounds.display_id)) || sources[0];
-
-            if (!source) {
-                console.error("❌ No matching snipper source found.");
-                return;
+            if (windows.regionSelection) {
+                windows.regionSelection.close();
+                windows.regionSelection = null;
             }
+        });
 
-            bounds.sourceId = source.id;
+        ipcMain.once("close-region-selection", () => {
+            console.log("🛑 Region selection canceled.");
+            if (windows.regionSelection) {
+                windows.regionSelection.close();
+                windows.regionSelection = null;
+            }
+        });
 
-            console.log(`📌 Saving selected region for "${snipperName}":`, bounds);
-
-            appSettings.snippers = appSettings.snippers.filter((snip) => snip.name !== snipperName);
-            appSettings.snippers.push({ name: snipperName, ...bounds });
-
-            saveSettings();
-
-            ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds, sourceId: bounds.sourceId });
-        } catch (error) {
-            console.error("⚠️ Error processing region selection:", error);
-        }
-
-        if (windows.regionSelection) {
-            windows.regionSelection.close();
-            windows.regionSelection = null; // ✅ Clear reference after closing
-        }
-    });
-
-    ipcMain.once("close-region-selection", () => {
-        console.log("🛑 Region selection canceled.");
-        if (windows.regionSelection) {
-            windows.regionSelection.close();
-            windows.regionSelection = null;
-        }
-    });
+    } catch (error) {
+        console.error("❌ Error starting region selection:", error);
+    }
 });
+
+
 
 // Update Snipper Settings (Rename & Move)
 ipcMain.on("update-snipper-settings", (event, { oldName, newName, x, y }) => {
@@ -673,11 +737,11 @@ function sendSnipperUpdates() {
 // Create Snipper Dialog Window
 function createSnipperDialogWindow() {
     const dialogWindow = new BrowserWindow({
-        width: 130,
-        height: 100,
+        width: 230,
+        height: 300,
         frame: false,
         alwaysOnTop: true,
-        resizable: false,
+        resizable: true,
         transparent: true,
         webPreferences: {
             preload: path.join(__dirname, "../renderer/common/preload.js"),
@@ -687,7 +751,7 @@ function createSnipperDialogWindow() {
 
     dialogWindow.loadFile(path.join(__dirname, "../renderer/snipper/dialog.html"));
 
-    // dialogWindow.webContents.openDevTools({ mode: "detach" });
+    dialogWindow.webContents.openDevTools({ mode: "detach" });
 
     return dialogWindow;
 }

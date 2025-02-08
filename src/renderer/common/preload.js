@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer, desktopCapturer } = require("electron");
 
 console.log("Preload script loaded");
 
@@ -63,6 +63,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     confirmSnipperName: (name) => ipcRenderer.send("snipper-name-confirmed", name),
     cancelSnipper: () => ipcRenderer.send("snipper-cancelled"),
     getSnipperBounds: () => ipcRenderer.invoke("get-snipper-bounds"),
+    getScreens: () => ipcRenderer.invoke("get-screens"),
+    selectScreen: (sourceId) => ipcRenderer.send("screen-selected", sourceId),
+
 
     // ❌ Exit and Restart
     exitApp: () => ipcRenderer.send("exit-app"),
@@ -74,14 +77,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
 // 🖼️ Region Selection API
 contextBridge.exposeInMainWorld("regionAPI", {
-    send: (channel, data) => {
-        const validChannels = ["region-selected", "close-region-selection"];
-        if (validChannels.includes(channel)) ipcRenderer.send(channel, data);
-    },
-    on: (channel, callback) => {
-        const validChannels = ["region-selected"];
-        if (validChannels.includes(channel)) ipcRenderer.on(channel, (_, ...args) => callback(...args));
-    },
+    send: (channel, data) => ipcRenderer.send(channel, data),
+    getSelectedScreen: async () => {
+        const selectedScreen = await ipcRenderer.invoke("get-selected-screen");
+        console.log("📡 Selected screen:", selectedScreen);
+        return selectedScreen;
+    }
 });
 
 // 📸 Snipper Capture API

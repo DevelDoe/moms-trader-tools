@@ -21,7 +21,8 @@
                 height: 40px;
             }
             input,
-            button {
+            button,
+            select {
                 padding: 10px;
                 margin: 8px;
                 font-size: 16px;
@@ -50,7 +51,8 @@
                 background: #777;
             }
             button:focus,
-            input:focus {
+            input:focus,
+            select:focus {
                 outline: 1px solid #ff9800;
             }
         </style>
@@ -58,7 +60,58 @@
     <body>
         <input type="text" id="snipper-name" placeholder="Snipper Name" autofocus />
         <button id="confirm-btn">Continue</button>
-        <!-- <button id="cancel-btn">Cancel</button> -->
+
+        <h2>Select a Screen</h2>
+        <select id="screen-select"></select>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", async () => {
+                const screenSelect = document.getElementById("screen-select");
+
+                try {
+                    console.log("🖥 Fetching screens from Electron...");
+                    const screens = await window.electronAPI.getScreens();
+
+                    if (screens.length === 0) {
+                        console.error("❌ No screens detected!");
+                        screenSelect.innerHTML = `<option value="">⚠️ No screens found</option>`;
+                        return;
+                    }
+
+                    // Populate the select dropdown
+                    screens.forEach((screen, index) => {
+                        const option = document.createElement("option");
+                        option.value = screen.id;
+                        option.textContent = screen.name;
+                        screenSelect.appendChild(option);
+                    });
+
+                    // ✅ Default to the first screen
+                    const defaultScreen = screens[0]?.id || null;
+                    if (defaultScreen) {
+                        screenSelect.value = defaultScreen;
+                        console.log(`✅ Default selected screen: ${defaultScreen}`);
+                        window.electronAPI.selectScreen(defaultScreen);
+                    }
+
+                    console.log("✅ Screens loaded:", screens);
+                } catch (error) {
+                    console.error("❌ Error loading screens:", error);
+                    screenSelect.innerHTML = `<option value="">⚠️ Error loading screens</option>`;
+                }
+
+                // 🚀 Automatically detect selection changes
+                screenSelect.addEventListener("change", (event) => {
+                    const selectedScreen = event.target.value;
+                    if (!selectedScreen) {
+                        console.error("❌ No screen selected.");
+                        return;
+                    }
+                    console.log(`✅ Auto-updating selected screen: ${selectedScreen}`);
+                    window.electronAPI.selectScreen(selectedScreen);
+                });
+            });
+        </script>
 
         <script>
             document.addEventListener("DOMContentLoaded", () => {
@@ -69,14 +122,8 @@
 
                 const inputField = document.getElementById("snipper-name");
                 const confirmBtn = document.getElementById("confirm-btn");
-                // const cancelBtn = document.getElementById("cancel-btn");
 
-                // if (!inputField || !confirmBtn || !cancelBtn) {
-                //     console.error("❌ Missing elements in dialog.html. Check element IDs.");
-                //     return;
-                // }
-
-                if (!inputField || !confirmBtn ) {
+                if (!inputField || !confirmBtn) {
                     console.error("❌ Missing elements in dialog.html. Check element IDs.");
                     return;
                 }
@@ -101,11 +148,6 @@
 
                 // Add event listeners (ensure they aren't duplicated)
                 confirmBtn.addEventListener("click", confirmSnipper);
-                // cancelBtn.addEventListener("click", () => {
-                //     console.log("❌ Snipper creation cancelled.");
-                //     window.electronAPI.send("snipper-cancelled");
-                //     setTimeout(() => window.close(), 150);
-                // });
 
                 inputField.addEventListener("keydown", (event) => {
                     if (event.key === "Enter") {
