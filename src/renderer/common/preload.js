@@ -76,6 +76,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     // 📏 Window Resizing
     resizeWindowToContent: (width, height) => ipcRenderer.send("resize-window-to-content", { width, height }),
+    
 });
 
 // 🖼️ Region Selection API
