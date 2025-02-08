@@ -47,8 +47,8 @@
         },
         "publish": {
             "provider": "github",
-            "owner": "your-github-username",
-            "repo": "your-repository-name"
+            "owner": "DevelDoe",
+            "repo": "moms-trader-tools"
         }
     }
 }
