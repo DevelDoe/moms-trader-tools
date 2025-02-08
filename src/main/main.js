@@ -89,7 +89,7 @@ function saveSettings() {
         delete appSettings.text;
     }
 
-    log("✅ Final settings before writing:", JSON.stringify(appSettings, null, 2));
+    log("Final settings before writing:");
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
 }
 
