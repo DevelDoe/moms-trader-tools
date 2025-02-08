@@ -120,7 +120,7 @@ ipcMain.on("toggle-settings", () => {
 
 ipcMain.handle("get-settings", () => {
     if (!Array.isArray(appSettings.reminderItems)) {
-        console.error("Fixing reminderItems array issue...");
+        error("Fixing reminderItems array issue...");
         appSettings.reminderItems = [];
     }
 
@@ -248,7 +248,7 @@ ipcMain.on("toggle-checklist-item", (event, { index, newState }) => {
         saveSettings();
         updateChecklistWindows();
     } else {
-        console.error("Checklist item not found at index:", index);
+        error("Checklist item not found at index:", index);
     }
 });
 ipcMain.on("add-checklist-item", (event, item) => {
@@ -268,7 +268,7 @@ ipcMain.on("remove-checklist-item", (event, index) => {
         saveSettings(appSettings);
         updateChecklistWindows();
     } else {
-        console.error("Item not found at index:", index); // Debug log
+        error("Item not found at index:", index); // Debug log
     }
 });
 
@@ -456,7 +456,7 @@ ipcMain.on("open-snipper-dialog", (event) => {
 
 ipcMain.on("screen-selected", (event, sourceId) => {
     if (!sourceId) {
-        console.error("❌ Invalid screen ID received!");
+        error("❌ Invalid screen ID received!");
         return;
     }
     log(`✅ User selected screen: ${sourceId}`);
@@ -474,7 +474,7 @@ ipcMain.handle("get-screens", async () => {
             name: source.name || `Screen ${source.id}`,
         }));
     } catch (error) {
-        console.error("❌ Error fetching screens:", error);
+        error("❌ Error fetching screens:", error);
         return [];
     }
 });
@@ -496,7 +496,7 @@ ipcMain.handle("get-selected-screen", async () => {
     const selectedScreen = sources.find((src) => src.id === selectedScreenId);
 
     if (!selectedScreen) {
-        console.error("❌ No matching screen found for ID:", selectedScreenId);
+        error("❌ No matching screen found for ID:", selectedScreenId);
         return { id: "default", name: "Unknown", display_id: null, bounds: { x: 0, y: 0, width: 1920, height: 1080 } };
     }
 
@@ -533,7 +533,7 @@ ipcMain.on("snipper-cancelled", (event) => {
 // Create Snipper Window
 ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
     if (!name || !bounds || !sourceId) {
-        console.error("❌ Missing required data for creating Snipper window.", { name, bounds, sourceId });
+        error("❌ Missing required data for creating Snipper window.", { name, bounds, sourceId });
         return;
     }
 
@@ -549,7 +549,7 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
     const matchedDisplay = displays.find((d) => d.id === parseInt(bounds.display_id));
 
     if (!matchedDisplay) {
-        console.error(`❌ No matching display found for screen ID: ${bounds.display_id}`);
+        error(`❌ No matching display found for screen ID: ${bounds.display_id}`);
         return;
     }
 
@@ -575,7 +575,7 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
     snipperWindow
         .loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
         .then(() => log(`✅ Snipper window "${name}" loaded`))
-        .catch((err) => console.error("❌ Error loading snipper HTML:", err));
+        .catch((err) => error("❌ Error loading snipper HTML:", err));
 
     // ✅ Send the correct `sourceId` to renderer
     snipperWindow.webContents.once("dom-ready", () => {
@@ -614,14 +614,14 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         );
 
         if (!selectedScreenId) {
-            console.error("❌ No screen has been selected. Defaulting to primary screen.");
+            error("❌ No screen has been selected. Defaulting to primary screen.");
             selectedScreenId = sources[0]?.id; // Set to first screen if none selected
         }
 
         const selectedScreen = sources.find((src) => src.id === selectedScreenId);
 
         if (!selectedScreen) {
-            console.error(`❌ No matching screen found for ID: ${selectedScreenId}`);
+            error(`❌ No matching screen found for ID: ${selectedScreenId}`);
             return;
         }
 
@@ -630,7 +630,7 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         const matchedDisplay = displays.find((d) => d.id === parseInt(selectedScreen.display_id));
 
         if (!matchedDisplay) {
-            console.error(`❌ Could not retrieve display bounds for screen ID: ${selectedScreen.display_id}`);
+            error(`❌ Could not retrieve display bounds for screen ID: ${selectedScreen.display_id}`);
             return;
         }
 
@@ -680,7 +680,7 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
                 ipcMain.emit("create-snipper-window", event, { name: snipperName, bounds, sourceId: bounds.sourceId });
             } catch (error) {
-                console.error("⚠️ Error processing region selection:", error);
+                error("⚠️ Error processing region selection:", error);
             }
 
             if (windows.regionSelection) {
@@ -697,7 +697,7 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
             }
         });
     } catch (error) {
-        console.error("❌ Error starting region selection:", error);
+        error("❌ Error starting region selection:", error);
     }
 });
 
@@ -794,7 +794,7 @@ app.on("ready", () => {
 
     // Ensure the taskbar window is created before passing
     if (!windows.taskbar) {
-        console.error("Taskbar window could not be created.");
+        error("Taskbar window could not be created.");
         return;
     }
 
@@ -845,7 +845,7 @@ app.on("ready", () => {
             .getSources({ types: ["screen"] })
             .then((sources) => {
                 if (sources.length === 0) {
-                    console.error("❌ No screen sources available for Snipper.");
+                    error("❌ No screen sources available for Snipper.");
                     return;
                 }
 
@@ -855,7 +855,7 @@ app.on("ready", () => {
                     const source = sources.find((src) => snip.sourceId && src.id === snip.sourceId) || sources[0];
 
                     if (!source) {
-                        console.error(`❌ No matching source found for Snipper: ${snip.name}`);
+                        error(`❌ No matching source found for Snipper: ${snip.name}`);
                         return;
                     }
 
@@ -869,7 +869,7 @@ app.on("ready", () => {
                 });
             })
             .catch((error) => {
-                console.error("❌ Error fetching screen sources:", error);
+                error("❌ Error fetching screen sources:", error);
             });
     }
 
@@ -915,7 +915,7 @@ function checkForUpdates() {
     });
 
     autoUpdater.on("error", (err) => {
-        console.error("Update error:", err);
+        error("Update error:", err);
     });
 
     autoUpdater.on("download-progress", (progressObj) => {
