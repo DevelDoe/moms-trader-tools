@@ -16,6 +16,11 @@ const fs = require("fs");
 
 const log = createLogger(__filename);
 
+autoUpdater.autoDownload = false; // Prevent auto-downloading
+autoUpdater.allowPrerelease = true; // Allow pre-releases (if used)
+autoUpdater.forceDevUpdateConfig = true; // ✅ Force update check in development mod
+autoUpdater.allowPrerelease = true;
+
 const isDevelopment = process.env.NODE_ENV === "development";
 const isDebug = process.env.DEBUG === "true";
 
@@ -970,7 +975,7 @@ ipcMain.on("restart-app", () => {
 });
 
 // UPDATES - Only runs in production mode
-if (!isDevelopment) {
+if (isDevelopment) {
     log.log("Production mode detected, checking for updates...");
     autoUpdater.checkForUpdatesAndNotify();
 
