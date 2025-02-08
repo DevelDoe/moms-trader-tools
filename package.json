@@ -8,7 +8,8 @@
         "package": "electron-packager . Moms_Trader_Suit --platform=win32 --arch=x64 --out=dist --overwrite",
         "package-all": "electron-packager . Moms_Trader_Suit --all --out=dist --overwrite",
         "package-mac": "electron-packager . Moms_Trader_Suit --platform=darwin --arch=x64 --out=dist --overwrite",
-        "package-linux": "electron-packager . Moms_Trader_Suit --platform=linux --arch=x64 --out=dist --overwrite"
+        "package-linux": "electron-packager . Moms_Trader_Suit --platform=linux --arch=x64 --out=dist --overwrite",
+        "publish": "electron-builder -p always"
     },
     "author": "Morgan A Ray",
     "license": "MIT",
@@ -19,12 +20,35 @@
     },
     "devDependencies": {
         "electron": "^26.1.0",
+        "electron-builder": "^23.6.0",  
         "electron-packager": "^17.1.2"
     },
     "build": {
+        "appId": "com.moms.trader.suit",
+        "productName": "Moms Trader Suit",
+        "directories": {
+            "output": "dist"
+        },
         "files": [
             "src/**/*",
             "assets/**/*"
-        ]
+        ],
+        "win": {
+            "target": "nsis",
+            "icon": "assets/icon.ico"
+        },
+        "mac": {
+            "target": "dmg",
+            "icon": "assets/icon.icns"
+        },
+        "linux": {
+            "target": "AppImage",
+            "icon": "assets/icon.png"
+        },
+        "publish": {
+            "provider": "github",
+            "owner": "your-github-username",
+            "repo": "your-repository-name"
+        }
     }
 }
