@@ -1,6 +1,9 @@
 const { contextBridge, ipcRenderer, desktopCapturer } = require("electron");
+const createLogger = require("../../hlps/logger");
 
-console.log("Preload script loaded");
+const log = createLogger(__filename); 
+
+log.log("Preload script loaded");
 
 contextBridge.exposeInMainWorld("electronAPI", {
     send: (channel, data) => {
@@ -80,7 +83,7 @@ contextBridge.exposeInMainWorld("regionAPI", {
     send: (channel, data) => ipcRenderer.send(channel, data),
     getSelectedScreen: async () => {
         const selectedScreen = await ipcRenderer.invoke("get-selected-screen");
-        console.log("📡 Selected screen:", selectedScreen);
+        log.log("Selected screen:", selectedScreen);
         return selectedScreen;
     }
 });
