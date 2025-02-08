@@ -859,7 +859,7 @@ app.on("ready", () => {
                         return;
                     }
 
-                    log(`📸 Assigning sourceId: ${source.id} to Snipper: ${snip.name}`);
+                    log(`Assigning sourceId`);
 
                     ipcMain.emit("create-snipper-window", null, {
                         name: snip.name,
