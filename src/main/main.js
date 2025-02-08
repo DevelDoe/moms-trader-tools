@@ -52,7 +52,7 @@ function loadSettings() {
         const data = fs.readFileSync(SETTINGS_FILE, "utf-8");
         const settings = JSON.parse(data);
 
-        console.log("Loaded settings on boot:", settings);
+        log("Loaded settings on boot:", settings);
 
         // Ensure all settings properties exist
         if (!Array.isArray(settings.checklist)) settings.checklist = [];
@@ -62,18 +62,18 @@ function loadSettings() {
 
         // Remove deprecated 'text' key if present
         if ("text" in settings) {
-            console.log("Removing deprecated 'text' attribute from settings...");
+            log("Removing deprecated 'text' attribute from settings...");
             delete settings.text;
             fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2)); // Save the cleaned settings
         }
 
         return settings;
-    } catch (error) {
-        console.error("Error loading settings:", error);
+    } catch (err) {
+        error("Error loading settings:", err);
         return {
             checklist: [],
             sessionCountdowns: [],
-            reminderItems: [], // Initialize as an empty list
+            reminderItems: [],
         };
     }
 }
