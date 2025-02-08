@@ -93,27 +93,26 @@ function isFirstInstall() {
 }
 
 // 🛠️ **Function to initialize settings**
-function initializeSettings() {
-    if (isFirstInstall()) {
-        log.log("Fresh install detected! Creating default settings...");
 
-        // Ensure the userData directory exists
-        const settingsDir = path.dirname(SETTINGS_FILE);
-        if (!fs.existsSync(settingsDir)) {
-            log.log(`Creating settings directory: ${settingsDir}`);
-            fs.mkdirSync(settingsDir, { recursive: true }); // ✅ Ensure all parent folders exist
-        }
+if (isFirstInstall()) {
+    log.log("Fresh install detected! Creating default settings...");
 
-        // Write default settings
-        fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2));
-
-        // Create marker file to prevent future resets
-        fs.writeFileSync(FIRST_RUN_FILE, "installed");
-
-        log.log("Settings file initialized:", SETTINGS_FILE);
-    } else {
-        log.log("App has been installed before. Keeping existing settings.");
+    // Ensure the userData directory exists
+    const settingsDir = path.dirname(SETTINGS_FILE);
+    if (!fs.existsSync(settingsDir)) {
+        log.log(`Creating settings directory: ${settingsDir}`);
+        fs.mkdirSync(settingsDir, { recursive: true }); // ✅ Ensure all parent folders exist
     }
+
+    // Write default settings
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2));
+
+    // Create marker file to prevent future resets
+    fs.writeFileSync(FIRST_RUN_FILE, "installed");
+
+    log.log("Settings file initialized:", SETTINGS_FILE);
+} else {
+    log.log("App has been installed before. Keeping existing settings.");
 }
 
 let windows = {}; // To store references to all windows
@@ -123,9 +122,6 @@ let appSettings = loadSettings(); // Load app settings from file
 
 app.commandLine.appendSwitch("disable-gpu-shader-disk-cache");
 app.commandLine.appendSwitch("disable-gpu-process-crash-limit");
-
-// Initialize settings only on fresh installs
-initializeSettings();
 
 // Function to load settings from a file
 function loadSettings() {
