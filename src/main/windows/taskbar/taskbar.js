@@ -3,12 +3,12 @@ const path = require("path");
 
 function createTaskbarWindow(toggleReminder, toggleSettings) {
     const taskbarWindow = new BrowserWindow({
-        width: 50, // Initial size
+        width: 65, // Initial size
         height: 73,
         frame: false,
         alwaysOnTop: true,
         transparent: true,
-        resizable: true, // Allow resizing dynamically
+        resizable: false, // Allow resizing dynamically
         webPreferences: {
             preload: path.join(__dirname, "../../../renderer/common/preload.js"),
             contextIsolation: true,
