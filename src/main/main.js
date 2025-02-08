@@ -11,10 +11,6 @@ const { createResumptionWindow } = require("./windows/resumption/resumption");
 const createLogger = require("../hlps/logger");
 const { autoUpdater } = require("electron-updater");
 
-autoUpdater.autoDownload = false; // Prevent auto-downloading
-autoUpdater.allowPrerelease = true; // Allow pre-releases (if used)
-autoUpdater.forceDevUpdateConfig = true; // ✅ Force update check in development mod
-
 const path = require("path");
 const fs = require("fs");
 
@@ -28,6 +24,77 @@ const SETTINGS_FILE = isDevelopment
     ? path.join(__dirname, "../settings.dev.json") // Dev settings (inside project)
     : path.join(app.getPath("userData"), "settings.json"); // Prod settings (persistent)
 
+const FIRST_RUN_FILE = path.join(app.getPath("userData"), "first-run.lock"); // Marker file
+
+// Default settings for fresh installs
+const DEFAULT_SETTINGS = {
+    checklist: [
+        { text: "Hijacked", type: "critical", state: "default" },
+        { text: "MACD", type: "critical", state: "default" },
+        { text: "Volume", type: "critical", state: "default" },
+        { text: "Extended", type: "optional", state: "state-yellow" },
+        { text: "Candles", type: "reminder", state: "default" },
+        { text: "Spread", type: "critical", state: "default" },
+        { text: "Orders", type: "reminder", state: "default" },
+        { text: "9 ema", type: "reminder", state: "default" },
+        { text: "Time", type: "reminder", state: "default" },
+        { text: "50%", type: "reminder", state: "default" },
+        { text: "VWAP", type: "reminder", state: "default" },
+        { text: "Float", type: "optional", state: "state-yellow" },
+        { text: "Cat", type: "optional", state: "state-yellow" },
+    ],
+    sessionCountdowns: [
+        {
+            start: "04:00",
+            end: "09:30",
+            title: "Pre Market",
+        },
+        {
+            start: "07:00",
+            end: "09:30",
+            title: "Breaking News",
+        },
+        {
+            start: "09:30",
+            end: "16:00",
+            title: "Open Market",
+        },
+        {
+            start: "15:00",
+            end: "16:00",
+            title: "Power Hour",
+        },
+        {
+            start: "16:00",
+            end: "20:00",
+            title: "Post Market",
+        },
+    ],
+    reminderItems: [],
+    snippers: [],
+};
+
+// 🛠️ **Function to check if it's a fresh install**
+function isFirstInstall() {
+    return !fs.existsSync(SETTINGS_FILE) && !fs.existsSync(FIRST_RUN_FILE);
+}
+
+// 🛠️ **Function to initialize settings**
+function initializeSettings() {
+    if (isFirstInstall()) {
+        log.log("Fresh install detected! Creating default settings...");
+
+        // Write default settings
+        fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2));
+
+        // Create marker file to prevent future resets
+        fs.writeFileSync(FIRST_RUN_FILE, "installed");
+
+        log.log("Settings file initialized:", SETTINGS_FILE);
+    } else {
+        log.log("App has been installed before. Keeping existing settings.");
+    }
+}
 
 let windows = {}; // To store references to all windows
 let snipperWindows = {}; // Store references to dynamically created snipper windows
@@ -43,7 +110,7 @@ function loadSettings() {
         const data = fs.readFileSync(SETTINGS_FILE, "utf-8");
         const settings = JSON.parse(data);
 
-        log.log("Settings loaded", settings);
+        log.log("Settings loaded");
 
         // Ensure all settings properties exist
         if (!Array.isArray(settings.checklist)) settings.checklist = [];
@@ -771,6 +838,11 @@ function createSnipperDialogWindow() {
 
 // App Ready Event
 app.on("ready", () => {
+    log.log("App is ready.");
+
+    // Initialize settings only on fresh installs
+    initializeSettings();
+
     // Create Taskbar Window
     windows.taskbar = createTaskbarWindow(
         () => ipcMain.emit("toggle-reminder"),
