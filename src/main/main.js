@@ -892,4 +892,8 @@ function checkForUpdates() {
     autoUpdater.on("update-not-available", () => {
         console.log("No update available.");
     });
+
+    autoUpdater.on("error", (err) => {
+        console.error("Update error:", err);
+    });
 }
