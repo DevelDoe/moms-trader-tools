@@ -148,6 +148,10 @@
     {
       "text": "Show version",
       "type": "critical"
+    },
+    {
+      "text": "Icon",
+      "type": "critical"
     }
   ],
   "sessionVolume": 0,
