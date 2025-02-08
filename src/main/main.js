@@ -7,7 +7,7 @@ const { createTaskbarWindow } = require("./windows/taskbar/taskbar");
 const { createChecklistWindow } = require("./windows/checklist/checklist");
 const { createCountdownWindow } = require("./windows/countdown/countdown");
 const { createClockWindow } = require("./windows/clock/clock");
-const { createResumptionWindow } = require("./windows/resumption/resumption"); 
+const { createResumptionWindow } = require("./windows/resumption/resumption");
 const createLogger = require("../../hlps/logger");
 
 const path = require("path");
@@ -17,7 +17,6 @@ const log = createLogger(__filename);
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const isDebug = process.env.DEBUG === "true";
-
 
 const SETTINGS_FILE = path.join(app.getPath("userData"), "settings.json");
 
@@ -76,7 +75,6 @@ function saveSettings() {
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
 }
 
-
 // IPC Handlers
 
 ipcMain.on("resize-window-to-content", (event, { width, height }) => {
@@ -90,7 +88,6 @@ ipcMain.on("resize-window-to-content", (event, { width, height }) => {
         });
     }
 });
-
 
 // Settings
 
@@ -239,19 +236,19 @@ ipcMain.on("add-checklist-item", (event, item) => {
         appSettings.checklist = [];
     }
     appSettings.checklist.push(item);
-    log.log("Checklist item added:", appSettings.checklist); 
+    log.log("Checklist item added:", appSettings.checklist);
     saveSettings(appSettings);
     updateChecklistWindows();
 });
 
 ipcMain.on("remove-checklist-item", (event, index) => {
     if (appSettings.checklist[index]) {
-        log.log("Removing item:", appSettings.checklist[index]); 
+        log.log("Removing item:", appSettings.checklist[index]);
         appSettings.checklist.splice(index, 1);
         saveSettings(appSettings);
         updateChecklistWindows();
     } else {
-        log.error("Item not found at index:", index); 
+        log.error("Item not found at index:", index);
     }
 });
 
@@ -516,14 +513,14 @@ ipcMain.on("snipper-cancelled", (event) => {
 // Create Snipper Window
 ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
     if (!name || !bounds || !sourceId) {
-        log.error("❌ Missing required data for creating Snipper window.", { name, bounds, sourceId });
+        log.error("Missing required data for creating Snipper window.", { name, bounds, sourceId });
         return;
     }
 
     log.log(`Creating Snipper window`);
 
     if (snipperWindows[name]) {
-        console.warn(`⚠️ Snipper "${name}" already exists.`);
+        console.warn(`Snipper "${name}" already exists.`);
         return;
     }
 
@@ -532,7 +529,7 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
     const matchedDisplay = displays.find((d) => d.id === parseInt(bounds.display_id));
 
     if (!matchedDisplay) {
-        log.error(`❌ No matching display found for screen ID: ${bounds.display_id}`);
+        log.error(`No matching display found for screen ID: ${bounds.display_id}`);
         return;
     }
 
@@ -557,8 +554,8 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
 
     snipperWindow
         .loadFile(path.join(__dirname, "../renderer/snipper/snipper.html"))
-        .then(() => log.log(`✅ Snipper window "${name}" loaded`))
-        .catch((err) => log.error("❌ Error loading snipper HTML:", err));
+        .then(() => log.log(`Snipper window "${name}" loaded`))
+        .catch((err) => log.error("Error loading snipper HTML:", err));
 
     // ✅ Send the correct `sourceId` to renderer
     snipperWindow.webContents.once("dom-ready", () => {
@@ -568,7 +565,7 @@ ipcMain.on("create-snipper-window", (event, { name, bounds, sourceId }) => {
     snipperWindows[name] = snipperWindow;
 
     snipperWindow.on("closed", () => {
-        log.log(`❌ Snipper "${name}" closed.`);
+        log.log(`Snipper "${name}" closed.`);
         delete snipperWindows[name];
 
         saveSettings();
@@ -597,14 +594,14 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         );
 
         if (!selectedScreenId) {
-            log.error("❌ No screen has been selected. Defaulting to primary screen.");
+            log.error("No screen has been selected. Defaulting to primary screen.");
             selectedScreenId = sources[0]?.id; // Set to first screen if none selected
         }
 
         const selectedScreen = sources.find((src) => src.id === selectedScreenId);
 
         if (!selectedScreen) {
-            log.error(`❌ No matching screen found for ID: ${selectedScreenId}`);
+            log.error(`No matching screen found for ID: ${selectedScreenId}`);
             return;
         }
 
@@ -613,12 +610,12 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         const matchedDisplay = displays.find((d) => d.id === parseInt(selectedScreen.display_id));
 
         if (!matchedDisplay) {
-            log.error(`❌ Could not retrieve display bounds for screen ID: ${selectedScreen.display_id}`);
+            log.error(`Could not retrieve display bounds for screen ID: ${selectedScreen.display_id}`);
             return;
         }
 
         const { x, y, width, height } = matchedDisplay.bounds;
-        log.log(`🖥 Opening region selection window on: ${selectedScreen.name} at (${x}, ${y}) [${width}x${height}]`);
+        log.log(`Opening region selection window on: ${selectedScreen.name} at (${x}, ${y}) [${width}x${height}]`);
 
         // Create the region selection window at the correct position
         windows.regionSelection = new BrowserWindow({
@@ -638,17 +635,17 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
 
         await windows.regionSelection.loadFile(path.join(__dirname, "../renderer/snipper/region.html"));
 
-        log.log("✅ Region selection window loaded on the correct screen.");
+        log.log("Region selection window loaded on the correct screen.");
 
         windows.regionSelection.webContents.once("dom-ready", () => {
-            log.log("✅ `region.html` is ready for selection.");
+            log.log("`region.html` is ready for selection.");
         });
 
         ipcMain.removeAllListeners("region-selected");
 
         ipcMain.once("region-selected", async (event, bounds) => {
-            log.log("✅ Region selected:", bounds);
-            log.log("🔎 Using selected screen ID:", selectedScreenId);
+            log.log("Region selected:", bounds);
+            log.log("Using selected screen ID:", selectedScreenId);
 
             try {
                 bounds.sourceId = selectedScreen.id;
@@ -673,14 +670,14 @@ ipcMain.on("start-region-selection", async (event, snipperName) => {
         });
 
         ipcMain.once("close-region-selection", () => {
-            log.log("🛑 Region selection canceled.");
+            log.log("Region selection canceled.");
             if (windows.regionSelection) {
                 windows.regionSelection.close();
                 windows.regionSelection = null;
             }
         });
     } catch (error) {
-        log.error("❌ Error starting region selection:", error);
+        log.error("Error starting region selection:", error);
     }
 });
 
@@ -828,7 +825,7 @@ app.on("ready", () => {
             .getSources({ types: ["screen"] })
             .then((sources) => {
                 if (sources.length === 0) {
-                    log.error("❌ No screen sources available for Snipper.");
+                    log.error("No screen sources available for Snipper.");
                     return;
                 }
 
@@ -838,7 +835,7 @@ app.on("ready", () => {
                     const source = sources.find((src) => snip.sourceId && src.id === snip.sourceId) || sources[0];
 
                     if (!source) {
-                        log.error(`❌ No matching source found for Snipper: ${snip.name}`);
+                        log.error(`No matching source found for Snipper: ${snip.name}`);
                         return;
                     }
 
@@ -852,7 +849,7 @@ app.on("ready", () => {
                 });
             })
             .catch((error) => {
-                log.error("❌ Error fetching screen sources:", error);
+                log.error("Error fetching screen sources:", error);
             });
     }
 
@@ -876,49 +873,47 @@ ipcMain.on("restart-app", () => {
 
 // UPDATES
 
-function checkForUpdates() {
-    autoUpdater.checkForUpdatesAndNotify();
+autoUpdater.checkForUpdatesAndNotify();
 
-    autoUpdater.on("checking-for-update", () => {
-        log.log("Checking for update...");
+autoUpdater.on("checking-for-update", () => {
+    log.log("Checking for update...");
+});
+
+autoUpdater.on("update-available", (info) => {
+    log.log("Update available:", info);
+    dialog.showMessageBox({
+        type: "info",
+        title: "Update Available",
+        message: "A new update is available. Downloading now...",
+        buttons: ["OK"],
     });
+});
 
-    autoUpdater.on("update-available", (info) => {
-        log.log("Update available:", info);
-        dialog.showMessageBox({
+autoUpdater.on("update-not-available", () => {
+    log.log("No update available.");
+});
+
+autoUpdater.on("error", (err) => {
+    log.error("Update error:", err);
+});
+
+autoUpdater.on("download-progress", (progressObj) => {
+    let logMessage = `Download speed: ${progressObj.bytesPerSecond} - `;
+    logMessage += `Downloaded ${progressObj.percent}% (${progressObj.transferred} / ${progressObj.total})`;
+    log.log(logMessage);
+});
+
+autoUpdater.on("update-downloaded", () => {
+    dialog
+        .showMessageBox({
             type: "info",
-            title: "Update Available",
-            message: "A new update is available. Downloading now...",
-            buttons: ["OK"],
+            title: "Update Ready",
+            message: "The update has been downloaded. Restart the app to install it?",
+            buttons: ["Restart", "Later"],
+        })
+        .then((result) => {
+            if (result.response === 0) {
+                autoUpdater.quitAndInstall();
+            }
         });
-    });
-
-    autoUpdater.on("update-not-available", () => {
-        log.log("No update available.");
-    });
-
-    autoUpdater.on("error", (err) => {
-        log.error("Update error:", err);
-    });
-
-    autoUpdater.on("download-progress", (progressObj) => {
-        let logMessage = `Download speed: ${progressObj.bytesPerSecond} - `;
-        logMessage += `Downloaded ${progressObj.percent}% (${progressObj.transferred} / ${progressObj.total})`;
-        log.log(logMessage);
-    });
-
-    autoUpdater.on("update-downloaded", () => {
-        dialog
-            .showMessageBox({
-                type: "info",
-                title: "Update Ready",
-                message: "The update has been downloaded. Restart the app to install it?",
-                buttons: ["Restart", "Later"],
-            })
-            .then((result) => {
-                if (result.response === 0) {
-                    autoUpdater.quitAndInstall();
-                }
-            });
-    });
-}
+});
