@@ -82,7 +82,7 @@ contextBridge.exposeInMainWorld("regionAPI", {
     send: (channel, data) => ipcRenderer.send(channel, data),
     getSelectedScreen: async () => {
         const selectedScreen = await ipcRenderer.invoke("get-selected-screen");
-        console.log("📡 Selected screen:", selectedScreen);
+        console.log("[preload.js] Selected screen:", selectedScreen);
         return selectedScreen;
     }
 });
