@@ -4,7 +4,7 @@ const createLogger = require("../../../hlps/logger");
 
 const log = createLogger(__filename); 
 
-console.log("✅ Preload script loaded"); // Log when preload runs
+console.log("✅ Preload script loaded from:", __dirname);
 
 
 contextBridge.exposeInMainWorld("electronAPI", {
