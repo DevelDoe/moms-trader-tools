@@ -858,8 +858,6 @@ function createSnipperDialogWindow() {
 // App Ready Event
 app.on("ready", () => {
     log.log("App is ready.");
-    log.log(`User data path: ${app.getPath("userData")}`);
-    log.log(`Checking if fresh install: SETTINGS_FILE exists? ${fs.existsSync(SETTINGS_FILE)} | FIRST_RUN_FILE exists? ${fs.existsSync(FIRST_RUN_FILE)}`);
 
     // Create Taskbar Window
     windows.taskbar = createTaskbarWindow(
