@@ -84,17 +84,15 @@ function saveSettings() {
     if (!Array.isArray(appSettings.reminderItems)) appSettings.reminderItems = [];
     if (!Array.isArray(appSettings.snippers)) appSettings.snippers = [];
 
-    // Remove deprecated `text` field
     if ("text" in appSettings) {
-        console.log("Removing deprecated 'text' from settings...");
+        log("Removing deprecated 'text' from settings...");
         delete appSettings.text;
     }
 
-    console.log("✅ Final settings before writing:", JSON.stringify(appSettings, null, 2));
-
-    console.log("Saving updated settings:", appSettings);
+    log("✅ Final settings before writing:", JSON.stringify(appSettings, null, 2));
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
 }
+
 
 // IPC Handlers
 
