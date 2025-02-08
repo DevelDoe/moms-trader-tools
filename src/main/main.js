@@ -52,7 +52,7 @@ function loadSettings() {
         const data = fs.readFileSync(SETTINGS_FILE, "utf-8");
         const settings = JSON.parse(data);
 
-        log("Loaded settings on boot:", settings);
+        log("Loaded settings on boot...");
 
         // Ensure all settings properties exist
         if (!Array.isArray(settings.checklist)) settings.checklist = [];
