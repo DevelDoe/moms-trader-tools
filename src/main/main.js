@@ -21,8 +21,8 @@ const isDebug = process.env.DEBUG === "true";
 
 // Use system settings file for production, separate file for development
 const SETTINGS_FILE = isDevelopment
-    ? path.join(app.getPath("userData"), "settings.json") // Prod settings (persistent) 
-    : path.join(__dirname, "../settings.dev.json") // Dev settings (inside project)
+    ? path.join(app.getPath("userData"), "settings.json") // Prod settings (persistent)
+    : path.join(__dirname, "../settings.dev.json"); // Dev settings (inside project)
 
 const FIRST_RUN_FILE = path.join(app.getPath("userData"), "first-run.lock"); // Marker file
 
@@ -123,6 +123,9 @@ let appSettings = loadSettings(); // Load app settings from file
 
 app.commandLine.appendSwitch("disable-gpu-shader-disk-cache");
 app.commandLine.appendSwitch("disable-gpu-process-crash-limit");
+
+// Initialize settings only on fresh installs
+initializeSettings();
 
 // Function to load settings from a file
 function loadSettings() {
@@ -861,9 +864,6 @@ app.on("ready", () => {
     log.log("App is ready.");
     log.log(`User data path: ${app.getPath("userData")}`);
     log.log(`Checking if fresh install: SETTINGS_FILE exists? ${fs.existsSync(SETTINGS_FILE)} | FIRST_RUN_FILE exists? ${fs.existsSync(FIRST_RUN_FILE)}`);
-
-    // Initialize settings only on fresh installs
-    initializeSettings();
 
     // Create Taskbar Window
     windows.taskbar = createTaskbarWindow(
