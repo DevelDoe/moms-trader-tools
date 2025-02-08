@@ -1,6 +1,6 @@
 // ./src/main/main.js
 
-const { app, BrowserWindow, ipcMain, desktopCapturer } = require("electron");
+const { app, BrowserWindow, ipcMain, desktopCapturer, dialog } = require("electron");
 const { createReminderWindow } = require("./windows/reminder/reminder");
 const { createSettingsWindow } = require("./windows/settings/settings");
 const { createTaskbarWindow } = require("./windows/taskbar/taskbar");
@@ -16,10 +16,16 @@ const fs = require("fs");
 
 const log = createLogger(__filename);
 
-autoUpdater.autoDownload = false; // Prevent auto-downloading
-autoUpdater.allowPrerelease = true; // Allow pre-releases (if used)
+autoUpdater.autoDownload = true; // Enable auto-downloading updates
+autoUpdater.allowPrerelease = true; // Ensure pre-releases are checked
 autoUpdater.forceDevUpdateConfig = true; // ✅ Force update check in development mod
-autoUpdater.allowPrerelease = true;
+
+autoUpdater.setFeedURL({
+    provider: "github",
+    owner: "DevelDoe",
+    repo: "moms-trader-tools",
+});
+
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const isDebug = process.env.DEBUG === "true";
@@ -984,13 +990,23 @@ if (isDevelopment) {
     });
 
     autoUpdater.on("update-available", (info) => {
-        log.log("Update available:", info);
-        dialog.showMessageBox({
-            type: "info",
-            title: "Update Available",
-            message: "A new update is available. Downloading now...",
-            buttons: ["OK"],
-        });
+        log.log(`🔔 Update found: ${info.version}`);
+    
+        if (app.isReady()) {
+            dialog.showMessageBox({
+                type: "info",
+                title: "Update Available",
+                message: `A new update (${info.version}) is available. Would you like to download it now?`,
+                buttons: ["Download", "Later"],
+            }).then((result) => {
+                if (result.response === 0) {
+                    log.log("Downloading update...");
+                    autoUpdater.downloadUpdate();
+                }
+            });
+        } else {
+            log.error("⚠️ App is not ready, skipping update prompt.");
+        }
     });
 
     autoUpdater.on("update-not-available", () => {
@@ -998,7 +1014,10 @@ if (isDevelopment) {
     });
 
     autoUpdater.on("error", (err) => {
-        log.error("Update error:", err);
+        log.error("🚨 Update error:", err);
+    });
+    process.on("unhandledRejection", (reason, promise) => {
+        log.error("Unhandled Promise Rejection:", reason);
     });
 
     autoUpdater.on("download-progress", (progressObj) => {
