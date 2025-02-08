@@ -12,6 +12,16 @@ const { createResumptionWindow } = require("./windows/resumption/resumption"); /
 const path = require("path");
 const fs = require("fs");
 
+const isDevelopment = process.env.NODE_ENV === "development";
+const isDebug = process.env.DEBUG === "true";
+
+function log(...args) {
+    if (isDevelopment || isDebug) {
+        console.log(...args);
+    }
+}
+
+
 const SETTINGS_FILE = path.join(app.getPath("userData"), "settings.json");
 
 let windows = {}; // To store references to all windows
