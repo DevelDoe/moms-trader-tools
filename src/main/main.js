@@ -11,6 +11,10 @@ const { createResumptionWindow } = require("./windows/resumption/resumption");
 const createLogger = require("../../hlps/logger");
 const { autoUpdater } = require("electron-updater");
 
+autoUpdater.autoDownload = false; // Prevent auto-downloading
+autoUpdater.allowPrerelease = true; // Allow pre-releases (if used)
+autoUpdater.forceDevUpdateConfig = true; // ✅ Force update check in development mod
+
 const path = require("path");
 const fs = require("fs");
 
