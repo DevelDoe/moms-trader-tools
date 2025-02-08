@@ -874,4 +874,8 @@ ipcMain.on("restart-app", () => {
 
 function checkForUpdates() {
     autoUpdater.checkForUpdatesAndNotify();
+
+    autoUpdater.on("checking-for-update", () => {
+        console.log("Checking for update...");
+    });
 }
