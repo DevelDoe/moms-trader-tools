@@ -134,7 +134,7 @@ ipcMain.on("update-settings", (event, newSettings) => {
 
     // Only send session volume update separately
     if (appSettings.sessionVolume !== previousSessionVolume) {
-        log("Session volume changed, updating session volume...");
+        log.log("Session volume changed, updating session volume...");
         Object.values(windows).forEach((window) => {
             if (window && window.webContents) {
                 window.webContents.send("update-session-volume", appSettings.sessionVolume);
