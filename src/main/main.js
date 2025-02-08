@@ -873,7 +873,7 @@ app.on("ready", () => {
             });
     }
 
-    log("Snippers restored from settings:", appSettings.snippers);
+    log("Snippers restored from settings");
 });
 
 // Quit the app when all windows are closed
