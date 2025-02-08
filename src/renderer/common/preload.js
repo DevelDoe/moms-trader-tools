@@ -3,7 +3,8 @@ const createLogger = require("../hlps/logger");
 
 const log = createLogger(__filename); 
 
-console.log("Preload script loaded");
+console.log("✅ Preload script loaded"); // Log when preload runs
+
 
 contextBridge.exposeInMainWorld("electronAPI", {
     send: (channel, data) => {
