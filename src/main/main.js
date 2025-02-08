@@ -7,33 +7,16 @@ const { createTaskbarWindow } = require("./windows/taskbar/taskbar");
 const { createChecklistWindow } = require("./windows/checklist/checklist");
 const { createCountdownWindow } = require("./windows/countdown/countdown");
 const { createClockWindow } = require("./windows/clock/clock");
-const { createResumptionWindow } = require("./windows/resumption/resumption"); // Import
+const { createResumptionWindow } = require("./windows/resumption/resumption"); 
+const createLogger = require("../../hlps/logger");
 
 const path = require("path");
 const fs = require("fs");
 
+const log = createLogger(__filename);
+
 const isDevelopment = process.env.NODE_ENV === "development";
 const isDebug = process.env.DEBUG === "true";
-
-// Custom log function to respect debug mode
-function log(...args) {
-    if (isDevelopment || isDebug) {
-        console.log(...args);
-    }
-}
-
-function warn(...args) {
-    if (isDevelopment || isDebug) {
-        console.warn(...args);
-    }
-}
-
-function error(...args) {
-    if (isDevelopment || isDebug) {
-        console.error(...args);
-    }
-}
-
 
 
 const SETTINGS_FILE = path.join(app.getPath("userData"), "settings.json");
