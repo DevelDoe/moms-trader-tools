@@ -126,7 +126,7 @@ ipcMain.on("update-settings", (event, newSettings) => {
 
     // Only send reminder update if `reminderItems` changed
     if (JSON.stringify(appSettings.reminderItems) !== previousReminderItems) {
-        log("Reminder items changed, updating reminder window...");
+        log.log("Reminder items changed, updating reminder window...");
         if (windows.reminder) {
             windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
         }
