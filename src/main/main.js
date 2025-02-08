@@ -981,7 +981,7 @@ ipcMain.on("restart-app", () => {
 });
 
 // UPDATES - Only runs in production mode
-if (isDevelopment) {
+if (!isDevelopment) {
     log.log("Production mode detected, checking for updates...");
     autoUpdater.checkForUpdatesAndNotify();
 
@@ -1014,7 +1014,7 @@ if (isDevelopment) {
     });
 
     autoUpdater.on("error", (err) => {
-        log.error("🚨 Update error:", err);
+        log.error("Update error:", err);
     });
     process.on("unhandledRejection", (reason, promise) => {
         log.error("Unhandled Promise Rejection:", reason);

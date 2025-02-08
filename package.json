@@ -50,7 +50,12 @@
             "provider": "github",
             "owner": "DevelDoe",
             "repo": "moms-trader-tools",
-            "releaseType": "prerelease"
-        }
+            "releaseType": "prerelease",
+            "releaseNotes": "Latest version available",
+            "vPrefixedTagName": true
+        },
+        "files": [
+            "dist/**/*"
+        ]
     }
 }
