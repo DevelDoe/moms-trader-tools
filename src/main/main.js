@@ -902,4 +902,19 @@ function checkForUpdates() {
         logMessage += `Downloaded ${progressObj.percent}% (${progressObj.transferred} / ${progressObj.total})`;
         console.log(logMessage);
     });
+
+    autoUpdater.on("update-downloaded", () => {
+        dialog
+            .showMessageBox({
+                type: "info",
+                title: "Update Ready",
+                message: "The update has been downloaded. Restart the app to install it?",
+                buttons: ["Restart", "Later"],
+            })
+            .then((result) => {
+                if (result.response === 0) {
+                    autoUpdater.quitAndInstall();
+                }
+            });
+    });
 }
