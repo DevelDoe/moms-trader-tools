@@ -86,4 +86,6 @@ reports/
 
 # temp files
 **/dump*
-**/dump.*dev-app-update.yml
+**/dump.*
+
+dev-app-update.yml
