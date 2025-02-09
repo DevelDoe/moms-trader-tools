@@ -24,7 +24,6 @@ function createClockWindow(taskbarWindow) {
 
     // clockWindow.webContents.openDevTools({ mode: "detach" });
 
-
     // Dynamically position the clock window relative to the taskbar
     if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {
         const taskbarBounds = taskbarWindow.getBounds();
