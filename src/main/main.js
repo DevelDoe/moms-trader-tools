@@ -151,13 +151,6 @@ function loadSettings() {
         if (!Array.isArray(settings.reminderItems)) settings.reminderItems = []; // Ensure this exists
         if (!Array.isArray(settings.snippers)) settings.snippers = [];
 
-        // Remove deprecated 'text' key if present
-        if ("text" in settings) {
-            log.log("Removing deprecated 'text' attribute from settings...");
-            delete settings.text;
-            fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2)); // Save the cleaned settings
-        }
-
         return settings;
     } catch (err) {
         log.error("log.error loading settings:", err);
