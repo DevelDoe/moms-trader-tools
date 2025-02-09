@@ -168,11 +168,6 @@ function saveSettings() {
     if (!Array.isArray(appSettings.reminderItems)) appSettings.reminderItems = [];
     if (!Array.isArray(appSettings.snippers)) appSettings.snippers = [];
 
-    if ("text" in appSettings) {
-        log.log("Removing deprecated 'text' from settings...");
-        delete appSettings.text;
-    }
-
     log.log("Final settings before writing:");
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
 }
