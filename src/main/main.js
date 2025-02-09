@@ -153,7 +153,7 @@ function loadSettings() {
 
         return settings;
     } catch (err) {
-        log.error("log.error loading settings:", err);
+        log.error("error loading settings:", err);
         return {
             checklist: [],
             sessionCountdowns: [],
