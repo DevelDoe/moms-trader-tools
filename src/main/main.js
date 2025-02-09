@@ -1,6 +1,10 @@
 // ./src/main/main.js
 
 const { app, BrowserWindow, ipcMain, desktopCapturer, dialog } = require("electron");
+const createLogger = require("../hlps/logger");
+const { autoUpdater } = require("electron-updater");
+
+const { createSplashWindow } = require("./windows/splash/splash");
 const { createReminderWindow } = require("./windows/reminder/reminder");
 const { createSettingsWindow } = require("./windows/settings/settings");
 const { createTaskbarWindow } = require("./windows/taskbar/taskbar");
@@ -8,15 +12,13 @@ const { createChecklistWindow } = require("./windows/checklist/checklist");
 const { createCountdownWindow } = require("./windows/countdown/countdown");
 const { createClockWindow } = require("./windows/clock/clock");
 const { createResumptionWindow } = require("./windows/resumption/resumption");
-const createLogger = require("../hlps/logger");
-const { autoUpdater } = require("electron-updater");
 
 const path = require("path");
 const fs = require("fs");
 
 const log = createLogger(__filename);
 
-autoUpdater.autoDownload = true; // Enable auto-downloading updates
+autoUpdater.autoDownload = false; // Enable auto-downloading updates
 autoUpdater.allowPrerelease = true; // Ensure pre-releases are checked
 autoUpdater.forceDevUpdateConfig = true; // ✅ Force update check in development mod
 
@@ -183,6 +185,15 @@ function saveSettings() {
 }
 
 // IPC Handlers
+
+ipcMain.on("close-splash", () => {
+    log.log(windows.splash)
+    if (windows.splash) {
+        log.log("Closing Splash Screen")
+        windows.splash.close();
+        delete windows.splash; // Remove reference after closing
+    }
+});
 
 ipcMain.on("resize-window-to-content", (event, { width, height }) => {
     const senderWindow = BrowserWindow.fromWebContents(event.sender);
@@ -866,103 +877,107 @@ function createSnipperDialogWindow() {
 
     return dialogWindow;
 }
-
-// App Ready Event
 app.on("ready", () => {
-    log.log("App is ready.");
+    log.log("App is starting...");
 
-    // Create Taskbar Window
-    windows.taskbar = createTaskbarWindow(
-        () => ipcMain.emit("toggle-reminder"),
-        () => ipcMain.emit("toggle-settings"),
-        () => ipcMain.emit("toggle-checklist"),
-        () => ipcMain.emit("toggle-countdown"),
-        () => ipcMain.emit("toggle-clock"),
-        () => ipcMain.emit("toggle-resumption")
-    );
+    // Show Splash Screen first, then load the main app
+    windows.splash = createSplashWindow(() => { // ✅ Store splash reference
+        log.log("Splash screen closed. Loading main app...");
 
-    // Ensure the taskbar window is created before passing
-    if (!windows.taskbar) {
-        log.error("Taskbar window could not be created.");
-        return;
-    }
+        // Do NOT redefine `windows` here! Remove `let windows = {};`
+        // 🟢 Create Taskbar Window
+        windows.taskbar = createTaskbarWindow(
+            () => ipcMain.emit("toggle-reminder"),
+            () => ipcMain.emit("toggle-settings"),
+            () => ipcMain.emit("toggle-checklist"),
+            () => ipcMain.emit("toggle-countdown"),
+            () => ipcMain.emit("toggle-clock"),
+            () => ipcMain.emit("toggle-resumption")
+        );
 
-    // Create Windows
-    windows.reminder = createReminderWindow(windows.taskbar, appSettings.text);
-    windows.settings = createSettingsWindow(windows.taskbar);
-    windows.checklist = createChecklistWindow(windows.taskbar);
-    windows.countdown = createCountdownWindow(windows.taskbar);
-    windows.clock = createClockWindow(windows.taskbar);
-    windows.resumption = createResumptionWindow(windows.taskbar);
-
-    windows.reminder.webContents.once("dom-ready", () => {
-        windows.reminder.webContents.send("update-reminder-text", appSettings.text);
-    });
-
-    // Hide all windows by default
-    Object.values(windows).forEach((window) => window?.hide());
-
-    // Ensure the taskbar is visible
-    if (windows.taskbar) {
-        windows.taskbar.show();
-    }
-
-    windows.settings.webContents.once("dom-ready", () => {
-        windows.settings.webContents.send("update-checklist", appSettings.checklist);
-    });
-
-    windows.checklist.webContents.once("dom-ready", () => {
-        windows.checklist.webContents.send("load-checklist-state", appSettings.checklist);
-    });
-
-    windows.clock.webContents.once("dom-ready", () => {
-        windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
-    });
-
-    // Ensure other windows are also synced
-    Object.values(windows).forEach((window) => {
-        if (window && window.webContents) {
-            window.webContents.send("settings-updated", appSettings);
+        if (!windows.taskbar) {
+            log.error("Taskbar window could not be created.");
+            return;
         }
-    });
 
-    // Restore Snippers from saved settings
-    if (Array.isArray(appSettings.snippers)) {
-        log.log("Restoring Snippers from saved regions");
+        // 🟢 Create Main Windows
+        windows.reminder = createReminderWindow(windows.taskbar, appSettings.text);
+        windows.settings = createSettingsWindow(windows.taskbar);
+        windows.checklist = createChecklistWindow(windows.taskbar);
+        windows.countdown = createCountdownWindow(windows.taskbar);
+        windows.clock = createClockWindow(windows.taskbar);
+        windows.resumption = createResumptionWindow(windows.taskbar);
 
-        desktopCapturer
-            .getSources({ types: ["screen"] })
-            .then((sources) => {
-                if (sources.length === 0) {
-                    log.error("No screen sources available for Snipper.");
-                    return;
-                }
+        windows.reminder.webContents.once("dom-ready", () => {
+            windows.reminder.webContents.send("update-reminder-text", appSettings.text);
+        });
 
-                appSettings.snippers.forEach((snip) => {
-                    log.log(`Restoring Snipper with saved region bounds`);
+        // Hide all windows except the taskbar
+        Object.values(windows).forEach((window) => window?.hide());
 
-                    const source = sources.find((src) => snip.sourceId && src.id === snip.sourceId) || sources[0];
+        // 🟢 Ensure Taskbar is visible
+        if (windows.taskbar) {
+            windows.taskbar.show();
+        }
 
-                    if (!source) {
-                        log.error(`No matching source found for Snipper: ${snip.name}`);
+        // Load settings into windows
+        windows.settings.webContents.once("dom-ready", () => {
+            windows.settings.webContents.send("update-checklist", appSettings.checklist);
+        });
+
+        windows.checklist.webContents.once("dom-ready", () => {
+            windows.checklist.webContents.send("load-checklist-state", appSettings.checklist);
+        });
+
+        windows.clock.webContents.once("dom-ready", () => {
+            windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
+        });
+
+        // 🟢 Sync Settings Across Windows
+        Object.values(windows).forEach((window) => {
+            if (window && window.webContents) {
+                window.webContents.send("settings-updated", appSettings);
+            }
+        });
+
+        // 🟢 Restore Snippers
+        if (Array.isArray(appSettings.snippers)) {
+            log.log("Restoring Snippers from saved regions");
+
+            desktopCapturer
+                .getSources({ types: ["screen"] })
+                .then((sources) => {
+                    if (sources.length === 0) {
+                        log.error("No screen sources available for Snipper.");
                         return;
                     }
 
-                    log.log(`Assigning sourceId`);
+                    appSettings.snippers.forEach((snip) => {
+                        log.log(`Restoring Snipper with saved region bounds`);
 
-                    ipcMain.emit("create-snipper-window", null, {
-                        name: snip.name,
-                        bounds: snip, // ✅ Use saved region bounds!
-                        sourceId: source.id,
+                        const source = sources.find((src) => snip.sourceId && src.id === snip.sourceId) || sources[0];
+
+                        if (!source) {
+                            log.error(`No matching source found for Snipper: ${snip.name}`);
+                            return;
+                        }
+
+                        log.log(`Assigning sourceId`);
+
+                        ipcMain.emit("create-snipper-window", null, {
+                            name: snip.name,
+                            bounds: snip,
+                            sourceId: source.id,
+                        });
                     });
+                })
+                .catch((error) => {
+                    log.error("Error fetching screen sources:", error);
                 });
-            })
-            .catch((error) => {
-                log.error("Error fetching screen sources:", error);
-            });
-    }
+        }
 
-    log.log("Snippers restored from settings");
+        log.log("Snippers restored from settings");
+    });
 });
 
 // Quit the app when all windows are closed
@@ -992,7 +1007,8 @@ if (!isDevelopment) {
     autoUpdater.on("update-available", (info) => {
         log.log(`🔔 Update found: ${info.version}`);
     
-        if (app.isReady()) {
+        if (appSettings.hasDonated) {
+            // 🛠 If user has donated, let them decide
             dialog.showMessageBox({
                 type: "info",
                 title: "Update Available",
@@ -1000,12 +1016,16 @@ if (!isDevelopment) {
                 buttons: ["Download", "Later"],
             }).then((result) => {
                 if (result.response === 0) {
-                    log.log("Downloading update...");
+                    log.log("User confirmed download, starting...");
                     autoUpdater.downloadUpdate();
+                } else {
+                    log.log("User postponed update.");
                 }
             });
         } else {
-            log.error("⚠️ App is not ready, skipping update prompt.");
+            // 🛠 If user hasn’t donated, update automatically
+            log.log("User hasn't donated, auto-downloading update...");
+            autoUpdater.downloadUpdate();
         }
     });
 
@@ -1027,19 +1047,25 @@ if (!isDevelopment) {
     });
 
     autoUpdater.on("update-downloaded", () => {
-        dialog
-            .showMessageBox({
+        if (appSettings.hasDonated) {
+            // 🛠 Donors can choose when to install
+            dialog.showMessageBox({
                 type: "info",
                 title: "Update Ready",
-                message: "The update has been downloaded. Restart the app to install it?",
+                message: "The update has been downloaded. Would you like to restart the app now to install it?",
                 buttons: ["Restart", "Later"],
-            })
-            .then((result) => {
+            }).then((result) => {
                 if (result.response === 0) {
                     autoUpdater.quitAndInstall();
                 }
             });
+        } else {
+            // 🛠 Non-donors get auto-installed updates
+            log.log("User hasn't donated, installing update now...");
+            autoUpdater.quitAndInstall();
+        }
     });
+
 } else {
     log.log("Skipping auto-updates in development mode.");
 }

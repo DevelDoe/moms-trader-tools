@@ -10,6 +10,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     on: (channel, callback) => {
         ipcRenderer.on(channel, (event, ...args) => callback(...args));
     },
+    
+    // splash
+    closeSplash: () => ipcRenderer.send("close-splash"),
+
     // 🛠️ Settings Management
     getSettings: () => ipcRenderer.invoke("get-settings"),
     updateSettings: (settings) => ipcRenderer.send("update-settings", settings),
