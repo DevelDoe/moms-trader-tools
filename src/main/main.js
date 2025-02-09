@@ -896,9 +896,9 @@ app.on("ready", () => {
         windows.clock = createClockWindow(windows.taskbar);
         windows.resumption = createResumptionWindow(windows.taskbar);
 
-        windows.reminder.webContents.once("dom-ready", () => {
-            windows.reminder.webContents.send("update-reminder-text", appSettings.text);
-        });
+        // windows.reminder.webContents.once("dom-ready", () => {
+        //     windows.reminder.webContents.send("update-reminder-text", appSettings.text);
+        // });
 
         // Hide all windows except the taskbar
         Object.values(windows).forEach((window) => window?.hide());
