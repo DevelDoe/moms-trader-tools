@@ -25,15 +25,15 @@ function createSplashWindow(onClose) {
 
     splashWindow.webContents.openDevTools({ mode: "detach" });
 
-    splashWindow.once("ready-to-show", () => {
-        splashWindow.show();
-    });
+    // splashWindow.once("ready-to-show", () => {
+    //     splashWindow.show();
+    // });
 
-    splashWindow.on("closed", () => {
-        if (typeof onClose === "function") {
-            onClose();
-        }
-    });
+    // splashWindow.on("closed", () => {
+    //     if (typeof onClose === "function") {
+    //         onClose();
+    //     }
+    // });
 
     return splashWindow; // ✅ Return the window instance
 }
