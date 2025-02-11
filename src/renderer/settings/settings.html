@@ -426,7 +426,7 @@
                         window.electronAPI.refreshReminderWindow();
 
                         // ✅ Send an event to `reminder.html` to update the CSS dynamically
-                        window.electronAPI.send("update-reminder-transparency", isTransparent);
+                        // window.electronAPI.send("update-reminder-transparency", isTransparent);
                     });
                     // Set the default active tab
                     const defaultTab = document.querySelector(".tablinks.active");
