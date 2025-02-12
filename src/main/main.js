@@ -175,7 +175,6 @@ function saveSettings() {
 // IPC Handlers
 
 ipcMain.on("close-splash", () => {
-    log.log(windows.splash)
     if (windows.splash) {
         log.log("Closing Splash Screen")
         windows.splash.close();

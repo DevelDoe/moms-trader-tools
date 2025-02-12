@@ -31,3 +31,8 @@ li {
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
 }
+img {
+    pointer-events: none;
+    user-drag: none;
+    -webkit-user-drag: none;
+}

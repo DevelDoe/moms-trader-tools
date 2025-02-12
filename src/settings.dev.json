@@ -130,10 +130,6 @@
       "type": "critical"
     },
     {
-      "text": "settings for publish",
-      "type": "optional"
-    },
-    {
       "text": "shades for notes",
       "type": "reminder"
     },
@@ -150,12 +146,84 @@
       "type": "critical"
     },
     {
-      "text": "Icon",
+      "text": "Gainers Collector",
+      "type": "optional"
+    },
+    {
+      "text": "Alert sounds",
+      "type": "optional"
+    },
+    {
+      "text": "Notify user on tickes incoming",
+      "type": "reminder"
+    },
+    {
+      "text": "No highlight",
       "type": "critical"
     },
     {
-      "text": "Spash screen with pre release info",
+      "text": "Image of the day",
+      "type": "optional"
+    },
+    {
+      "text": "filter, float, score",
+      "type": "reminder"
+    },
+    {
+      "text": "Checklist width on add",
       "type": "critical"
+    },
+    {
+      "text": "Save ticker when take notes on disk",
+      "type": "optional"
+    },
+    {
+      "text": "Block and highlight news keywords",
+      "type": "reminder"
+    },
+    {
+      "text": "set interval of scrapes",
+      "type": "critical"
+    },
+    {
+      "text": "taskbar always on top",
+      "type": "optional"
+    },
+    {
+      "text": "give tickers bonus or minus points after analyze",
+      "type": "reminder"
+    },
+    {
+      "text": "Connect MTT & MTM for Pro version: analyze bonus from MTT to MTM",
+      "type": "critical"
+    },
+    {
+      "text": "Connect Sessions in MTT & MTM",
+      "type": "optional"
+    },
+    {
+      "text": "add button to fetch on MTM",
+      "type": "reminder"
+    },
+    {
+      "text": "save countdown volume",
+      "type": "critical"
+    },
+    {
+      "text": "Clock one sec after",
+      "type": "optional"
+    },
+    {
+      "text": "alert sound for tickers stack or cards for every ticker",
+      "type": "reminder"
+    },
+    {
+      "text": "Change Splash screen to make it distinct",
+      "type": "critical"
+    },
+    {
+      "text": "Object has been destroyed on upgrade splash screen",
+      "type": "optional"
     }
   ],
   "sessionVolume": 0,
