@@ -224,6 +224,10 @@
     {
       "text": "Object has been destroyed on upgrade splash screen",
       "type": "optional"
+    },
+    {
+      "text": "2 THINGS TO DO BEFORE PRE LAUNCH:\n1 SNIPPET\n2 TOOLTIP FOR CHECKLIST",
+      "type": "critical"
     }
   ],
   "sessionVolume": 0,
