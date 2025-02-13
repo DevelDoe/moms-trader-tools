@@ -198,10 +198,6 @@
       "type": "optional"
     },
     {
-      "text": "add button to fetch on MTM",
-      "type": "reminder"
-    },
-    {
       "text": "save countdown volume",
       "type": "critical"
     },
