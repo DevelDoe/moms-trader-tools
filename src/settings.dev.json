@@ -154,10 +154,6 @@
       "type": "optional"
     },
     {
-      "text": "Notify user on tickes incoming",
-      "type": "reminder"
-    },
-    {
       "text": "Image of the day",
       "type": "optional"
     },
