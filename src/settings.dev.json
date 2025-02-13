@@ -208,6 +208,10 @@
     {
       "text": "MTM: check sector and country",
       "type": "optional"
+    },
+    {
+      "text": "MTM : save images of tickers",
+      "type": "critical"
     }
   ],
   "sessionVolume": 0,
