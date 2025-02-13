@@ -186,10 +186,6 @@
       "type": "optional"
     },
     {
-      "text": "give tickers bonus or minus points after analyze",
-      "type": "reminder"
-    },
-    {
       "text": "Connect Sessions in MTT & MTM",
       "type": "optional"
     },
