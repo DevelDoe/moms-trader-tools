@@ -158,10 +158,6 @@
       "type": "reminder"
     },
     {
-      "text": "No highlight",
-      "type": "critical"
-    },
-    {
       "text": "Image of the day",
       "type": "optional"
     },
