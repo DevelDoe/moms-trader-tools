@@ -190,10 +190,6 @@
       "type": "reminder"
     },
     {
-      "text": "Connect MTT & MTM for Pro version: analyze bonus from MTT to MTM",
-      "type": "critical"
-    },
-    {
       "text": "Connect Sessions in MTT & MTM",
       "type": "optional"
     },
