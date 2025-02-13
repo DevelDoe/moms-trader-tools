@@ -178,10 +178,6 @@
       "type": "reminder"
     },
     {
-      "text": "set interval of scrapes",
-      "type": "critical"
-    },
-    {
       "text": "taskbar always on top",
       "type": "optional"
     },
