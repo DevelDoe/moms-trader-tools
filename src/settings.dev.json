@@ -142,10 +142,6 @@
       "type": "critical"
     },
     {
-      "text": "countdown toggle transparent",
-      "type": "critical"
-    },
-    {
       "text": "clock resizable",
       "type": "optional"
     },
@@ -204,6 +200,10 @@
     {
       "text": "MTT: Countdown transparent",
       "type": "reminder"
+    },
+    {
+      "text": "MTT: Clock resizeble",
+      "type": "critical"
     }
   ],
   "sessionVolume": 1,
