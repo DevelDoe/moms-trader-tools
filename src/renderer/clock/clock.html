@@ -123,23 +123,25 @@
                 return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
             }
 
-            // Check if a session is currently active
             function checkActiveSession(now) {
-                // Sort sessions by start time in descending order
+                console.log("🔍 Checking Active Sessions at:", now.toLocaleTimeString());
+
+                console.log("📌 Current Sessions List:", sessionCountdowns);
+
+                if (!sessionCountdowns || sessionCountdowns.length === 0) {
+                    console.warn("⚠️ No sessions loaded!");
+                    clearActiveSession();
+                    return;
+                }
+
                 const sortedSessions = [...sessionCountdowns].sort((a, b) => {
                     const [aHours, aMinutes] = a.start.split(":").map(Number);
                     const [bHours, bMinutes] = b.start.split(":").map(Number);
-
-                    const aStart = new Date(now);
-                    aStart.setHours(aHours, aMinutes, 0, 0);
-
-                    const bStart = new Date(now);
-                    bStart.setHours(bHours, bMinutes, 0, 0);
-
-                    return bStart - aStart; // Sort in descending order
+                    return new Date().setHours(bHours, bMinutes) - new Date().setHours(aHours, aMinutes);
                 });
 
-                // Find the most recent active session
+                console.log("🔎 Sorted Sessions:", sortedSessions);
+
                 const activeSession = sortedSessions.find((session) => {
                     const [startHours, startMinutes] = session.start.split(":").map(Number);
                     const [endHours, endMinutes] = session.end.split(":").map(Number);
@@ -150,14 +152,18 @@
                     const sessionEnd = new Date(now);
                     sessionEnd.setHours(endHours, endMinutes, 0, 0);
 
+                    console.log(`🕒 Checking "${session.title}" | Start: ${sessionStart.toLocaleTimeString()} | End: ${sessionEnd.toLocaleTimeString()} | Now: ${now.toLocaleTimeString()}`);
+
                     return sessionStart <= now && now <= sessionEnd;
                 });
 
                 if (activeSession) {
+                    console.log(`✅ Found Active Session: "${activeSession.title}"`);
                     if (activeSessionTitle !== activeSession.title) {
                         activateSession(activeSession, now);
                     }
                 } else {
+                    console.warn("🚫 No Active Sessions Found!");
                     clearActiveSession();
                 }
             }
