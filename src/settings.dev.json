@@ -233,15 +233,6 @@
   "sessionVolume": 1,
   "snippers": [
     {
-      "name": "a",
-      "x": 669,
-      "y": 466,
-      "width": 127,
-      "height": 53,
-      "display_id": "2480450848",
-      "sourceId": "screen:0:0"
-    },
-    {
       "name": "b",
       "x": 2733,
       "y": 538,
