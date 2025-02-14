@@ -174,10 +174,6 @@
       "type": "optional"
     },
     {
-      "text": "alert sound for tickers stack or cards for every ticker",
-      "type": "reminder"
-    },
-    {
       "text": "Change Splash screen to make it distinct",
       "type": "critical"
     },
