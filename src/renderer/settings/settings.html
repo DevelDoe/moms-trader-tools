@@ -222,7 +222,7 @@
     <body>
         <button class="close-btn" onclick="window.electronAPI.toggleSettings()" aria-label="Close"></button>
         <div class="settings-container">
-            <h1 class="dragable" style="width: 90%;">Settings</h1>
+            <h1 class="dragable" style="width: 90%">Settings</h1>
 
             <!-- <button onclick="window.electronAPI.toggleSettings()">Close</button> -->
 
@@ -274,6 +274,9 @@
             <div id="checklist-settings" class="tabcontent">
                 <div class="form-group">
                     <input type="text" id="new-item-text" placeholder="Checklist item text" class="form-input" />
+                    <input type="text" id="new-item-tooltip" placeholder="Tooltip (optional)" class="form-input" />
+                    <!-- ✅ Tooltip Input -->
+
                     <div class="form-row">
                         <button id="add-item-btn" class="form-button">Add Item</button>
                         <select id="new-item-type" class="form-select">
@@ -283,6 +286,7 @@
                         </select>
                     </div>
                 </div>
+
                 <div>
                     <ul id="checklist-items" class="scrollable-list" style="height: 288px"></ul>
                 </div>
@@ -292,11 +296,9 @@
                 </div>
             </div>
 
-            
-
             <!-- Clock -->
-            <div id="session-countdowns" class="tabcontent" >
-                <div class="form-container" style="padding-top: 0;">
+            <div id="session-countdowns" class="tabcontent">
+                <div class="form-container" style="padding-top: 0">
                     <div class="form-group">
                         <label for="session-title" class="form-label">Countdown Title:</label>
                         <input type="text" id="session-title" placeholder="Countdown Title" class="form-input" />
@@ -495,6 +497,7 @@
             }
 
             // Checklist Section
+            // Checklist Section
             function initializeChecklistSection(items) {
                 const checklistContainer = document.getElementById("checklist-items");
                 checklistContainer.innerHTML = "";
@@ -502,6 +505,11 @@
                 items.forEach((item, index) => {
                     const listItem = document.createElement("li");
                     listItem.textContent = `${item.text} (${item.type})`;
+
+                    // ✅ Add tooltip if available
+                    if (item.tooltip && item.tooltip.trim() !== "") {
+                        listItem.title = item.tooltip; // Set the tooltip as the title attribute
+                    }
 
                     // Create the remove button
                     const removeButton = document.createElement("button");
@@ -530,8 +538,11 @@
 
             function addChecklistItem() {
                 const inputField = document.getElementById("new-item-text");
+                const tooltipField = document.getElementById("new-item-tooltip"); // ✅ Tooltip input field
                 const typeSelect = document.getElementById("new-item-type");
+
                 const text = inputField.value.trim();
+                const tooltip = tooltipField.value.trim(); // ✅ Get tooltip value
                 const type = typeSelect.value;
 
                 if (!text) {
@@ -539,12 +550,14 @@
                     return;
                 }
 
-                window.electronAPI.addChecklistItem({ text, type });
+                // ✅ Include tooltip in the new item
+                window.electronAPI.addChecklistItem({ text, tooltip, type });
                 window.electronAPI.getSettings().then((settings) => {
                     initializeChecklistSection(settings.checklist || []);
 
-                    // Clear input field after adding
+                    // Clear input fields after adding
                     inputField.value = "";
+                    tooltipField.value = ""; // ✅ Clear tooltip field
                 });
             }
 
