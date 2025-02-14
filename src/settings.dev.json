@@ -219,7 +219,7 @@
       "type": "critical"
     }
   ],
-  "sessionVolume": 0.72,
+  "sessionVolume": 1,
   "snippers": [],
   "reminderTransparent": false
 }
