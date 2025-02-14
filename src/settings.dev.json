@@ -142,10 +142,6 @@
       "type": "critical"
     },
     {
-      "text": "Alert sounds",
-      "type": "optional"
-    },
-    {
       "text": "Image of the day",
       "type": "optional"
     },
@@ -204,6 +200,10 @@
     {
       "text": "MTM: Notifications, sound toasts?",
       "type": "critical"
+    },
+    {
+      "text": "MTT: feature Images",
+      "type": "reminder"
     }
   ],
   "sessionVolume": 1,
