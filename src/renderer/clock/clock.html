@@ -55,176 +55,180 @@
         </div>
         <script>
             let sessionCountdowns = [];
-            let activeSessionStack = []; // Stack to track session priority
-            let activeInterval = null;
-            let bellSound = null;
-            let warningSound = null;
-            let fiveMinuteWarningPlayed = false;
+let activeSessionStack = [];
+let activeInterval = null;
+let bellSound = null;
+let warningSound = null;
+let fiveMinuteWarningPlayed = false;
 
-            document.addEventListener("DOMContentLoaded", async () => {
-                listenForSessionUpdates();
-                syncClock();
-                console.log("Clock initialized.");
+document.addEventListener("DOMContentLoaded", async () => {
+    listenForSessionUpdates();
+    syncClock();
+    console.log("🕒 Clock initialized.");
 
-                // 🔔 Load bell sound
-                try {
-                    const bellSoundPath = await window.electronAPI.getBellSoundPath();
-                    bellSound = new Audio(bellSoundPath);
-                    bellSound.volume = 0;
-                    window.electronAPI.onSessionVolumeUpdate((volume) => {
-                        bellSound.volume = volume;
-                    });
-                } catch (error) {
-                    console.error("Error loading bell sound:", error);
-                }
+    try {
+        const bellSoundPath = await window.electronAPI.getBellSoundPath();
+        bellSound = new Audio(bellSoundPath);
+        bellSound.volume = 0;
+        window.electronAPI.onSessionVolumeUpdate((volume) => {
+            bellSound.volume = volume;
+        });
+    } catch (error) {
+        console.error("❌ Error loading bell sound:", error);
+    }
 
-                // ⚠️ Load 5-minute warning sound
-                try {
-                    const warningSoundPath = await window.electronAPI.get5minSoundPath();
-                    warningSound = new Audio(warningSoundPath);
-                    warningSound.volume = 0.8;
-                } catch (error) {
-                    console.error("Error loading 5-minute warning sound:", error);
-                }
-            });
+    try {
+        const warningSoundPath = await window.electronAPI.get5minSoundPath();
+        warningSound = new Audio(warningSoundPath);
+        warningSound.volume = 0.8;
+    } catch (error) {
+        console.error("❌ Error loading warning sound:", error);
+    }
+});
 
-            // 🕰 **Sync clock without lag**
-            function syncClock() {
-                updateClock();
-                const now = new Date();
-                const msUntilNextSecond = 1000 - now.getMilliseconds();
-                setTimeout(() => {
-                    updateClock();
-                    setInterval(updateClock, 1000);
-                }, msUntilNextSecond);
+// **Sync clock without lag**
+function syncClock() {
+    updateClock();
+    const now = new Date();
+    const msUntilNextSecond = 1000 - now.getMilliseconds();
+    setTimeout(() => {
+        updateClock();
+        setInterval(updateClock, 1000);
+    }, msUntilNextSecond);
+}
+
+// **Get New York time**
+function getNYTime() {
+    return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+}
+
+// **Update clock & check session**
+function updateClock() {
+    const nyTime = getNYTime();
+    document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: false });
+    checkActiveSession(nyTime);
+}
+
+// **Find the highest-priority session**
+function checkActiveSession(now) {
+    console.log("🔎 Checking active session at:", now.toLocaleTimeString("en-US", { hour12: false }));
+    console.log("📋 Sessions available:", sessionCountdowns);
+
+    let prioritySession = null;
+    let lastSession = activeSessionStack.length > 0 ? activeSessionStack[activeSessionStack.length - 1] : null;
+
+    sessionCountdowns.forEach((session) => {
+        const [startH, startM] = session.start.split(":").map(Number);
+        const [endH, endM] = session.end.split(":").map(Number);
+        const sessionStart = new Date(now).setHours(startH, startM, 0, 0);
+        const sessionEnd = new Date(now).setHours(endH, endM, 0, 0);
+
+        if (sessionStart <= now && now <= sessionEnd) {
+            console.log(`✅ Session "${session.title}" is active.`);
+            if (!prioritySession || sessionStart > new Date(prioritySession.start)) {
+                prioritySession = session;
             }
+        }
+    });
 
-            // ⏳ **Get New York time**
-            function getNYTime() {
-                return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
-            }
+    if (prioritySession) {
+        console.log(`🔵 Priority session chosen: "${prioritySession.title}"`);
+        if (!lastSession || prioritySession.title !== lastSession.title) {
+            activateSession(prioritySession);
+        }
+    } else {
+        clearActiveSession();
+    }
+}
 
-            // 🕒 **Update clock and check session**
-            function updateClock() {
-                const nyTime = getNYTime();
-                document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: false });
-                checkActiveSession(nyTime);
-            }
+// **Activate a new session**
+function activateSession(session) {
+    console.log(`🚀 Activating session: "${session.title}"`);
 
-            // 🔍 **Find the highest-priority session**
-            function checkActiveSession(now) {
-                let prioritySession = null;
-                let lastSession = activeSessionStack.length > 0 ? activeSessionStack[activeSessionStack.length - 1] : null;
+    if (!activeSessionStack.find((s) => s.title === session.title)) {
+        activeSessionStack.push(session);
+        console.log("📌 Updated session stack:", activeSessionStack.map(s => s.title));
+    }
 
-                sessionCountdowns.forEach((session) => {
-                    const [startH, startM] = session.start.split(":").map(Number);
-                    const [endH, endM] = session.end.split(":").map(Number);
-                    const sessionStart = new Date(now).setHours(startH, startM, 0, 0);
-                    const sessionEnd = new Date(now).setHours(endH, endM, 0, 0);
+    document.getElementById("session-title").textContent = session.title.toUpperCase();
 
-                    if (sessionStart <= now && now <= sessionEnd) {
-                        if (!prioritySession || sessionStart > new Date(prioritySession.start)) {
-                            prioritySession = session;
-                        }
-                    }
-                });
+    if (bellSound) {
+        bellSound.currentTime = 0;
+        bellSound.play().catch((error) => console.warn("🔔 Bell sound playback failed:", error));
+    }
 
-                if (prioritySession) {
-                    if (!lastSession || prioritySession.title !== lastSession.title) {
-                        activateSession(prioritySession);
-                    }
-                } else {
-                    clearActiveSession();
-                }
-            }
+    const [endH, endM] = session.end.split(":").map(Number);
+    const sessionEnd = new Date(getNYTime());
+    sessionEnd.setHours(endH, endM, 0, 0);
 
-            // 🚀 **Activate a new session**
-            function activateSession(session) {
-                console.log(`🎯 Activating session: "${session.title}"`);
+    fiveMinuteWarningPlayed = false;
 
-                // Push the new session onto the stack if it's not already active
-                if (!activeSessionStack.find((s) => s.title === session.title)) {
-                    activeSessionStack.push(session);
-                }
+    if (activeInterval) clearInterval(activeInterval);
+    activeInterval = setInterval(() => {
+        updateSessionCountdown(sessionEnd, session.title);
+    }, 1000);
+}
 
-                document.getElementById("session-title").textContent = session.title.toUpperCase();
+// **Update countdown timer**
+function updateSessionCountdown(sessionEnd, sessionTitle) {
+    const now = getNYTime();
+    let timeLeft = sessionEnd - now;
 
-                if (bellSound) {
-                    bellSound.currentTime = 0;
-                    bellSound.play().catch((error) => console.warn("🔔 Bell sound playback failed:", error));
-                }
+    if (timeLeft <= 0) {
+        console.log(`⏳ Session "${sessionTitle}" ended.`);
+        endSession(sessionTitle);
+        return;
+    }
 
-                const [endH, endM] = session.end.split(":").map(Number);
-                const sessionEnd = new Date(getNYTime());
-                sessionEnd.setHours(endH, endM, 0, 0);
+    const h = Math.floor(timeLeft / 3600000);
+    const m = Math.floor((timeLeft % 3600000) / 60000);
+    const s = Math.floor((timeLeft % 60000) / 1000);
+    document.getElementById("session-timer").textContent = `${h ? h + "h " : ""}${m ? m + "m " : ""}${s}s`;
 
-                fiveMinuteWarningPlayed = false;
+    if (h === 0 && m === 5 && s === 0 && !fiveMinuteWarningPlayed) {
+        fiveMinuteWarningPlayed = true;
+        if (warningSound) {
+            warningSound.currentTime = 0;
+            warningSound.play().catch((error) => console.warn("⚠️ 5-minute warning sound playback failed:", error));
+        }
+    }
+}
 
-                if (activeInterval) clearInterval(activeInterval);
-                activeInterval = setInterval(() => {
-                    updateSessionCountdown(sessionEnd, session.title);
-                }, 1000);
-            }
+// **End session & revert to the previous one**
+function endSession(sessionTitle) {
+    console.log(`🛑 Ending session: "${sessionTitle}"`);
+    activeSessionStack = activeSessionStack.filter((s) => s.title !== sessionTitle);
 
-            // ⏳ **Update countdown timer**
-            function updateSessionCountdown(sessionEnd, sessionTitle) {
-                const now = getNYTime();
-                let timeLeft = sessionEnd - now;
+    if (activeSessionStack.length > 0) {
+        let previousSession = activeSessionStack[activeSessionStack.length - 1];
+        console.log(`🔄 Resuming previous session: "${previousSession.title}"`);
+        activateSession(previousSession);
+    } else {
+        clearActiveSession();
+    }
+}
 
-                if (timeLeft <= 0) {
-                    console.log(`⏳ Session "${sessionTitle}" ended.`);
-                    endSession(sessionTitle);
-                    return;
-                }
+// **Clear session display**
+function clearActiveSession() {
+    if (activeInterval) {
+        clearInterval(activeInterval);
+        activeInterval = null;
+    }
+    activeSessionStack = [];
+    document.getElementById("session-title").textContent = "No Active Sessions";
+    document.getElementById("session-timer").textContent = "";
+    console.log("🚫 No active sessions.");
+}
 
-                const h = Math.floor(timeLeft / 3600000);
-                const m = Math.floor((timeLeft % 3600000) / 60000);
-                const s = Math.floor((timeLeft % 60000) / 1000);
-                document.getElementById("session-timer").textContent = `${h ? h + "h " : ""}${m ? m + "m " : ""}${s}s`;
+// **Listen for session updates**
+function listenForSessionUpdates() {
+    window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
+        console.log("🔄 Session Data Received:", updatedSessions);
+        sessionCountdowns = updatedSessions;
+        checkActiveSession(getNYTime());
+    });
+}
 
-                // ⚠️ **Play 5-minute warning sound**
-                if (h === 0 && m === 5 && s === 0 && !fiveMinuteWarningPlayed) {
-                    fiveMinuteWarningPlayed = true;
-                    if (warningSound) {
-                        warningSound.currentTime = 0;
-                        warningSound.play().catch((error) => console.warn("⚠️ 5-minute warning sound playback failed:", error));
-                    }
-                }
-            }
-
-            // ⏹ **End session & revert to the previous one**
-            function endSession(sessionTitle) {
-                activeSessionStack = activeSessionStack.filter((s) => s.title !== sessionTitle);
-
-                if (activeSessionStack.length > 0) {
-                    let previousSession = activeSessionStack[activeSessionStack.length - 1];
-                    console.log(`🔄 Resuming previous session: "${previousSession.title}"`);
-                    activateSession(previousSession);
-                } else {
-                    clearActiveSession();
-                }
-            }
-
-            // ❌ **Clear session display**
-            function clearActiveSession() {
-                if (activeInterval) {
-                    clearInterval(activeInterval);
-                    activeInterval = null;
-                }
-                activeSessionStack = [];
-                document.getElementById("session-title").textContent = "No Active Sessions";
-                document.getElementById("session-timer").textContent = "";
-                console.log("🚫 No active sessions.");
-            }
-
-            // 📡 **Listen for session updates from Electron**
-            function listenForSessionUpdates() {
-                window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
-                    console.log("🔄 Session Data Received:", updatedSessions);
-                    sessionCountdowns = updatedSessions;
-                    checkActiveSession(getNYTime());
-                });
-            }
         </script>
     </body>
 </html>
