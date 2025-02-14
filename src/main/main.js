@@ -42,11 +42,11 @@ const FIRST_RUN_FILE = path.join(app.getPath("userData"), "first-run.lock"); // 
 // Default settings for fresh installs
 const DEFAULT_SETTINGS = {
     checklist: [
-        { text: "Hijacked", type: "critical", state: "default" },
-        { text: "MACD", type: "critical", state: "default" },
-        { text: "Volume", type: "critical", state: "default" },
-        { text: "Extended", type: "optional", state: "state-yellow" },
-        { text: "Candles", type: "reminder", state: "default" },
+        { text: "Hijacked", type: "critical", state: "default", tooltip: "This check serves as a reminder to assess your emotional state before trading. Emotional hijacking—whether from rage, FOMO, or overconfidence—can impair judgment and lead to costly mistakes. Developing awareness of your emotions and recognizing your body's signals is key to maintaining discipline.", },
+        { text: "MACD", type: "critical", state: "default", tooltip: "The MACD signal indicator helps identify trend direction and momentum shifts, reducing the risk of trading against the trend. It can assist in avoiding the backside of a move by confirming strength or weakness in price action, helping you time entries and exits more effectively." },
+        { text: "Volume", type: "critical", state: "default", tooltip: "Volume reveals market sentiment and strength. High volume confirms trends—bullish or bearish—while low volume signals weak moves. Tracking volume helps you follow the pack, spot momentum shifts, and avoid false breakouts." },
+        { text: "Extended", type: "optional", state: "state-yellow", tooltip: "A reminder to avoid entering trades on overextended charts, which often results from FOMO. Overextended moves are prone to sharp reversals, making risk management crucial. Look for healthier pullbacks instead of chasing highs." },
+        { text: "Candles", type: "reminder", state: "default", tooltip: "Reading candlestick patterns helps anticipate market moves. Dojis, pin bars, and other formations signal potential reversals, continuations, or indecision. Mastering candle analysis improves trade timing and decision-making." },
         { text: "Spread", type: "critical", state: "default" },
         { text: "Orders", type: "reminder", state: "default" },
         { text: "9 ema", type: "reminder", state: "default" },
