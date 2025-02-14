@@ -63,7 +63,12 @@
             let fiveMinuteWarningPlayed = false; // Ensure warning plays once per session
 
             function syncClock() {
-                updateClock(); // Immediate update
+                updateClock();
+                checkActiveSession(getNYTime()); // 🟢 Ensure session updates every second
+
+                const now = new Date();
+                const msUntilNextSecond = 1000 - now.getMilliseconds();
+                setTimeout(syncClock, msUntilNextSecond);
             }
 
             function updateClock() {
