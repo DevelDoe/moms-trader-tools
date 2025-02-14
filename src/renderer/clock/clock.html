@@ -124,49 +124,113 @@
             }
 
             function checkActiveSession(now) {
-                console.log("🔍 Checking Active Sessions at:", now.toLocaleTimeString());
+    // Sort sessions by start time (earliest first)
+    const sortedSessions = [...sessionCountdowns].sort((a, b) => {
+        const [aStartHours, aStartMinutes] = a.start.split(":").map(Number);
+        const [bStartHours, bStartMinutes] = b.start.split(":").map(Number);
+        return new Date(now).setHours(aStartHours, aStartMinutes, 0, 0) - new Date(now).setHours(bStartHours, bStartMinutes, 0, 0);
+    });
 
-                console.log("📌 Current Sessions List:", sessionCountdowns);
+    let activeSession = null;
+    let outerSession = null;
 
-                if (!sessionCountdowns || sessionCountdowns.length === 0) {
-                    console.warn("⚠️ No sessions loaded!");
-                    clearActiveSession();
-                    return;
-                }
+    sortedSessions.forEach((session) => {
+        const [startHours, startMinutes] = session.start.split(":").map(Number);
+        const [endHours, endMinutes] = session.end.split(":").map(Number);
 
-                const sortedSessions = [...sessionCountdowns].sort((a, b) => {
-                    const [aHours, aMinutes] = a.start.split(":").map(Number);
-                    const [bHours, bMinutes] = b.start.split(":").map(Number);
-                    return new Date().setHours(bHours, bMinutes) - new Date().setHours(aHours, aMinutes);
-                });
+        const sessionStart = new Date(now);
+        sessionStart.setHours(startHours, startMinutes, 0, 0);
 
-                console.log("🔎 Sorted Sessions:", sortedSessions);
+        const sessionEnd = new Date(now);
+        sessionEnd.setHours(endHours, endMinutes, 0, 0);
 
-                const activeSession = sortedSessions.find((session) => {
-                    const [startHours, startMinutes] = session.start.split(":").map(Number);
-                    const [endHours, endMinutes] = session.end.split(":").map(Number);
-
-                    const sessionStart = new Date(now);
-                    sessionStart.setHours(startHours, startMinutes, 0, 0);
-
-                    const sessionEnd = new Date(now);
-                    sessionEnd.setHours(endHours, endMinutes, 0, 0);
-
-                    console.log(`🕒 Checking "${session.title}" | Start: ${sessionStart.toLocaleTimeString()} | End: ${sessionEnd.toLocaleTimeString()} | Now: ${now.toLocaleTimeString()}`);
-
-                    return sessionStart <= now && now <= sessionEnd;
-                });
-
-                if (activeSession) {
-                    console.log(`✅ Found Active Session: "${activeSession.title}"`);
-                    if (activeSessionTitle !== activeSession.title) {
-                        activateSession(activeSession, now);
-                    }
-                } else {
-                    console.warn("🚫 No Active Sessions Found!");
-                    clearActiveSession();
-                }
+        if (sessionStart <= now && now <= sessionEnd) {
+            // If an active session is already found, check if this one is smaller (nested)
+            if (!activeSession || (sessionStart >= activeSession.start && sessionEnd <= activeSession.end)) {
+                outerSession = activeSession; // Store previous session in case we need to switch back
+                activeSession = session;
             }
+        }
+    });
+
+    if (activeSession) {
+        if (activeSessionTitle !== activeSession.title) {
+            activateSession(activeSession, outerSession);
+        }
+    } else {
+        clearActiveSession();
+    }
+}
+
+function activateSession(session, outerSession = null) {
+    console.log(`Activating session: "${session.title}"`);
+    document.getElementById("session-title").textContent = session.title.toUpperCase();
+
+    if (bellSound && session.title !== lastSessionTitle) {
+        lastSessionTitle = session.title;
+        bellSound.currentTime = 0;
+        bellSound.play().catch((error) => {
+            console.warn("🔔 Bell sound playback failed:", error);
+        });
+    }
+
+    const [endHours, endMinutes] = session.end.split(":").map(Number);
+    const sessionEnd = new Date(getNYTime());
+    sessionEnd.setHours(endHours, endMinutes, 0, 0);
+
+    activeSessionTitle = session.title;
+    fiveMinuteWarningPlayed = false;
+
+    // Clear previous interval before starting a new one
+    if (activeInterval) clearInterval(activeInterval);
+
+    activeInterval = setInterval(() => {
+        updateSessionCountdown(sessionEnd, session.title, outerSession);
+    }, 1000); // Update every second
+}
+
+function updateSessionCountdown(sessionEnd, sessionTitle, outerSession) {
+    const now = getNYTime();
+    let timeLeft = sessionEnd - now;
+
+    if (timeLeft <= 0) {
+        console.log(`Session "${sessionTitle}" ended.`);
+
+        if (outerSession) {
+            console.log(`Resuming outer session: "${outerSession.title}"`);
+            activateSession(outerSession);
+        } else {
+            clearActiveSession();
+        }
+        return;
+    }
+
+    const remainingHours = Math.floor(timeLeft / 3600000);
+    const remainingMinutes = Math.floor((timeLeft % 3600000) / 60000);
+    const remainingSeconds = Math.floor((timeLeft % 60000) / 1000);
+
+    const timeString = [
+        remainingHours > 0 ? `${remainingHours}h` : "",
+        remainingMinutes > 0 ? `${remainingMinutes}m` : "",
+        remainingSeconds > 0 ? `${remainingSeconds}s` : "",
+    ]
+        .filter(Boolean)
+        .join(" ");
+
+    document.getElementById("session-timer").textContent = timeString;
+
+    // Play 5-minute warning sound
+    if (remainingHours === 0 && remainingMinutes === 5 && remainingSeconds === 0 && !fiveMinuteWarningPlayed) {
+        fiveMinuteWarningPlayed = true;
+        if (warningSound) {
+            warningSound.currentTime = 0;
+            warningSound.play().catch((error) => {
+                console.warn("⚠️ 5-minute warning sound playback failed:", error);
+            });
+        }
+    }
+}
+
 
             function activateSession(session) {
                 console.log(`Activating session: "${session.title}"`);
