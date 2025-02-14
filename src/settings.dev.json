@@ -190,10 +190,6 @@
       "type": "optional"
     },
     {
-      "text": "MTM : save images of tickers",
-      "type": "critical"
-    },
-    {
       "text": "MTT: Width of clock dynamic must be",
       "type": "reminder"
     },
