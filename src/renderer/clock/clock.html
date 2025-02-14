@@ -63,7 +63,25 @@
             let fiveMinuteWarningPlayed = false; // Ensure warning plays once per session
 
             function syncClock() {
-                updateClock(); // Update immediately
+                updateClock(); // Immediate update
+                syncSessionCountdown(); // Ensure session countdown also starts
+            }
+
+            function updateClock() {
+                const nyTime = getNYTime();
+                const options = {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                };
+                const formatter = new Intl.DateTimeFormat("en-US", options);
+                document.getElementById("clock").textContent = formatter.format(nyTime);
+
+                // Precisely schedule the next update at the start of the next second
+                const now = new Date();
+                const msUntilNextSecond = 1000 - now.getMilliseconds();
+                setTimeout(updateClock, msUntilNextSecond);
             }
 
             // Load bell sound when the page loads
@@ -106,23 +124,7 @@
                 return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
             }
 
-            // Update the clock display
-            function updateClock() {
-                const nyTime = getNYTime();
-                const options = {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                    hour12: false,
-                };
-                const formatter = new Intl.DateTimeFormat("en-US", options);
-                document.getElementById("clock").textContent = formatter.format(nyTime);
 
-                // Sync the next execution exactly with the start of the next second
-                const now = new Date();
-                const msUntilNextSecond = 1000 - now.getMilliseconds();
-                setTimeout(updateClock, msUntilNextSecond);
-            }
 
             // Check if a session is currently active
             function checkActiveSession(now) {
