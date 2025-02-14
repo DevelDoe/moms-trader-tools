@@ -142,10 +142,6 @@
       "type": "critical"
     },
     {
-      "text": "Image of the day",
-      "type": "optional"
-    },
-    {
       "text": "filter, float, score",
       "type": "reminder"
     },
@@ -204,6 +200,10 @@
     {
       "text": "MTT: feature Images",
       "type": "reminder"
+    },
+    {
+      "text": "MTM: Filter: float, score",
+      "type": "critical"
     }
   ],
   "sessionVolume": 1,
