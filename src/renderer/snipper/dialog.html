@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="../../styles/styles.css" />
         <title>Snipper Setup</title>
         <style>
+            /* General Page Styling */
             body {
                 font-family: Arial, sans-serif;
                 background: #1c1d23;
@@ -16,51 +17,89 @@
                 justify-content: center;
                 height: 100vh;
                 text-align: center;
+                padding: 20px;
             }
+
             #title {
                 height: 40px;
+                font-size: 22px;
+                font-weight: bold;
+                margin-bottom: 20px;
             }
+
+            /* Input & Select Field Styling */
             input,
             button,
             select {
-                padding: 10px;
-                margin: 8px;
+                padding: 12px;
+                margin: 10px 0;
                 font-size: 16px;
-                width: 80%;
-                max-width: 300px;
+                width: 85%;
+                max-width: 350px;
                 border-radius: 5px;
-            }
-            input {
-                background: rgb(22 26 26);
-                color: white !important;
                 border: none;
                 text-align: center;
-                margin: 0;
+                transition: all 0.2s ease-in-out;
             }
+
+            input {
+                background: rgb(30, 35, 45);
+                color: white;
+                box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+            }
+
+            input:focus,
+            select:focus {
+                outline: none;
+                box-shadow: 0 0 8px #ff9800;
+            }
+
+            /* Dropdown (Select) Styling */
+            select {
+                background: rgb(30, 35, 45);
+                color: white;
+                cursor: pointer;
+            }
+
+            select:hover {
+                background: rgb(40, 45, 55);
+            }
+
+            /* Button Styling */
             button {
                 background-color: #089981;
                 color: white;
-                border: none;
-                padding: 0 20px;
-                font-size: 16px;
                 cursor: pointer;
-                height: 36px;
-                transition: background 0.3s ease;
+                font-weight: bold;
+                transition: background 0.3s ease, transform 0.1s ease-in-out;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             }
+
             button:hover {
-                background: #777;
+                background: #0bb292;
+                transform: scale(1.05);
             }
-            button:focus,
-            input:focus,
-            select:focus {
-                outline: 1px solid #ff9800;
+
+            button:active {
+                transform: scale(0.98);
+            }
+
+            button:focus {
+                outline: none;
+                box-shadow: 0 0 10px #ff9800;
             }
         </style>
     </head>
     <body>
-        <input type="text" id="snipper-name" placeholder="Snipper Name" autofocus />
+        <h2 id="title">Snipper Setup</h2>
+
+        <!-- Snipper Name Input -->
+        <input type="text" id="snipper-name" placeholder="Enter Snipper Name" autofocus />
+
+        <!-- Confirm Button -->
         <button id="confirm-btn">Continue</button>
 
+        <!-- Screen Selection -->
         <h2>Select a Screen</h2>
         <select id="screen-select"></select>
 
@@ -111,9 +150,7 @@
                     window.electronAPI.selectScreen(selectedScreen);
                 });
             });
-        </script>
 
-        <script>
             document.addEventListener("DOMContentLoaded", () => {
                 if (!window.electronAPI || typeof window.electronAPI.send !== "function") {
                     console.error("❌ electronAPI is not available. Ensure preload.js is properly loaded.");
