@@ -212,6 +212,10 @@
     {
       "text": "MTM: NEWS: blocklist highlightlist must filter in the store and only add news entry to ticker",
       "type": "reminder"
+    },
+    {
+      "text": "MTT: taskbar on top",
+      "type": "critical"
     }
   ],
   "sessionVolume": 0,
