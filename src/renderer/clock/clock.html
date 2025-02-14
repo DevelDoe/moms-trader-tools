@@ -88,13 +88,16 @@
 
             // **Sync clock without lag**
             function syncClock() {
-                updateClock();
-                const now = new Date();
-                const msUntilNextSecond = 1000 - now.getMilliseconds();
-                setTimeout(() => {
-                    updateClock();
-                    setInterval(updateClock, 1000);
-                }, msUntilNextSecond);
+                function updateClockWithSync() {
+                    const nyTime = getNYTime();
+                    document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: false });
+
+                    // 🔍 Ensure the next update happens precisely at the start of the next second
+                    const msUntilNextSecond = 1000 - nyTime.getMilliseconds();
+                    setTimeout(() => requestAnimationFrame(updateClockWithSync), msUntilNextSecond);
+                }
+
+                updateClockWithSync(); // Start immediately with sync
             }
 
             // **Get New York time**
