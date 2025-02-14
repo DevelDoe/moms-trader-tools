@@ -128,10 +128,6 @@
       "type": "reminder"
     },
     {
-      "text": "CLOCK YELLOW",
-      "type": "optional"
-    },
-    {
       "text": "Snipper dialog",
       "type": "critical"
     },
