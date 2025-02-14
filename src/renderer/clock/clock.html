@@ -74,6 +74,20 @@
                 }, msUntilNextSecond);
             }
 
+            // Update the clock display
+            function updateClock() {
+                const nyTime = getNYTime();
+                const options = {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false,
+                };
+                const formatter = new Intl.DateTimeFormat("en-US", options);
+                document.getElementById("clock").textContent = formatter.format(nyTime);
+                checkActiveSession(nyTime);
+            }
+
             // Load bell sound when the page loads
             document.addEventListener("DOMContentLoaded", async () => {
                 listenForSessionUpdates(); // Set up listener for session updates
@@ -112,20 +126,6 @@
             // Get New York time
             function getNYTime() {
                 return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
-            }
-
-            // Update the clock display
-            function updateClock() {
-                const nyTime = getNYTime();
-                const options = {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                    hour12: false,
-                };
-                const formatter = new Intl.DateTimeFormat("en-US", options);
-                document.getElementById("clock").textContent = formatter.format(nyTime);
-                checkActiveSession(nyTime);
             }
 
             // Check if a session is currently active
