@@ -59,6 +59,11 @@
       "text": "Cat",
       "type": "optional",
       "state": "state-yellow"
+    },
+    {
+      "text": "test",
+      "tooltip": "tooltip test",
+      "type": "critical"
     }
   ],
   "sessionCountdowns": [
