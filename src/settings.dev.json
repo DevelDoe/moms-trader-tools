@@ -46,8 +46,13 @@
       "state": "default"
     },
     {
+      "text": "50%",
+      "type": "reminder",
+      "state": "default"
+    },
+    {
       "text": "VWAP",
-      "type": "critical",
+      "type": "reminder",
       "state": "default"
     },
     {
@@ -59,11 +64,6 @@
       "text": "Cat",
       "type": "optional",
       "state": "state-yellow"
-    },
-    {
-      "text": "test",
-      "tooltip": "tooltip test",
-      "type": "critical"
     }
   ],
   "sessionCountdowns": [
