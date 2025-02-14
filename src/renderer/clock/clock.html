@@ -166,63 +166,64 @@
             }
 
             function activateSession(session, now) {
-                console.log(`Activating session: "${session.title}"`);
-                document.getElementById("session-title").textContent = session.title.toUpperCase();
+    console.log(`Activating session: "${session.title}"`);
+    document.getElementById("session-title").textContent = session.title.toUpperCase();
 
-                if (bellSound && session.title !== lastSessionTitle) {
-                    lastSessionTitle = session.title;
-                    bellSound.currentTime = 0;
-                    bellSound.play().catch((error) => {
-                        console.warn("🔔 Bell sound playback failed:", error);
-                    });
-                }
+    if (bellSound && session.title !== lastSessionTitle) {
+        lastSessionTitle = session.title;
+        bellSound.currentTime = 0;
+        bellSound.play().catch((error) => {
+            console.warn("🔔 Bell sound playback failed:", error);
+        });
+    }
 
-                const [endHours, endMinutes] = session.end.split(":").map(Number);
-                const sessionEnd = new Date(now);
-                sessionEnd.setHours(endHours, endMinutes, 0, 0);
+    const [endHours, endMinutes] = session.end.split(":").map(Number);
+    const sessionEnd = new Date(now);
+    sessionEnd.setHours(endHours, endMinutes, 0, 0);
 
-                activeSessionTitle = session.title;
-                fiveMinuteWarningPlayed = false; // Reset for new session
+    activeSessionTitle = session.title;
+    fiveMinuteWarningPlayed = false; // Reset for new session
 
-                function updateCountdown() {
-                    const now = getNYTime(); // Get real-time synced clock
-                    let timeLeft = sessionEnd - now;
+    if (activeInterval) clearInterval(activeInterval); // Avoid duplicate intervals
 
-                    if (timeLeft <= 0) {
-                        console.log(`Session "${session.title}" ended.`);
-                        clearActiveSession();
-                        return;
-                    }
+    activeInterval = setInterval(() => {
+        const now = getNYTime();
+        let timeLeft = sessionEnd - now;
 
-                    const remainingHours = Math.floor(timeLeft / 3600000);
-                    const remainingMinutes = Math.floor((timeLeft % 3600000) / 60000);
-                    const remainingSeconds = Math.floor((timeLeft % 60000) / 1000);
+        if (timeLeft <= 0) {
+            console.log(`Session "${session.title}" ended.`);
+            clearActiveSession();
+            return;
+        }
 
-                    const timeString = [remainingHours > 0 ? `${remainingHours}h` : "", remainingMinutes > 0 ? `${remainingMinutes}m` : "", remainingSeconds > 0 ? `${remainingSeconds}s` : ""]
-                        .filter(Boolean)
-                        .join(" ");
+        const remainingHours = Math.floor(timeLeft / 3600000);
+        const remainingMinutes = Math.floor((timeLeft % 3600000) / 60000);
+        const remainingSeconds = Math.floor((timeLeft % 60000) / 1000);
 
-                    document.getElementById("session-timer").textContent = timeString;
-                    console.log(`Time left for session "${session.title}": ${timeString}`);
+        const timeString = [
+            remainingHours > 0 ? `${remainingHours}h` : "",
+            remainingMinutes > 0 ? `${remainingMinutes}m` : "",
+            remainingSeconds > 0 ? `${remainingSeconds}s` : "",
+        ]
+            .filter(Boolean)
+            .join(" ");
 
-                    // ⚠️ Play 5-minute warning sound when exactly 5 minutes left
-                    if (remainingHours === 0 && remainingMinutes === 5 && remainingSeconds === 0 && !fiveMinuteWarningPlayed) {
-                        fiveMinuteWarningPlayed = true;
-                        if (warningSound) {
-                            warningSound.currentTime = 0;
-                            warningSound.play().catch((error) => {
-                                console.warn("⚠️ 5-minute warning sound playback failed:", error);
-                            });
-                        }
-                    }
+        document.getElementById("session-timer").textContent = timeString;
+        console.log(`Time left for session "${session.title}": ${timeString}`);
 
-                    // **Sync next update with the exact start of the next second**
-                    const msUntilNextSecond = 1000 - now.getMilliseconds();
-                    setTimeout(updateCountdown, msUntilNextSecond);
-                }
-
-                updateCountdown(); // Start countdown with precise sync
+        // ⚠️ Play 5-minute warning sound
+        if (remainingHours === 0 && remainingMinutes === 5 && remainingSeconds === 0 && !fiveMinuteWarningPlayed) {
+            fiveMinuteWarningPlayed = true;
+            if (warningSound) {
+                warningSound.currentTime = 0;
+                warningSound.play().catch((error) => {
+                    console.warn("⚠️ 5-minute warning sound playback failed:", error);
+                });
             }
+        }
+    }, 1000); // ✅ Keeps countdown running every second
+}
+
 
             // Clear the active session display
             function clearActiveSession() {
