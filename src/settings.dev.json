@@ -200,10 +200,6 @@
     {
       "text": "MTM: Filter: float, score",
       "type": "critical"
-    },
-    {
-      "text": "MTM: save notes on tickers",
-      "type": "reminder"
     }
   ],
   "sessionVolume": 1,
