@@ -231,16 +231,6 @@
     }
   ],
   "sessionVolume": 1,
-  "snippers": [
-    {
-      "name": "asdf",
-      "x": 768,
-      "y": 626,
-      "width": 698,
-      "height": 295,
-      "display_id": "2480450848",
-      "sourceId": "screen:0:0"
-    }
-  ],
+  "snippers": [],
   "reminderTransparent": false
 }
