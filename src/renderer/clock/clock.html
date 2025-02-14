@@ -63,15 +63,7 @@
             let fiveMinuteWarningPlayed = false; // Ensure warning plays once per session
 
             function syncClock() {
-                updateClock(); // Update immediately to avoid delay
-
-                const now = new Date();
-                const msUntilNextSecond = 1000 - now.getMilliseconds(); // Calculate the time until next second
-
-                setTimeout(() => {
-                    updateClock();
-                    setInterval(updateClock, 1000); // Now we run precisely every second
-                }, msUntilNextSecond);
+                updateClock(); // Update immediately
             }
 
             // Load bell sound when the page loads
@@ -125,7 +117,11 @@
                 };
                 const formatter = new Intl.DateTimeFormat("en-US", options);
                 document.getElementById("clock").textContent = formatter.format(nyTime);
-                checkActiveSession(nyTime);
+
+                // Sync the next execution exactly with the start of the next second
+                const now = new Date();
+                const msUntilNextSecond = 1000 - now.getMilliseconds();
+                setTimeout(updateClock, msUntilNextSecond);
             }
 
             // Check if a session is currently active
