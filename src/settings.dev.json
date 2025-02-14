@@ -142,10 +142,6 @@
       "type": "critical"
     },
     {
-      "text": "clock resizable",
-      "type": "optional"
-    },
-    {
       "text": "Show version",
       "type": "critical"
     },
@@ -204,6 +200,10 @@
     {
       "text": "MTT: Clock resizeble",
       "type": "critical"
+    },
+    {
+      "text": "MTT&MTM: show version",
+      "type": "reminder"
     }
   ],
   "sessionVolume": 1,
