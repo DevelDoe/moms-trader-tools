@@ -106,6 +106,11 @@
       "start": "09:00",
       "end": "09:30",
       "title": "Breaking News E"
+    },
+    {
+      "start": "23:21",
+      "end": "23:22",
+      "title": "test 1 minute"
     }
   ],
   "reminderItems": [
