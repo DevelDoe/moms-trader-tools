@@ -125,6 +125,8 @@
 
                     if (sessionStart <= now && now <= sessionEnd) {
                         console.log(`✅ Session "${session.title}" is active.`);
+
+                        // Always prioritize the latest starting session that is active
                         if (!prioritySession || sessionStart > new Date(prioritySession.start)) {
                             prioritySession = session;
                         }
@@ -132,7 +134,7 @@
                 });
 
                 if (prioritySession) {
-                    console.log(`🔵 Priority session chosen: "${prioritySession.title}"`);
+                    console.log(`🔥 New priority session: "${prioritySession.title}"`);
                     if (!lastSession || prioritySession.title !== lastSession.title) {
                         activateSession(prioritySession);
                     }
