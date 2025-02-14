@@ -102,11 +102,15 @@
 
                     reminderContainer.innerHTML = ""; // Clear previous items
 
-                    items.forEach((item) => {
+                    items.forEach((item, index) => {
                         if (!item.text.trim()) return;
+
                         const itemElement = document.createElement("div");
                         itemElement.className = `reminder-item ${item.type}`;
+
+                        // ✅ Alternate background effect (Handled in CSS via nth-child)
                         itemElement.textContent = item.text;
+
                         reminderContainer.appendChild(itemElement);
                     });
 
