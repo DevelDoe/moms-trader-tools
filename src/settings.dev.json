@@ -146,10 +146,6 @@
       "type": "critical"
     },
     {
-      "text": "Gainers Collector",
-      "type": "optional"
-    },
-    {
       "text": "Alert sounds",
       "type": "optional"
     },
