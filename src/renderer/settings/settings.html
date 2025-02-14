@@ -428,6 +428,7 @@
                     // ✅ Load the saved setting (default to true)
                     const transparentToggle = document.getElementById("reminder-transparent-toggle");
                     transparentToggle.checked = settings.reminderTransparent ?? true;
+                    transparentToggle.checked = true;
 
                     // ✅ Listen for changes and save setting
                     transparentToggle.addEventListener("change", () => {
