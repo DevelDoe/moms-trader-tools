@@ -142,10 +142,6 @@
       "type": "critical"
     },
     {
-      "text": "Save ticker when take notes on disk",
-      "type": "optional"
-    },
-    {
       "text": "save countdown volume",
       "type": "critical"
     },
