@@ -860,7 +860,7 @@ function createSnipperDialogWindow() {
 
     dialogWindow.loadFile(path.join(__dirname, "../renderer/snipper/dialog.html"));
 
-    // dialogWindow.webContents.openDevTools({ mode: "detach" });
+    dialogWindow.webContents.openDevTools({ mode: "detach" });
 
     return dialogWindow;
 }
