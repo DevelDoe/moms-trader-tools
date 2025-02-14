@@ -142,10 +142,6 @@
       "type": "critical"
     },
     {
-      "text": "Snipper dialog",
-      "type": "critical"
-    },
-    {
       "text": "shades for notes",
       "type": "reminder"
     },
@@ -231,16 +227,6 @@
     }
   ],
   "sessionVolume": 1,
-  "snippers": [
-    {
-      "name": "b",
-      "x": 2733,
-      "y": 538,
-      "width": 193,
-      "height": 145,
-      "display_id": "2480450848",
-      "sourceId": "screen:0:0"
-    }
-  ],
+  "snippers": [],
   "reminderTransparent": false
 }
