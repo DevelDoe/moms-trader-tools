@@ -182,10 +182,6 @@
       "type": "optional"
     },
     {
-      "text": "2 THINGS TO DO BEFORE PRE LAUNCH:\n1 SNIPPET\n2 TOOLTIP FOR CHECKLIST",
-      "type": "critical"
-    },
-    {
       "text": "MTM: check sector and country",
       "type": "optional"
     },
