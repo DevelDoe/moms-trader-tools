@@ -98,7 +98,7 @@ const DEFAULT_SETTINGS = {
         },
     ],
     snippers: [],
-    reminderTransparent: false
+    reminderTransparent: true
 };
 
 // 🛠️ **Function to check if it's a fresh install**
