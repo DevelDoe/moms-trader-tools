@@ -166,10 +166,6 @@
       "type": "reminder"
     },
     {
-      "text": "Checklist width on add",
-      "type": "critical"
-    },
-    {
       "text": "Save ticker when take notes on disk",
       "type": "optional"
     },
