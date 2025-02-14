@@ -111,6 +111,11 @@
       "start": "17:30",
       "end": "17:31",
       "title": "test"
+    },
+    {
+      "start": "17:32",
+      "end": "17:38",
+      "title": "6 min test"
     }
   ],
   "reminderItems": [
