@@ -166,10 +166,6 @@
       "type": "optional"
     },
     {
-      "text": "taskbar always on top",
-      "type": "optional"
-    },
-    {
       "text": "save countdown volume",
       "type": "critical"
     },
