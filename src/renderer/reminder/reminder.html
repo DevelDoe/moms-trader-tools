@@ -74,9 +74,9 @@
                 // ✅ Listen for setting changes
                 window.electronAPI.onSettingsUpdated((updatedSettings) => {
                     console.log("📩 Received updated settings:", updatedSettings);
-                    if (updatedSettings.reminderTransparent !== undefined) {
-                        updateBackground(updatedSettings.reminderTransparent);
-                    }
+                    // if (updatedSettings.reminderTransparent !== undefined) {
+                    //     updateBackground(updatedSettings.reminderTransparent);
+                    // }
                 });
 
                 // ✅ Listen for direct updates from settings UI
