@@ -11,7 +11,7 @@ function createReminderWindow(taskbarWindow, transparent = true) {
     reminderWindow = new BrowserWindow({
         width: 10,
         height: 10,
-        transparent: true, // ✅ Set based on user settings
+        transparent, // ✅ Set based on user settings
         frame: false,
         resizable: true,
         alwaysOnTop: true,
