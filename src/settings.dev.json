@@ -142,10 +142,6 @@
       "type": "critical"
     },
     {
-      "text": "filter, float, score",
-      "type": "reminder"
-    },
-    {
       "text": "Save ticker when take notes on disk",
       "type": "optional"
     },
@@ -204,6 +200,10 @@
     {
       "text": "MTM: Filter: float, score",
       "type": "critical"
+    },
+    {
+      "text": "MTM: save notes on tickers",
+      "type": "reminder"
     }
   ],
   "sessionVolume": 1,
