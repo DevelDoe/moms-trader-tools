@@ -231,6 +231,16 @@
     }
   ],
   "sessionVolume": 1,
-  "snippers": [],
+  "snippers": [
+    {
+      "name": "a",
+      "x": 669,
+      "y": 466,
+      "width": 127,
+      "height": 53,
+      "display_id": "2480450848",
+      "sourceId": "screen:0:0"
+    }
+  ],
   "reminderTransparent": false
 }
