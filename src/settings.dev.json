@@ -212,6 +212,10 @@
     {
       "text": "MTM: alert sound for adding ticker. queue and make it sound like card flip stack.",
       "type": "reminder"
+    },
+    {
+      "text": "MTT: Images and socket, MTM: socket server and push to MTT ticker from active...",
+      "type": "critical"
     }
   ],
   "sessionVolume": 0,
