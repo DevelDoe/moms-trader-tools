@@ -425,22 +425,24 @@
 
                     // Reminder Transparency
 
-                    // ✅ Load the saved setting (default to true)
-                    const transparentToggle = document.getElementById("reminder-transparent-toggle");
+                    // // ✅ Load the saved setting (default to true)
+                    // const transparentToggle = document.getElementById("reminder-transparent-toggle");
                     // transparentToggle.checked = settings.reminderTransparent ?? true;
-                    transparentToggle.checked = true;
+                    // transparentToggle.checked = settings.reminderTransparent ?? true;
 
-                    // ✅ Listen for changes and save setting
-                    transparentToggle.addEventListener("change", () => {
-                        const isTransparent = transparentToggle.checked;
-                        window.electronAPI.updateSettings({ reminderTransparent: isTransparent });
+                    // // ✅ Listen for changes and save setting
+                    // transparentToggle.addEventListener("change", () => {
+                    //     const isTransparent = transparentToggle.checked;
+                    //     window.electronAPI.updateSettings({ reminderTransparent: isTransparent });
 
-                        // ✅ Notify Electron to update the Reminder window
-                        window.electronAPI.refreshReminderWindow();
+                    //     // ✅ Notify Electron to update the Reminder window
+                    //     window.electronAPI.refreshReminderWindow();
 
-                        // ✅ Send an event to `reminder.html` to update the CSS dynamically
-                        // window.electronAPI.send("update-reminder-transparency", isTransparent);
-                    });
+                    //     // ✅ Send an event to `reminder.html` to update the CSS dynamically
+                    //     // window.electronAPI.send("update-reminder-transparency", isTransparent);
+                    // });
+
+
                     // Set the default active tab
                     const defaultTab = document.querySelector(".tablinks.active");
                     if (defaultTab) {
