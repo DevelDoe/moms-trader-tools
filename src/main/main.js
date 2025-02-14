@@ -846,8 +846,8 @@ function sendSnipperUpdates() {
 // Create Snipper Dialog Window
 function createSnipperDialogWindow() {
     const dialogWindow = new BrowserWindow({
-        width: 400,
-        height: 300,
+        width: 500,
+        height: 260,
         frame: false,
         alwaysOnTop: true,
         resizable: true,
