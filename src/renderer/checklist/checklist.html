@@ -148,21 +148,6 @@
             #checklist li {
                 position: relative;
             }
-
-            #checklist li:hover::after {
-                content: attr(data-tooltip);
-                position: absolute;
-                left: 50%;
-                bottom: 120%;
-                transform: translateX(-50%);
-                background-color: rgba(0, 0, 0, 0.75);
-                color: white;
-                padding: 5px 10px;
-                border-radius: 5px;
-                font-size: 12px;
-                white-space: nowrap;
-                z-index: 10;
-            }
         </style>
     </head>
     <body class="dragable">
