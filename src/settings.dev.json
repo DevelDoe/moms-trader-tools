@@ -64,16 +64,6 @@
       "text": "Cat",
       "type": "optional",
       "state": "state-yellow"
-    },
-    {
-      "text": "tst",
-      "tooltip": "ssdfgdfg",
-      "type": "critical"
-    },
-    {
-      "text": "fsdgsd",
-      "tooltip": "sdfgsdfgd",
-      "type": "critical"
     }
   ],
   "sessionCountdowns": [
