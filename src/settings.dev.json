@@ -3,67 +3,80 @@
     {
       "text": "Hijacked",
       "type": "critical",
-      "state": "default"
+      "state": "default",
+      "tooltip": "This check serves as a reminder to assess your emotional state before trading. Emotional hijacking—whether from rage, FOMO, or overconfidence—can impair judgment and lead to costly mistakes. Developing awareness of your emotions and recognizing your body's signals is key to maintaining discipline."
     },
     {
       "text": "MACD",
       "type": "critical",
-      "state": "default"
+      "state": "default",
+      "tooltip": "The MACD signal indicator helps identify trend direction and momentum shifts, reducing the risk of trading against the trend. It can assist in avoiding the backside of a move by confirming strength or weakness in price action, helping you time entries and exits more effectively."
     },
     {
       "text": "Volume",
       "type": "critical",
-      "state": "default"
+      "state": "default",
+      "tooltip": "Volume reveals market sentiment and strength. High volume confirms trends—bullish or bearish—while low volume signals weak moves. Tracking volume helps you follow the pack, spot momentum shifts, and avoid false breakouts."
     },
     {
       "text": "Extended",
       "type": "optional",
-      "state": "state-yellow"
+      "state": "state-yellow",
+      "tooltip": "A reminder to avoid entering trades on overextended charts, which often results from FOMO. Overextended moves are prone to sharp reversals, making risk management crucial. Look for healthier pullbacks instead of chasing highs."
     },
     {
       "text": "Candles",
       "type": "reminder",
-      "state": "default"
+      "state": "default",
+      "tooltip": "Reading candlestick patterns helps anticipate market moves. Dojis, pin bars, and other formations signal potential reversals, continuations, or indecision. Mastering candle analysis improves trade timing and decision-making."
     },
     {
       "text": "Spread",
       "type": "critical",
-      "state": "default"
+      "state": "default",
+      "tooltip": "A wide or volatile spread can lead to significant losses. Always monitor the spread to avoid unexpected price slippage and ensure precise entries and exits."
     },
     {
       "text": "Orders",
       "type": "reminder",
-      "state": "default"
+      "state": "default",
+      "tooltip": "Large bid and ask orders at key price levels can act as support or resistance. Monitoring these can help anticipate potential reversals or breakouts."
     },
     {
-      "text": "9 ema",
+      "text": "EMA",
       "type": "reminder",
-      "state": "default"
+      "state": "default",
+      "tooltip": "Helps identify trends by smoothing out price action. A rising EMA suggests bullish momentum, while a falling EMA indicates bearish pressure. It can also act as dynamic support or resistance and are often trigger points."
     },
     {
-      "text": "Time",
+      "text": "Time bar",
       "type": "reminder",
-      "state": "default"
+      "state": "default",
+      "tooltip": "The remaining time in a candle is crucial for confirming signals. A setup that looks strong mid-bar can completely change by the close. Waiting for the candle to complete prevents premature entries based on incomplete patterns and false moves."
     },
     {
       "text": "50%",
       "type": "reminder",
-      "state": "default"
+      "state": "default",
+      "tooltip": "A stock that dumps more than 50% of its move often signals weak momentum and a potential trend reversal rather than a healthy pullback. When a stock retraces this deeply, it suggests that buyers are losing control, and sellers are stepping in aggressively."
     },
     {
       "text": "VWAP",
       "type": "reminder",
-      "state": "default"
+      "state": "default",
+      "tooltip": "VWAP is a key intraday indicator that helps traders assess fair value and a stock’s strength or weakness. Institutional traders often use it as a benchmark for buy/sell decisions. Most trades cluster around VWAP, making it a crucial level for entries and exits."
     },
     {
       "text": "Float",
       "type": "optional",
-      "state": "state-yellow"
+      "state": "state-yellow",
+      "tooltip": "Understanding float helps traders anticipate supply/demand imbalances, identify potential short squeezes, and gauge the risk level of a trade. Low float stocks tend to be more volatile due to limited supply, while high float stocks are generally more stable."
     },
     {
-      "text": "Cat",
+      "text": "Catalyst",
       "type": "optional",
-      "state": "state-yellow"
+      "state": "state-yellow",
+      "tooltip": "A strong news catalyst can drive volume and momentum, making a stock more volatile and tradable. Positive news can fuel bullish moves, while negative news can trigger sell-offs. Traders should assess the strength of the catalyst, its impact on the stock, and how the market react."
     }
   ],
   "sessionCountdowns": [
