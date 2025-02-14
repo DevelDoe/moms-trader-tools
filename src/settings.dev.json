@@ -142,10 +142,6 @@
       "type": "critical"
     },
     {
-      "text": "add a tooltip to checklist items.",
-      "type": "reminder"
-    },
-    {
       "text": "Snipper dialog",
       "type": "critical"
     },
