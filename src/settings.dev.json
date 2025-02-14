@@ -77,11 +77,6 @@
       "type": "optional",
       "state": "state-yellow",
       "tooltip": "A strong news catalyst can drive volume and momentum, making a stock more volatile and tradable. Positive news can fuel bullish moves, while negative news can trigger sell-offs. Traders should assess the strength of the catalyst, its impact on the stock, and how the market react."
-    },
-    {
-      "text": "test",
-      "tooltip": "test",
-      "type": "critical"
     }
   ],
   "sessionCountdowns": [
