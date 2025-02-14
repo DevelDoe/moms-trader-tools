@@ -194,10 +194,6 @@
       "type": "reminder"
     },
     {
-      "text": "MTT: taskbar on top",
-      "type": "critical"
-    },
-    {
       "text": "MTM: alert sound for adding ticker. queue and make it sound like card flip stack.",
       "type": "reminder"
     },
