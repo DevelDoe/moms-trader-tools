@@ -232,11 +232,13 @@
                 console.log("No active sessions.");
             }
 
-            // Listen for session updates from the Electron app
             function listenForSessionUpdates() {
                 window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
-                    console.log("Updated sessions received:", updatedSessions);
-                    sessionCountdowns = updatedSessions; // Replace with updated sessions
+                    console.log("🔄 Session Data Received:", updatedSessions);
+                    sessionCountdowns = updatedSessions; // Update session list
+
+                    // ✅ Ensure active session is checked
+                    checkActiveSession(getNYTime());
                 });
             }
         </script>
