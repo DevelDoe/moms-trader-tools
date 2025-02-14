@@ -145,6 +145,24 @@
             .state-yellow {
                 background-color: #fdf4e3; /* Light Yellow */
             }
+            #checklist li {
+                position: relative;
+            }
+
+            #checklist li:hover::after {
+                content: attr(data-tooltip);
+                position: absolute;
+                left: 50%;
+                bottom: 120%;
+                transform: translateX(-50%);
+                background-color: rgba(0, 0, 0, 0.75);
+                color: white;
+                padding: 5px 10px;
+                border-radius: 5px;
+                font-size: 12px;
+                white-space: nowrap;
+                z-index: 10;
+            }
         </style>
     </head>
     <body class="dragable">
@@ -237,6 +255,11 @@
                     listItem.textContent = item.text;
                     listItem.dataset.type = item.type;
 
+                    // ✅ Add tooltip if available
+                    if (item.tooltip) {
+                        listItem.setAttribute("title", item.tooltip);
+                    }
+
                     // Initialize default states based on type
                     if (item.type === "critical") {
                         listItem.style.borderLeftColor = item.borderColor || "rgb(85, 1, 1)"; // Red for critical
@@ -244,7 +267,6 @@
                         listItem.classList.add("state-yellow"); // Default to yellow for optional
                         listItem.style.borderLeftColor = item.borderColor || "rgb(255, 152, 0)"; // Yellow border
                     } else if (item.type === "reminder") {
-                        // Reminders are static and non-interactive
                         listItem.classList.add("reminder");
                     }
 
