@@ -220,6 +220,16 @@
     }
   ],
   "sessionVolume": 1,
-  "snippers": [],
+  "snippers": [
+    {
+      "name": "fgsdf",
+      "x": 604,
+      "y": 632,
+      "width": 191,
+      "height": 314,
+      "display_id": "2480450848",
+      "sourceId": "screen:0:0"
+    }
+  ],
   "reminderTransparent": false
 }
