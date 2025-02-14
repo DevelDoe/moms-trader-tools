@@ -174,10 +174,6 @@
       "type": "critical"
     },
     {
-      "text": "Clock one sec after",
-      "type": "optional"
-    },
-    {
       "text": "Change Splash screen to make it distinct",
       "type": "critical"
     },
