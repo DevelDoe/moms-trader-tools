@@ -69,7 +69,7 @@
 
                 // ✅ Fetch the transparency setting on load
                 const settings = await window.electronAPI.getSettings();
-                updateBackground(settings.reminderTransparent);
+                // updateBackground(settings.reminderTransparent);
 
                 // ✅ Listen for setting changes
                 window.electronAPI.onSettingsUpdated((updatedSettings) => {
