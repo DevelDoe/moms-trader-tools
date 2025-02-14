@@ -123,46 +123,47 @@
                 return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
             }
 
+
             function checkActiveSession(now) {
-    // Sort sessions by start time (earliest first)
-    const sortedSessions = [...sessionCountdowns].sort((a, b) => {
-        const [aStartHours, aStartMinutes] = a.start.split(":").map(Number);
-        const [bStartHours, bStartMinutes] = b.start.split(":").map(Number);
-        return new Date(now).setHours(aStartHours, aStartMinutes, 0, 0) - new Date(now).setHours(bStartHours, bStartMinutes, 0, 0);
+    // Find all currently active sessions
+    let activeSessions = sessionCountdowns.filter((session) => {
+        const sessionStart = getSessionTime(session.start, now);
+        const sessionEnd = getSessionTime(session.end, now);
+        return sessionStart <= now && now <= sessionEnd;
     });
 
-    let activeSession = null;
-    let outerSession = null;
-
-    sortedSessions.forEach((session) => {
-        const [startHours, startMinutes] = session.start.split(":").map(Number);
-        const [endHours, endMinutes] = session.end.split(":").map(Number);
-
-        const sessionStart = new Date(now);
-        sessionStart.setHours(startHours, startMinutes, 0, 0);
-
-        const sessionEnd = new Date(now);
-        sessionEnd.setHours(endHours, endMinutes, 0, 0);
-
-        if (sessionStart <= now && now <= sessionEnd) {
-            // If an active session is already found, check if this one is smaller (nested)
-            if (!activeSession || (sessionStart >= activeSession.start && sessionEnd <= activeSession.end)) {
-                outerSession = activeSession; // Store previous session in case we need to switch back
-                activeSession = session;
-            }
-        }
-    });
-
-    if (activeSession) {
-        if (activeSessionTitle !== activeSession.title) {
-            activateSession(activeSession, outerSession);
-        }
-    } else {
+    // If no active sessions, clear
+    if (activeSessions.length === 0) {
         clearActiveSession();
+        return;
+    }
+
+    // Sort active sessions by duration (shortest first)
+    activeSessions.sort((a, b) => getSessionDuration(a) - getSessionDuration(b));
+
+    // Get the most nested session (smallest duration)
+    let smallestActiveSession = activeSessions[0];
+
+    // If switching sessions, activate the new one
+    if (activeSessionTitle !== smallestActiveSession.title) {
+        activateSession(smallestActiveSession, activeSessions);
     }
 }
 
-function activateSession(session, outerSession = null) {
+// Convert session time (HH:MM) to a Date object
+function getSessionTime(timeString, referenceDate) {
+    const [hours, minutes] = timeString.split(":").map(Number);
+    const sessionTime = new Date(referenceDate);
+    sessionTime.setHours(hours, minutes, 0, 0);
+    return sessionTime;
+}
+
+// Helper function to get session duration in minutes
+function getSessionDuration(session) {
+    return getSessionTime(session.end, new Date()) - getSessionTime(session.start, new Date());
+}
+
+function activateSession(session, activeSessions) {
     console.log(`Activating session: "${session.title}"`);
     document.getElementById("session-title").textContent = session.title.toUpperCase();
 
@@ -174,31 +175,30 @@ function activateSession(session, outerSession = null) {
         });
     }
 
-    const [endHours, endMinutes] = session.end.split(":").map(Number);
-    const sessionEnd = new Date(getNYTime());
-    sessionEnd.setHours(endHours, endMinutes, 0, 0);
-
+    const sessionEnd = getSessionTime(session.end, getNYTime());
     activeSessionTitle = session.title;
     fiveMinuteWarningPlayed = false;
 
-    // Clear previous interval before starting a new one
+    // Clear previous countdown
     if (activeInterval) clearInterval(activeInterval);
 
     activeInterval = setInterval(() => {
-        updateSessionCountdown(sessionEnd, session.title, outerSession);
-    }, 1000); // Update every second
+        updateSessionCountdown(sessionEnd, session.title, activeSessions);
+    }, 1000);
 }
 
-function updateSessionCountdown(sessionEnd, sessionTitle, outerSession) {
+function updateSessionCountdown(sessionEnd, sessionTitle, activeSessions) {
     const now = getNYTime();
     let timeLeft = sessionEnd - now;
 
     if (timeLeft <= 0) {
         console.log(`Session "${sessionTitle}" ended.`);
 
-        if (outerSession) {
-            console.log(`Resuming outer session: "${outerSession.title}"`);
-            activateSession(outerSession);
+        // Find next fallback session (return to outer session)
+        const remainingSessions = activeSessions.filter((session) => session.title !== sessionTitle);
+        if (remainingSessions.length > 0) {
+            console.log(`Resuming outer session: "${remainingSessions[0].title}"`);
+            activateSession(remainingSessions[0], remainingSessions);
         } else {
             clearActiveSession();
         }
@@ -209,17 +209,13 @@ function updateSessionCountdown(sessionEnd, sessionTitle, outerSession) {
     const remainingMinutes = Math.floor((timeLeft % 3600000) / 60000);
     const remainingSeconds = Math.floor((timeLeft % 60000) / 1000);
 
-    const timeString = [
-        remainingHours > 0 ? `${remainingHours}h` : "",
-        remainingMinutes > 0 ? `${remainingMinutes}m` : "",
-        remainingSeconds > 0 ? `${remainingSeconds}s` : "",
-    ]
+    const timeString = [remainingHours > 0 ? `${remainingHours}h` : "", remainingMinutes > 0 ? `${remainingMinutes}m` : "", remainingSeconds > 0 ? `${remainingSeconds}s` : ""]
         .filter(Boolean)
         .join(" ");
 
     document.getElementById("session-timer").textContent = timeString;
 
-    // Play 5-minute warning sound
+    // ⚠️ Play 5-minute warning sound
     if (remainingHours === 0 && remainingMinutes === 5 && remainingSeconds === 0 && !fiveMinuteWarningPlayed) {
         fiveMinuteWarningPlayed = true;
         if (warningSound) {
@@ -232,64 +228,7 @@ function updateSessionCountdown(sessionEnd, sessionTitle, outerSession) {
 }
 
 
-            function activateSession(session) {
-                console.log(`Activating session: "${session.title}"`);
-                document.getElementById("session-title").textContent = session.title.toUpperCase();
 
-                if (bellSound && session.title !== lastSessionTitle) {
-                    lastSessionTitle = session.title;
-                    bellSound.currentTime = 0;
-                    bellSound.play().catch((error) => {
-                        console.warn("🔔 Bell sound playback failed:", error);
-                    });
-                }
-
-                const [endHours, endMinutes] = session.end.split(":").map(Number);
-                const sessionEnd = new Date(getNYTime());
-                sessionEnd.setHours(endHours, endMinutes, 0, 0);
-
-                activeSessionTitle = session.title;
-                fiveMinuteWarningPlayed = false; // Reset warning
-
-                // ✅ Ensure previous interval is cleared before starting a new one
-                if (activeInterval) clearInterval(activeInterval);
-
-                activeInterval = setInterval(() => {
-                    updateSessionCountdown(sessionEnd, session.title);
-                }, 1000); // Runs every second
-            }
-
-            function updateSessionCountdown(sessionEnd, sessionTitle) {
-                const now = getNYTime();
-                let timeLeft = sessionEnd - now;
-
-                if (timeLeft <= 0) {
-                    console.log(`Session "${sessionTitle}" ended.`);
-                    clearActiveSession();
-                    return;
-                }
-
-                const remainingHours = Math.floor(timeLeft / 3600000);
-                const remainingMinutes = Math.floor((timeLeft % 3600000) / 60000);
-                const remainingSeconds = Math.floor((timeLeft % 60000) / 1000);
-
-                const timeString = [remainingHours > 0 ? `${remainingHours}h` : "", remainingMinutes > 0 ? `${remainingMinutes}m` : "", remainingSeconds > 0 ? `${remainingSeconds}s` : ""]
-                    .filter(Boolean)
-                    .join(" ");
-
-                document.getElementById("session-timer").textContent = timeString;
-
-                // ⚠️ Play 5-minute warning sound
-                if (remainingHours === 0 && remainingMinutes === 5 && remainingSeconds === 0 && !fiveMinuteWarningPlayed) {
-                    fiveMinuteWarningPlayed = true;
-                    if (warningSound) {
-                        warningSound.currentTime = 0;
-                        warningSound.play().catch((error) => {
-                            console.warn("⚠️ 5-minute warning sound playback failed:", error);
-                        });
-                    }
-                }
-            }
 
             function clearActiveSession() {
                 if (activeInterval) {
