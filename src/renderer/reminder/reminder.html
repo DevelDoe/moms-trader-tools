@@ -29,19 +29,33 @@
                 font-weight: 100;
                 line-height: 1.4;
                 word-wrap: break-word;
-                white-space: normal; /* Allow proper wrapping */
+                white-space: normal;
                 display: block;
+                padding: 5px;
+                border-radius: 4px;
             }
 
+            /* ✅ Alternate Row Colors */
+            .reminder-item:nth-child(odd) {
+                background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent */
+            }
+
+            .reminder-item:nth-child(even) {
+                background-color: rgba(255, 255, 255, 0.2); /* More solid */
+            }
+
+            /* Critical Items */
             .critical {
                 color: #f23645;
                 font-weight: 600;
             }
 
+            /* Optional Items */
             .optional {
                 color: #ff9800;
             }
 
+            /* Default Reminder Items */
             .reminder {
                 color: white;
             }
