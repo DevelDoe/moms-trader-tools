@@ -132,10 +132,6 @@
       "type": "optional"
     },
     {
-      "text": "CLOCK IS MOVING, FLOAT TO LEFT MAYBE...",
-      "type": "optional"
-    },
-    {
       "text": "Snipper dialog",
       "type": "critical"
     },
