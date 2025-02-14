@@ -120,14 +120,22 @@
                 sessionCountdowns.forEach((session) => {
                     const [startH, startM] = session.start.split(":").map(Number);
                     const [endH, endM] = session.end.split(":").map(Number);
-                    const sessionStart = new Date(now).setHours(startH, startM, 0, 0);
-                    const sessionEnd = new Date(now).setHours(endH, endM, 0, 0);
+
+                    const sessionStart = new Date(now);
+                    sessionStart.setHours(startH, startM, 0, 0);
+
+                    const sessionEnd = new Date(now);
+                    sessionEnd.setHours(endH, endM, 0, 0);
 
                     if (sessionStart <= now && now <= sessionEnd) {
                         console.log(`✅ Session "${session.title}" is active.`);
 
-                        // Always prioritize the latest starting session that is active
-                        if (!prioritySession || sessionStart > new Date(prioritySession.start)) {
+                        // Convert previous priority session start time to Date for comparison
+                        const prevStart = prioritySession ? new Date(now).setHours(...prioritySession.start.split(":").map(Number), 0, 0) : null;
+
+                        // 🔥 Choose the session with the latest start time
+                        if (!prioritySession || sessionStart > prevStart) {
+                            console.log(`🚀 "${session.title}" is taking priority over "${prioritySession ? prioritySession.title : "none"}"`);
                             prioritySession = session;
                         }
                     }
