@@ -188,6 +188,10 @@
     {
       "text": "MTM: Object destroyed updates",
       "type": "critical"
+    },
+    {
+      "text": "MTM: notifications(windows toast), alerts(carddeck sound for updates)",
+      "type": "reminder"
     }
   ],
   "sessionVolume": 1,
