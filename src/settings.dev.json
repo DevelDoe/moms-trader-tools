@@ -148,10 +148,6 @@
       "type": "reminder"
     },
     {
-      "text": "MTT: Countdown transparent",
-      "type": "reminder"
-    },
-    {
       "text": "MTT: Clock resizeble",
       "type": "critical"
     },
