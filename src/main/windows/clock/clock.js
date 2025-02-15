@@ -11,7 +11,7 @@ function createClockWindow(taskbarWindow, transparent = true) {
         frame: false,
         transparent,
         alwaysOnTop: true,
-        resizable: true,
+        resizable: false,
         webPreferences: {
             preload: path.join(__dirname, "../../../renderer/common/preload.js"),
             contextIsolation: true, // Required for contextBridge
