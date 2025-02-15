@@ -9,7 +9,7 @@ function createClockWindow(taskbarWindow, transparent = true) {
         height: 43,
         show: false,
         frame: false,
-        transparent: true,
+        transparent,
         alwaysOnTop: true,
         resizable: true,
         webPreferences: {
