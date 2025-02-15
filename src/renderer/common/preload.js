@@ -45,6 +45,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getTickSoundPath: async () => await ipcRenderer.invoke("get-tick-sound-path"),
     setCountdownVolume: (volume) => ipcRenderer.send("countdown-volume-change", volume),
     onCountdownVolumeUpdate: (callback) => ipcRenderer.on("update-countdown-volume", (_, volume) => callback(volume)),
+    refreshCountdownWindow: () => ipcRenderer.send("refresh-reminder-window"),
 
     // ⏰ Session Countdowns
     setSessionVolume: (volume) => ipcRenderer.send("session-volume-change", volume),
