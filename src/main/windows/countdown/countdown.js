@@ -9,7 +9,7 @@ function createCountdownWindow(taskbarWindow) {
         height: 30,
         transparent: true,
         frame: false,
-        resizable: false,
+        resizable: true,
         show: false,
         alwaysOnTop: true,
         webPreferences: {
