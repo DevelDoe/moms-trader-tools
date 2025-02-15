@@ -74,17 +74,42 @@
 
             .btn {
                 display: inline-block;
-                background: #333;
+                background: linear-gradient(135deg, #089981, #056e63);
                 color: #fff;
-                padding: 10px 20px;
+                padding: 12px 24px;
                 text-decoration: none;
-                border-radius: 3px;
-                margin-top: 10px;
+                border-radius: 8px;
+                margin-top: 15px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                box-shadow: 0 4px 10px rgba(8, 153, 129, 0.4);
+                transition: all 0.3s ease-in-out;
             }
 
             .btn:hover {
-                background: #444;
-                color: white;
+                background: linear-gradient(135deg, #05a789, #068d77);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(8, 153, 129, 0.6);
+            }
+
+            .btn.paypal {
+                background: linear-gradient(135deg, #0070ba, #005a9c);
+                box-shadow: 0 4px 10px rgba(0, 112, 186, 0.4);
+            }
+
+            .btn.paypal:hover {
+                background: linear-gradient(135deg, #005ea8, #004c87);
+                box-shadow: 0 6px 15px rgba(0, 112, 186, 0.6);
+            }
+
+            .btn.coffee {
+                background: linear-gradient(135deg, #ff9900, #cc7a00);
+                box-shadow: 0 4px 10px rgba(255, 153, 0, 0.4);
+            }
+
+            .btn.coffee:hover {
+                background: linear-gradient(135deg, #e68a00, #b36b00);
+                box-shadow: 0 6px 15px rgba(255, 153, 0, 0.6);
             }
             * {
                 user-select: none; /* Standard */
@@ -114,11 +139,16 @@
             <div class="message">
                 <p>Hi, I’m Morgan, the developer of this app.</p>
                 <p>
-                    I built Moms Trader Tools (MTT) because I needed something simple and efficient to help with day trading. Over time, it grew into a full toolset that I decided to share with others.
-                <p>
-                    If you find value in the app and want to support the development, even a coffee goes a long way with keeping the light on and allowing me to continue to work on the application.
+                    I built Moms Trader Tools (MTT) because I needed something simple and efficient to help with day trading. Over time, it grew into a full toolset that I decided to share with
+                    others.
                 </p>
-                <p>It’s still a work in progress, so expect some rough edges. Please contribute in the <a href="https://github.com/DevelDoe/moms-trader-tools/discussions" target="_blank">discussions</a> and help me hammer out buggs and share you thought. Thanks for checking it out, and I hope it makes your trading a little easier!</p>
+
+                <p>If you find value in the app and want to support the development, even a coffee goes a long way with keeping the light on and allowing me to continue to work on the application.</p>
+                <p>
+                    It’s still a work in progress, so expect some rough edges. Please contribute in the
+                    <a href="https://github.com/DevelDoe/moms-trader-tools/discussions" target="_blank">discussions</a> and help me hammer out buggs and share you thought. Thanks for checking it out,
+                    and I hope it makes your trading a little easier!
+                </p>
             </div>
 
             <div class="donate-buttons">
