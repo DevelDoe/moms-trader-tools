@@ -154,10 +154,6 @@
       "type": "reminder"
     },
     {
-      "text": "MTM: alert sound for adding ticker. queue and make it sound like card flip stack.",
-      "type": "reminder"
-    },
-    {
       "text": "MTT: Countdown transparent",
       "type": "reminder"
     },
