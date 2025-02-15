@@ -166,10 +166,6 @@
       "type": "reminder"
     },
     {
-      "text": "MTM: Notifications, sound toasts?",
-      "type": "critical"
-    },
-    {
       "text": "MTM: Filter: float, score",
       "type": "critical"
     },
