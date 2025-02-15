@@ -158,10 +158,6 @@
       "type": "reminder"
     },
     {
-      "text": "MTT: Images and socket, MTM: socket server and push to MTT ticker from active...",
-      "type": "critical"
-    },
-    {
       "text": "MTT: Countdown transparent",
       "type": "reminder"
     },
