@@ -84,15 +84,11 @@ const DEFAULT_SETTINGS = {
     ],
     reminderItems: [
         {
-            text: "Reminder",
-            type: "critical",
+            text: "MTT (Moms Traders Tool)",
+            type: "Optional",
         },
         {
-            text: "Jot down important insights, ideas and observations.",
-            type: "optional",
-        },
-        {
-            text: "inform your trading decisions.",
+            text: "Moms Trader Tools is a comprehensive suite designed to enhance the trading experience for both novice and experienced day traders. With a focus on efficiency and user-friendliness, this toolset aims to streamline your trading process and provide a competitive edge.",
             type: "reminder",
         },
     ],
