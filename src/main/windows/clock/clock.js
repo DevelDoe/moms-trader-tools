@@ -33,8 +33,8 @@ function createClockWindow(taskbarWindow, transparent = true) {
         clockWindow.setBounds({
             x: clockX,
             y: clockY,
-            width: 360,
-            height: 43,
+            width: 406,
+            height: 53,
         });
     }
 
