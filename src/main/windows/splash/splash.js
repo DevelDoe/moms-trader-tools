@@ -10,7 +10,7 @@ function createSplashWindow(onClose) {
         width: 1080,
         height: 490,
         frame: false, 
-        alwaysOnTop: true, 
+        alwaysOnTop: false, 
         transparent: false, 
         resizable: true,
         show: false,
