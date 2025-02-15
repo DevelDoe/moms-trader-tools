@@ -444,7 +444,7 @@ ipcMain.on("refresh-countdown-window", async () => {
 
     // ✅ Recreate the window with updated settings
     windows.countdown = await createCountdownWindow(windows.taskbar);
-    windows.reminder.show();
+    windows.countdown.show();
 });
 
 // Clock
