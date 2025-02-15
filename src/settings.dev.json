@@ -193,5 +193,5 @@
     }
   ],
   "reminderTransparent": false,
-  "countdownTransparent": false
+  "countdownTransparent": true
 }
