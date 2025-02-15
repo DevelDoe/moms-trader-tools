@@ -5,7 +5,7 @@ const path = require("path");
 
 function createChecklistWindow(taskbarWindow) {
     const checklistWindow = new BrowserWindow({
-        width: 80, // Initial size
+        width: 90, // Initial size
         height: 350, // Initial size
         show: false,
         frame: false,
@@ -33,7 +33,7 @@ function createChecklistWindow(taskbarWindow) {
         checklistWindow.setBounds({
             x: checklistX,
             y: checklistY,
-            width: 80,
+            width: 90,
             height: 350,
         });
     } else {
