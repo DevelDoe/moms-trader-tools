@@ -3,7 +3,7 @@
 const { BrowserWindow } = require("electron");
 const path = require("path");
 
-function createClockWindow(taskbarWindow) {
+function createClockWindow(taskbarWindow, transparent = true) {
     const clockWindow = new BrowserWindow({
         width: 360,
         height: 43,
