@@ -26,8 +26,6 @@ function createReminderWindow(taskbarWindow, transparent = true) {
 
     reminderWindow.loadFile(path.join(__dirname, "../../../renderer/reminder/reminder.html"));
 
-    /* The line `reminderWindow.webContents.openDevTools({ mode: "detach" });` is opening the DevTools
-    for the web contents of the `reminderWindow` in Electron with a specific mode. */
     // reminderWindow.webContents.openDevTools({ mode: "detach" });
 
     if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {
