@@ -5,7 +5,7 @@ const path = require("path");
 
 function createClockWindow(taskbarWindow, transparent = true) {
     const clockWindow = new BrowserWindow({
-        width: 360,
+        width: 405,
         height: 43,
         show: false,
         frame: false,
