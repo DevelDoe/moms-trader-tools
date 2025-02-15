@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const countdownTransparentToggle = document.getElementById("countdown-transparent-toggle");
         countdownTransparentToggle.checked = settings.countdownTransparent ?? true;
 
-        transparentToggle.addEventListener("change", () => {
+        countdownTransparentToggle.addEventListener("change", () => {
             const countdownIsTransparent = countdownTransparentToggle.checked;
             window.electronAPI.updateSettings({ countdownTransparent: countdownIsTransparent });
 
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             // ✅ Send an event to `reminder.html` to update the CSS dynamically
             // window.electronAPI.send("update-countdown-transparency", countdownIsTransparent);
         });
-        
+
         // Set the default active tab
         const defaultTab = document.querySelector(".tablinks.active");
         if (defaultTab) {
