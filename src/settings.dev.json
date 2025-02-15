@@ -183,5 +183,5 @@
   "sessionVolume": 1,
   "snippers": [],
   "reminderTransparent": false,
-  "countdownTransparent": true
+  "countdownTransparent": false
 }
