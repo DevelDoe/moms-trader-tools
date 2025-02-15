@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             window.electronAPI.refreshCountdownWindow();
 
             // ✅ Send an event to `reminder.html` to update the CSS dynamically
-            // window.electronAPI.send("update-reminder-transparency", isTransparent);
+            window.electronAPI.send("update-countdown-transparency", countdownIsTransparent);
         });
         // Set the default active tab
         const defaultTab = document.querySelector(".tablinks.active");
