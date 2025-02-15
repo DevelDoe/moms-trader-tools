@@ -178,6 +178,10 @@
     {
       "text": "MTT: Settings font sieze",
       "type": "critical"
+    },
+    {
+      "text": "MTM: drawer size like taskbar of mtt, only show last 3. on hover show more..",
+      "type": "reminder"
     }
   ],
   "sessionVolume": 1,
