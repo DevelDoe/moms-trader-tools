@@ -8,7 +8,7 @@ const path = require("path");
 function createSplashWindow(onClose) {
     const splashWindow = new BrowserWindow({
         width: 1080,
-        height: 470,
+        height: 490,
         frame: false, 
         alwaysOnTop: true, 
         transparent: false, 
