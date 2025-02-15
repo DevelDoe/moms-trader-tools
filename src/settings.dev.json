@@ -181,7 +181,17 @@
     }
   ],
   "sessionVolume": 1,
-  "snippers": [],
+  "snippers": [
+    {
+      "name": "test",
+      "x": 842,
+      "y": 604,
+      "width": 135,
+      "height": 126,
+      "display_id": "2528732444",
+      "sourceId": "screen:0:0"
+    }
+  ],
   "reminderTransparent": false,
   "countdownTransparent": false
 }
