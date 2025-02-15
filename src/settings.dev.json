@@ -55,12 +55,6 @@
       "tooltip": "The remaining time in a candle is crucial for confirming signals. A setup that looks strong mid-bar can completely change by the close. Waiting for the candle to complete prevents premature entries based on incomplete patterns and false moves."
     },
     {
-      "text": "50%",
-      "type": "reminder",
-      "state": "default",
-      "tooltip": "A stock that dumps more than 50% of its move often signals weak momentum and a potential trend reversal rather than a healthy pullback. When a stock retraces this deeply, it suggests that buyers are losing control, and sellers are stepping in aggressively."
-    },
-    {
       "text": "VWAP",
       "type": "reminder",
       "state": "default",
