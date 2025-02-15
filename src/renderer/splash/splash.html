@@ -116,7 +116,6 @@
                 color: #089981;
                 text-decoration: none;
             }
-
         </style>
     </head>
     <body>
@@ -149,7 +148,11 @@
                 <a href="https://buymeacoffee.com/develdoe" class="btn coffee" target="_blank">Buy Me a Coffee</a>
             </div>
             <script>
-                document.addEventListener("click", () => {
+                document.addEventListener("click", (event) => {
+                    // Check if the clicked element is an anchor tag
+                    if (event.target.tagName.toLowerCase() === "a") {
+                        return; // Do nothing, let the link open
+                    }
                     window.electronAPI.closeSplash();
                 });
             </script>
