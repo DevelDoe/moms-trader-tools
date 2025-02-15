@@ -178,10 +178,6 @@
       "type": "critical"
     },
     {
-      "text": "MTT: feature Images",
-      "type": "reminder"
-    },
-    {
       "text": "MTM: Filter: float, score",
       "type": "critical"
     },
