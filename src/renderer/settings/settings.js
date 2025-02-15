@@ -77,7 +77,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         // // ✅ Load the saved setting (default to true)
         // const transparentToggle = document.getElementById("reminder-transparent-toggle");
         // transparentToggle.checked = settings.reminderTransparent ?? true;
-        // transparentToggle.checked = settings.reminderTransparent ?? true;
 
         // // ✅ Listen for changes and save setting
         // transparentToggle.addEventListener("change", () => {
@@ -91,6 +90,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         //     // window.electronAPI.send("update-reminder-transparency", isTransparent);
         // });
 
+        // Countdown Transparency
+        // Load the saved setting (default to true)
+        const countdownTransparentToggle = document.getElementById("countdown-transparent-toggle");
+        countdownTransparentToggle.checked = settings.countdownTransparent ?? true;
+
+        transparentToggle.addEventListener("change", () => {
+            const countdownIsTransparent = countdownTransparentToggle.checked;
+            window.electronAPI.updateSettings({ countdownTransparent: countdownIsTransparent });
+
+            // ✅ Notify Electron to update the Reminder window
+            window.electronAPI.refreshCountdownWindow();
+
+            // ✅ Send an event to `reminder.html` to update the CSS dynamically
+            // window.electronAPI.send("update-reminder-transparency", isTransparent);
+        });
         // Set the default active tab
         const defaultTab = document.querySelector(".tablinks.active");
         if (defaultTab) {
