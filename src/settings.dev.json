@@ -142,10 +142,6 @@
       "type": "critical"
     },
     {
-      "text": "Change Splash screen to make it distinct",
-      "type": "critical"
-    },
-    {
       "text": "Object has been destroyed on upgrade splash screen",
       "type": "optional"
     },
@@ -204,6 +200,10 @@
     {
       "text": "MTM: Update to its own splashscreen",
       "type": "reminder"
+    },
+    {
+      "text": "MTM: Object destroyed updates",
+      "type": "critical"
     }
   ],
   "sessionVolume": 1,
