@@ -142,10 +142,6 @@
       "type": "critical"
     },
     {
-      "text": "Object has been destroyed on upgrade splash screen",
-      "type": "optional"
-    },
-    {
       "text": "MTM: check sector and country",
       "type": "optional"
     },
