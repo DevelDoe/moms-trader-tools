@@ -435,6 +435,18 @@ ipcMain.on("countdown-volume-change", (event, volume) => {
     });
 });
 
+ipcMain.on("refresh-countdown-window", async () => {
+    log.log("Refreshing Countdown window due to settings change...");
+
+    if (windows.countdown) {
+        windows.countdown.close(); // Close the old window
+    }
+
+    // ✅ Recreate the window with updated settings
+    windows.countdown = await createReminderWindow(windows.taskbar);
+    windows.reminder.show();
+});
+
 // Clock
 
 ipcMain.on("toggle-clock", async () => {
