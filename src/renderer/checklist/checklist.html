@@ -59,6 +59,13 @@
             }
 
             #checklist li {
+                display: block; /* Keep block layout */
+                width: auto; /* Allow width to expand based on content */
+                white-space: nowrap; /* Prevent text wrapping */
+                overflow: visible; /* Ensure no hidden overflow */
+            }
+
+            #checklist li {
                 cursor: pointer;
                 color: white;
                 text-align: center;
@@ -263,11 +270,31 @@
             }
 
             function resizeChecklistWindowToContent() {
-                const bodyWidth = document.body.scrollWidth + 7;
-                const bodyHeight = document.body.scrollHeight;
+                setTimeout(() => {
+                    const checklistItems = document.querySelectorAll("#checklist li");
 
-                // Send the calculated dimensions to the main process
-                window.electronAPI.resizeWindowToContent(bodyWidth, bodyHeight);
+                    if (checklistItems.length === 0) {
+                        window.electronAPI.resizeWindowToContent(50, 100); // Default size
+                        return;
+                    }
+
+                    let maxWidth = 0;
+                    let totalHeight = 0;
+
+                    checklistItems.forEach((item) => {
+                        item.style.width = "auto"; // Reset width each time
+                        const rect = item.getBoundingClientRect();
+                        maxWidth = Math.max(maxWidth, rect.width);
+                        totalHeight += rect.height;
+                    });
+
+                    const width = Math.min(Math.max(maxWidth + 20, 100), 600);
+                    const height = Math.max(totalHeight + 20, 100);
+
+                    if (width > 0 && height > 0) {
+                        window.electronAPI.resizeWindowToContent(Math.floor(width), Math.floor(height)+100);
+                    }
+                }, 50); // Small delay to allow DOM rendering
             }
         </script>
     </body>

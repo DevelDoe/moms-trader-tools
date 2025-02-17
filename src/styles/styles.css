@@ -36,3 +36,10 @@ img {
     user-drag: none;
     -webkit-user-drag: none;
 }
+
+/* Remove outline from all elements when clicked */
+*:focus,
+*:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}

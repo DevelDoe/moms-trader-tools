@@ -11,7 +11,7 @@ function createChecklistWindow(taskbarWindow) {
         frame: false,
         transparent: true,
         alwaysOnTop: true,
-        resizable: false,
+        resizable: true,
         webPreferences: {
             preload: path.join(__dirname, "../../../renderer/common/preload.js"),
             contextIsolation: true,
