@@ -265,7 +265,6 @@ function initializeCountdownSection(settings) {
 }
 
 // Session Countdowns
-// Session Countdowns
 function initializeSessionCountdowns(sessions, sessionVolume) {
     const sessionList = document.getElementById("session-list");
     const sessionVolumeSlider = document.getElementById("session-volume-slider");

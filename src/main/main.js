@@ -180,14 +180,20 @@ ipcMain.on("close-splash", () => {
 ipcMain.on("resize-window-to-content", (event, { width, height }) => {
     const senderWindow = BrowserWindow.fromWebContents(event.sender);
     if (senderWindow) {
+        log.log(`📥 Received resize request: ${width}x${height}`);
+        log.log(`🔧 Current window bounds: `, senderWindow.getBounds());
         senderWindow.setBounds({
             x: senderWindow.getBounds().x,
             y: senderWindow.getBounds().y,
             width: Math.max(width, 1),
             height: Math.max(height, 1),
         });
+        log.log(`✅ Window resized to: ${width}x${height}`);
+    } else {
+        log.error("❌ No sender window found for resizing.");
     }
 });
+
 
 // Settings
 
@@ -383,6 +389,28 @@ ipcMain.on("request-update", (event) => {
     const updatedData = getUpdatedData(); // Function to fetch updated data
     event.sender.send("update-data", updatedData);
 });
+
+ipcMain.on("resize-checklist-to-content", (event, { width, height }) => {
+    const senderWindow = BrowserWindow.fromWebContents(event.sender);
+    if (senderWindow) {
+        senderWindow.setBounds({
+            x: senderWindow.getBounds().x,
+            y: senderWindow.getBounds().y,
+            width: 1,
+            height: 1,
+        });
+        setTimeout(() => {
+            senderWindow.setBounds({
+                x: senderWindow.getBounds().x,
+                y: senderWindow.getBounds().y,
+                width: Math.max(width, 1),
+                height: Math.max(height, 1),
+            });
+        }, 100);
+    }
+});
+
+
 
 // Countdown
 

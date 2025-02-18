@@ -40,6 +40,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     toggleChecklistItem: (index, newState) => ipcRenderer.send("toggle-checklist-item", { index, newState }),
     onChecklistUpdated: (callback) => ipcRenderer.on("update-checklist", (_, checklist) => callback(checklist)),
     resetToLegacyChecklist: () => ipcRenderer.send("reset-to-legacy-checklist"),
+    resizeChecklistToContent: (width, height) => ipcRenderer.send("resize-checklist-to-content", { width, height }),
+
 
     // ⏳ Countdown
     getTickSoundPath: async () => await ipcRenderer.invoke("get-tick-sound-path"),
