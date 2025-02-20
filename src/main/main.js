@@ -22,7 +22,6 @@ const log = createLogger(__filename);
 
 autoUpdater.autoDownload = false; // Enable auto-downloading updates
 autoUpdater.allowPrerelease = true; // Ensure pre-releases are checked
-const forceUpdate = false;
 
 autoUpdater.setFeedURL({
     provider: "github",
