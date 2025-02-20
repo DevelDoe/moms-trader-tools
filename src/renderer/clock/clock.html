@@ -114,15 +114,6 @@
                 updateClockWithSync(); // Start immediately with sync
             }
 
-            // It listens for session updates from the Electron backend and updates the session list.
-            function listenForSessionUpdates() {
-                window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
-                    console.log("listenForSessionUpdates, updatedSessions:", updatedSessions);
-                    sessionCountdowns = updatedSessions;
-                    console.log("listenForSessionUpdates, sessionCountdowns:", sessionCountdowns);
-                });
-            }
-
             // Scans sessionCountdowns
             // * Find the most relevant session (latest start time).
             // * If a new session is found, it triggers activateSession(session).
@@ -166,6 +157,15 @@
                 } else {
                     clearActiveSession();
                 }
+            }
+
+            // It listens for session updates from the Electron backend and updates the session list.
+            function listenForSessionUpdates() {
+                window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
+                    console.log("listenForSessionUpdates, updatedSessions:", updatedSessions);
+                    sessionCountdowns = updatedSessions;
+                    console.log("listenForSessionUpdates, sessionCountdowns:", sessionCountdowns);
+                });
             }
 
             // Activate a new session
