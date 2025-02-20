@@ -111,9 +111,15 @@
             function syncClock() {
                 function updateClockWithSync() {
                     const nyTime = getNYTime();
-                    console.log("syncClock: NY time: ", nyTime);
+                    console.log("⏳ syncClock: NY time:", nyTime);
+
+                    // ✅ Update the clock display
                     document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: true });
-                    // 🔄 Ensure the next update happens precisely at the start of the next second
+
+                    // ✅ Check active session every second (keeps countdowns accurate)
+                    checkActiveSession(nyTime);
+
+                    // ✅ Ensure next update happens at the start of the next second
                     const msUntilNextSecond = 1000 - nyTime.getMilliseconds();
                     setTimeout(() => requestAnimationFrame(updateClockWithSync), msUntilNextSecond);
                 }
