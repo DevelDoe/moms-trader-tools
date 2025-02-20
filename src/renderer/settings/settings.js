@@ -257,6 +257,7 @@ function resetChecklist() {
 }
 
 // Countdown Bar Section
+// Countdown Bar Section
 function initializeCountdownAlertSettings(settings) {
     document.getElementById("enable-tick-sound").checked = settings.enableTickSound ?? true;
     document.getElementById("countdown-ranges").value = settings.countdownRanges?.map(r => `${r.start}-${r.end}`).join(", ") || "50-60, 10-20";
@@ -265,24 +266,37 @@ function initializeCountdownAlertSettings(settings) {
 
     document.getElementById("enable-tick-sound").addEventListener("change", () => {
         window.electronAPI.updateSettings({ enableTickSound: document.getElementById("enable-tick-sound").checked });
+        console.log("✅ Updated enableTickSound:", document.getElementById("enable-tick-sound").checked);
     });
 
-    document.getElementById("countdown-ranges").addEventListener("change", () => {
+    // ✅ Immediately update countdown ranges on input
+    document.getElementById("countdown-ranges").addEventListener("input", () => {
         const newRanges = document.getElementById("countdown-ranges").value
             .split(",")
             .map(range => range.trim().split("-").map(v => parseInt(v.trim(), 10)))
             .filter(arr => arr.length === 2 && arr.every(Number.isFinite))
             .map(([start, end]) => ({ start, end }));
 
+        console.log("🔄 Updating countdownRanges:", newRanges);
         window.electronAPI.updateSettings({ countdownRanges: newRanges });
     });
 
-    document.getElementById("tick-sound-duration").addEventListener("change", () => {
-        window.electronAPI.updateSettings({ tickSoundDuration: parseInt(document.getElementById("tick-sound-duration").value, 10) });
+    document.getElementById("tick-sound-duration").addEventListener("input", () => {
+        const duration = parseInt(document.getElementById("tick-sound-duration").value, 10);
+        console.log("🔄 Updating tickSoundDuration:", duration);
+        window.electronAPI.updateSettings({ tickSoundDuration: duration });
     });
 
+    // ✅ Real-time volume updates
     document.getElementById("volume-slider").addEventListener("input", () => {
-        window.electronAPI.updateSettings({ tickSoundVolume: parseFloat(document.getElementById("volume-slider").value) });
+        const newVolume = parseFloat(document.getElementById("volume-slider").value);
+        console.log("🔊 Updating tickSoundVolume:", newVolume);
+        window.electronAPI.updateSettings({ tickSoundVolume: newVolume });
+
+        // ✅ Also update volume directly if `tickSound` exists
+        if (window.tickSound) {
+            window.tickSound.volume = newVolume;
+        }
     });
 }
 
