@@ -174,12 +174,12 @@
   "countdownTransparent": true,
   "countdownRanges": [
     {
-      "start": 50,
-      "end": 60
+      "start": 10,
+      "end": 10
     },
     {
-      "start": 10,
-      "end": 20
+      "start": 20,
+      "end": 30
     }
   ]
 }
