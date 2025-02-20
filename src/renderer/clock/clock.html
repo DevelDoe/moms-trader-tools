@@ -54,9 +54,9 @@
             </section>
         </div>
         <script>
-            let sessionCountdowns = [];
-            let activeSessionStack = [];
-            let activeInterval = null;
+            let sessionCountdowns = [];             // stores all defined sessions (start/end times).
+            let activeSessionStack = [];            // tracks currently active sessions.
+            let activeInterval = null;              
             let bellSound = null;
             let warningSound = null;
             let fiveMinuteWarningPlayed = false;
@@ -86,7 +86,8 @@
                 }
             });
 
-            // **Sync clock without lag**
+            // Keeps the clock synchronized with New York time.
+            // It ensures the updates happen precisely at the start of the next second to reduce lag.
             function syncClock() {
                 function updateClockWithSync() {
                     const nyTime = getNYTime();
@@ -112,7 +113,10 @@
                 checkActiveSession(nyTime);
             }
 
-            // **Find the highest-priority session**
+            // Scans sessionCountdowns
+            // find the most relevant session (latest start time).
+            // if a new session is found, it triggers activateSession(session)
+            // if no sessions are found, it clears the active session.
             function checkActiveSession(now) {
                 console.log("🔎 Checking active session at:", now.toLocaleTimeString("en-US", { hour12: false }));
                 console.log("📋 Sessions available:", sessionCountdowns);
