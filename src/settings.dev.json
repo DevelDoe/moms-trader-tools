@@ -176,6 +176,10 @@
     {
       "start": 10,
       "end": 20
+    },
+    {
+      "start": 40,
+      "end": 5
     }
   ],
   "enableTickSound": true
