@@ -32,7 +32,7 @@ autoUpdater.setFeedURL({
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const isDebug = process.env.DEBUG === "true";
-const forceUpdate = true;
+const forceUpdate = false;
 
 // Use system settings file for production, separate file for development
 const SETTINGS_FILE = isDevelopment
