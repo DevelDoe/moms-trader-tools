@@ -151,9 +151,11 @@
                     const isActive = isInCountdownRange(remaining);
 
                     if (isActive) {
-                        element.style.color = "#00CC66"; // ✅ Green 
+                        element.style.color = "#00CC66"; // ✅ Green when inside the range
+                        element.classList.remove("blinking"); // Stop blinking when active
                     } else {
-                        element.style.color = "#FF2800"; // 🔴 Red 
+                        element.style.color = "#FF2800"; // 🔴 Red when outside range
+                        element.classList.add("blinking"); // Start blinking when not active
                     }
                 }
 
