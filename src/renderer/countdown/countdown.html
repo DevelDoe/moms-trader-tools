@@ -148,32 +148,12 @@
                 }
 
                 function applyColors(remaining, element, isOneMinutePart = false) {
-                    if (isOneMinutePart) {
-                        // Apply new color rules for the one-minute countdown
-                        if (remaining > 50) {
-                            element.style.color = "orange";
-                        } else if (remaining > 40) {
-                            element.style.color = "#006666";
-                        } else if (remaining > 30) {
-                            element.style.color = "#FF2800";
-                        } else if (remaining > 20) {
-                            element.style.color = "orange";
-                        } else if (remaining > 10) {
-                            element.style.color = "#006666";
-                        } else {
-                            element.style.color = "#FF2800";
-                        }
+                    const isActive = isInCountdownRange(remaining);
+
+                    if (isActive) {
+                        element.style.color = "#FF2800"; // 🔴 Red when in active range
                     } else {
-                        // Keep five-minute part unchanged
-                        const colorMap = {
-                            5: "orange",
-                            4: "#006666",
-                            3: "#FF2800",
-                            2: "orange",
-                            1: "#006666",
-                            0: "#FF2800",
-                        };
-                        element.style.color = colorMap[remaining] || "transparent";
+                        element.style.color = "#00CC66"; // ✅ Green when outside active range
                     }
                 }
 
