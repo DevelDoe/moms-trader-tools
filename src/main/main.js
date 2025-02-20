@@ -93,7 +93,6 @@ const DEFAULT_SETTINGS = {
         },
     ],
     snippers: [],
-    reminderTransparent: true,
     countdownTransparent: false,
 };
 
