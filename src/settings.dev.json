@@ -171,7 +171,7 @@
   "sessionVolume": 0.82,
   "snippers": [],
   "reminderTransparent": false,
-  "countdownTransparent": false,
+  "countdownTransparent": true,
   "countdownRanges": [
     {
       "start": 0,
