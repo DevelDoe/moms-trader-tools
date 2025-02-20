@@ -174,8 +174,8 @@
   "countdownTransparent": true,
   "countdownRanges": [
     {
-      "start": 0,
-      "end": 1
+      "start": 10,
+      "end": 60
     }
   ]
 }
