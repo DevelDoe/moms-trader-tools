@@ -107,9 +107,9 @@
             }
 
             // Scans sessionCountdowns
-            // * find the most relevant session (latest start time).
-            // * if a new session is found, it triggers activateSession(session)
-            // * if no sessions are found, it clears the active session.
+            // * Find the most relevant session (latest start time).
+            // * If a new session is found, it triggers activateSession(session).
+            // * If no sessions are found, it clears the active session.
             function checkActiveSession(now) {
                 console.log("🔎 Checking active session at:", now.toLocaleTimeString("en-US", { hour12: false }));
                 console.log("📋 Sessions available:", sessionCountdowns);
@@ -152,8 +152,8 @@
             }
 
             // Activate a new session
-            // * Updates the UI with the session title
-            // * Plays a bell sound if it exists
+            // * Updates the UI with the session title.
+            // * Plays a bell sound if it exists.
             // * Calculates the session's end time.
             // * Starts an interval to update the countdown every second.
             function activateSession(session) {
@@ -186,7 +186,11 @@
                 }, 1000);
             }
 
-            // **Update countdown timer**
+            // Update countdown timer
+            // * Checks how much time is left until the session ends.
+            // * Updates the UI (session-timer).
+            // * Plays a 5-minute warning sound when 5 minutes are left.
+            // * If time runs out, calls endSession(sessionTitle).
             function updateSessionCountdown(sessionEnd, sessionTitle) {
                 const now = getNYTime();
                 let timeLeft = sessionEnd - now;
@@ -211,7 +215,9 @@
                 }
             }
 
-            // **End session & revert to the previous one**
+            // Removes the session from activeSessionStack.
+            // If another session is running, it switches back to it.
+            // If no sessions remain, it clears the UI.
             function endSession(sessionTitle) {
                 console.log(`🛑 Ending session: "${sessionTitle}"`);
                 activeSessionStack = activeSessionStack.filter((s) => s.title !== sessionTitle);
@@ -225,7 +231,10 @@
                 }
             }
 
-            // **Clear session display**
+            // Stops the countdown interval (clearInterval(activeInterval);).
+            // Resets the active session stack (activeSessionStack = [];).
+            // Updates the UI to display "No Active Sessions".
+            // Logs the event for debugging.
             function clearActiveSession() {
                 if (activeInterval) {
                     clearInterval(activeInterval);
@@ -237,7 +246,7 @@
                 console.log("🚫 No active sessions.");
             }
 
-            // **Listen for session updates**
+            // It listens for session updates from the Electron backend and updates the session list.
             function listenForSessionUpdates() {
                 window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
                     console.log("🔄 Session Data Received:", updatedSessions);
