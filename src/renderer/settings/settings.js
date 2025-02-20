@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateSnipperList(snippers);
 
         // Event listeners
-        document.getElementById("restart-app-button").addEventListener("click", restartApp);
         document.getElementById("add-reminder-btn").addEventListener("click", addReminderItem);
         document.getElementById("add-item-btn").addEventListener("click", addChecklistItem);
         document.getElementById("reset-legacy-checklist-btn").addEventListener("click", function (event) {
@@ -300,7 +299,6 @@ function initializeSessionCountdowns(sessions, sessionVolume) {
             sessions.splice(index, 1);
             saveSettings({ sessionCountdowns: sessions });
             initializeSessionCountdowns(sessions, sessionVolume); // Refresh UI
-            showRestartNotification(); // Show restart message when a session is removed
         });
 
         listItem.appendChild(removeButton);
@@ -420,7 +418,6 @@ async function addSessionCountdown() {
 
     // ✅ Refresh the session list
     initializeSessionCountdowns(updatedSessions, settings.sessionVolume);
-    showRestartNotification();
 
     setTimeout(() => {
         restartMessage.style.display = "none";
@@ -433,12 +430,6 @@ async function addSessionCountdown() {
     document.getElementById("countdown-minutes").value = "0";
 }
 
-
-// ✅ Function to show restart message & button
-function showRestartNotification() {
-    document.getElementById("restart-message").style.display = "block";
-    document.getElementById("restart-app-button").style.display = "block";
-}
 
 // Snipper
 
