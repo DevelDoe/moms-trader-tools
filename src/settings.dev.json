@@ -60,11 +60,6 @@
       "start": "00:40",
       "end": "06:40",
       "title": "Outer Long session"
-    },
-    {
-      "start": "06:43",
-      "end": "06:49",
-      "title": "Inner short session"
     }
   ],
   "reminderItems": [
