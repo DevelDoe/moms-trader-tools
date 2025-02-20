@@ -101,7 +101,7 @@
                 function updateClockWithSync() {
                     const nyTime = getNYTime();
                     console.log("NY time: ", nyTime);
-                    document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: false });
+                    document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: true });
 
                     // 🔍 Ensure session check is in sync with the clock
                     checkActiveSession(nyTime);
@@ -119,6 +119,7 @@
             // * If a new session is found, it triggers activateSession(session).
             // * If no sessions are found, it clears the active session.
             function checkActiveSession(now) {
+                console.lot("⏳ checkActiveSession, now : ", now)
                 console.log("🔎 Checking active session at:", now.toLocaleTimeString("en-US", { hour12: false }));
                 console.log("📋 Sessions available:", sessionCountdowns);
 
