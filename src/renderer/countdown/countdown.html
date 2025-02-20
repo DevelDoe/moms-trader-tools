@@ -61,99 +61,96 @@
             <span id="five-minute-part" class="countdown-part dragable"></span>
             <span id="one-minute-part" class="countdown-part dragable"></span>
         </div>
-
         <script>
             document.addEventListener("DOMContentLoaded", async () => {
                 console.log("Countdown script loaded");
-
+        
                 // ✅ Fetch user settings
                 const settings = await window.electronAPI.getSettings();
-                const countdownRanges = settings.countdownRanges || [
+                let countdownRanges = settings.countdownRanges || [
                     { start: 50, end: 60 },
                     { start: 10, end: 20 },
                 ];
-                const tickSoundDuration = settings.tickSoundDuration || 100;
-                const tickSoundVolume = settings.tickSoundVolume || 0.5;
-                const enableTickSound = settings.enableTickSound ?? true;
-
-                let tickSound = null;
+                let tickSoundDuration = settings.tickSoundDuration || 100;
+                let tickSoundVolume = settings.tickSoundVolume || 0.5;
+                let enableTickSound = settings.enableTickSound ?? true;
+        
+                let tickSound = null; // ✅ Declare tickSound globally
+        
                 try {
-                    let tickSound = new Audio(tickSoundPath);
-
+                    const tickSoundPath = await window.electronAPI.getTickSoundPath(); // ✅ Define tickSoundPath properly
                     tickSound = new Audio(tickSoundPath);
                     tickSound.volume = tickSoundVolume;
                 } catch (error) {
                     console.error("Error loading tick sound:", error);
                 }
-
+        
                 function startRealTimeCountdown() {
                     function updateDisplay() {
                         const now = new Date();
                         const seconds = now.getSeconds();
                         const minutes = now.getMinutes();
-
+        
                         // Calculate five-minute countdown
                         const secondsSinceLastFiveMinutes = (minutes % 5) * 60 + seconds;
                         const totalSecondsFiveMinute = 300 - secondsSinceLastFiveMinutes - 1;
                         const fiveMinuteRemaining = Math.floor(totalSecondsFiveMinute / 60);
-
+        
                         // Calculate full seconds countdown for the last minute
                         const oneMinuteRemaining = 60 - seconds;
                         const tensDigit = Math.floor(oneMinuteRemaining / 10);
                         const onesDigit = oneMinuteRemaining % 10;
-
+        
                         document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
                         document.getElementById("one-minute-part").innerHTML = `
-                <span id="tens-digit">${tensDigit}</span>
-                <span id="ones-digit">${onesDigit}</span>
-            `;
-
+                            <span id="tens-digit">${tensDigit}</span>
+                            <span id="ones-digit">${onesDigit}</span>
+                        `;
+        
                         applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true);
                         applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part"));
-
+        
                         // ✅ Check if current second is inside any defined band
                         if (enableTickSound && isInCountdownRange(oneMinuteRemaining)) {
                             playTickSound();
                         }
-
+        
                         const nowMillis = new Date().getTime();
                         const nextTick = 1000 - (nowMillis % 1000);
                         setTimeout(updateDisplay, nextTick);
                     }
-
+        
                     updateDisplay();
                 }
-
+        
                 function isInCountdownRange(second) {
                     return countdownRanges.some(({ start, end }) => second >= start && second <= end);
                 }
-
+        
                 function playTickSound() {
                     if (!tickSound || !enableTickSound) return;
                     tickSound.currentTime = 0;
                     tickSound.play().catch((error) => {
                         console.warn("Tick sound playback failed:", error);
                     });
-
+        
                     setTimeout(() => {
                         tickSound.pause();
                     }, tickSoundDuration);
                 }
-
+        
                 function applyColors(remaining, element, isOneMinutePart = false) {
                     if (isOneMinutePart) {
                         // Apply new color rules for the one-minute countdown
                         if (remaining > 50) {
                             element.style.color = "orange";
                         } else if (remaining > 40) {
-                            // playTickSound(); // 🔊 Play sound if within a range
                             element.style.color = "#006666";
                         } else if (remaining > 30) {
                             element.style.color = "#FF2800";
                         } else if (remaining > 20) {
                             element.style.color = "orange";
                         } else if (remaining > 10) {
-                            // playTickSound(); // 🔊 Play sound if within a range
                             element.style.color = "#006666";
                         } else {
                             element.style.color = "#FF2800";
@@ -171,11 +168,13 @@
                         element.style.color = colorMap[remaining] || "transparent";
                     }
                 }
-
+        
                 startRealTimeCountdown();
-
+        
+                // ✅ Ensure settings updates are applied correctly
                 window.electronAPI.onSettingsUpdated((updatedSettings) => {
                     console.log("📩 Received updated settings:", updatedSettings);
+        
                     if (updatedSettings.countdownRanges !== undefined) {
                         countdownRanges = updatedSettings.countdownRanges;
                     }
@@ -186,10 +185,11 @@
                         tickSoundDuration = updatedSettings.tickSoundDuration;
                     }
                     if (updatedSettings.tickSoundVolume !== undefined) {
-                        tickSound.volume = updatedSettings.tickSoundVolume;
+                        tickSound.volume = updatedSettings.tickSoundVolume; // ✅ Update volume properly
                     }
                 });
             });
         </script>
+        
     </body>
 </html>
