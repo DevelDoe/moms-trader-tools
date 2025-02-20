@@ -90,7 +90,7 @@
             // It ensures the updates happen precisely at the start of the next second to reduce lag.
             function syncClock() {
                 function updateClockWithSync() {
-                    const nyTime = getNYTime();
+                    const nyTime = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
                     document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: false });
 
                     // 🔍 Ensure the next update happens precisely at the start of the next second
