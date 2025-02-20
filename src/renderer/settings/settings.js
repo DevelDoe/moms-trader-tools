@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         initializeReminderSection(settings.reminderItems || []);
         initializeChecklistSection(settings.checklist || []);
-        initializeCountdownSettings(settings);
+        initializeCountdownSection(settings);
         initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
         initializeCountdownDuration();
         updateSnipperList(snippers);
@@ -262,7 +262,7 @@ function initializeCountdownSection(settings) {
 }
 
 // Countdown Bar Section
-function initializeCountdownSettings(settings) {
+function initializeCountdownSection(settings) {
     document.getElementById("enable-tick-sound").checked = settings.enableTickSound ?? true;
     document.getElementById("countdown-ranges").value = settings.countdownRanges?.map(r => `${r.start}-${r.end}`).join(", ") || "50-60, 10-20";
     document.getElementById("tick-sound-duration").value = settings.tickSoundDuration ?? 100;
