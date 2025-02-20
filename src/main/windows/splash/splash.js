@@ -5,7 +5,7 @@ const path = require("path");
  * Creates the splash screen window and returns it
  * @param {Function} onClose - Callback to execute after splash closes
  */
-function createSplashWindow(isDevelopment) {
+function createSplashWindow(onClose) {
     const splashWindow = new BrowserWindow({
         width: 1080,
         height: 490,
