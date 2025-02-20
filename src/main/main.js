@@ -22,7 +22,7 @@ const log = createLogger(__filename);
 
 autoUpdater.autoDownload = false; // Enable auto-downloading updates
 autoUpdater.allowPrerelease = true; // Ensure pre-releases are checked
-autoUpdater.forceDevUpdateConfig = true; // ✅ Force update check in development mod
+const forceUpdate = false;
 
 autoUpdater.setFeedURL({
     provider: "github",
