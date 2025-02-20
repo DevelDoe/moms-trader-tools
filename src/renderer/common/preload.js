@@ -48,16 +48,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     const { contextBridge, ipcRenderer } = require("electron");
 
 
-    setCountdownVolume: (volume) => {
-        console.log("📤 Sending countdown volume update:", volume);
-        ipcRenderer.send("countdown-volume-change", volume);
-    },
-    onCountdownVolumeUpdate: (callback) => {
-        ipcRenderer.on("update-countdown-volume", (event, volume) => {
-            console.log("🔊 Received countdown volume update:", volume);
-            callback(volume);
-        });
-    },
+    setCountdownVolume: (volume) => { ipcRenderer.send("countdown-volume-change", volume); },
+    onCountdownVolumeUpdate: (callback) => { ipcRenderer.on("update-countdown-volume", (event, volume) => {  callback(volume); }); },
 
 
     refreshCountdownWindow: () => ipcRenderer.send("refresh-countdown-window"),
