@@ -1031,15 +1031,24 @@ ipcMain.on("restart-app", () => {
     app.exit(0);
 });
 
-// UPDATES - Only runs in production mode
+////////////////////////////////////////////////////////////////////////////////////
+// UPDATES
+
 if (!isDevelopment || forceUpdate) {
     if (forceUpdate) {
         autoUpdater.forceDevUpdateConfig = true;
         autoUpdater.allowDowngrade = true;
     }
-
+   
     log.log("Production mode detected, checking for updates...");
     autoUpdater.checkForUpdatesAndNotify();
+
+    if (forceUpdate) {
+        ipcMain.on("force-update-check", () => {
+            log.log("Forcing update check in development mode...");
+            autoUpdater.checkForUpdatesAndNotify();
+        });
+    }
 
     autoUpdater.on("checking-for-update", () => {
         log.log("Checking for update...");
@@ -1047,22 +1056,31 @@ if (!isDevelopment || forceUpdate) {
 
     autoUpdater.on("update-available", (info) => {
         log.log(`🔔 Update found: ${info.version}`);
-    
+
+        // ✅ Close splash screen if it's still open
+        if (windows.splash && !windows.splash.isDestroyed()) {
+            log.log("Closing splash screen before starting update...");
+            windows.splash.close();
+            delete windows.splash; // ✅ Ensure reference is removed
+        }
+
         if (appSettings.hasDonated) {
             // 🛠 If user has donated, let them decide
-            dialog.showMessageBox({
-                type: "info",
-                title: "Update Available",
-                message: `A new update (${info.version}) is available. Would you like to download it now?`,
-                buttons: ["Download", "Later"],
-            }).then((result) => {
-                if (result.response === 0) {
-                    log.log("User confirmed download, starting...");
-                    autoUpdater.downloadUpdate();
-                } else {
-                    log.log("User postponed update.");
-                }
-            });
+            dialog
+                .showMessageBox({
+                    type: "info",
+                    title: "Update Available",
+                    message: `A new update (${info.version}) is available. Would you like to download it now?`,
+                    buttons: ["Download", "Later"],
+                })
+                .then((result) => {
+                    if (result.response === 0) {
+                        log.log("User confirmed download, starting...");
+                        autoUpdater.downloadUpdate();
+                    } else {
+                        log.log("User postponed update.");
+                    }
+                });
         } else {
             // 🛠 If user hasn’t donated, update automatically
             log.log("User hasn't donated, auto-downloading update...");
@@ -1090,42 +1108,55 @@ if (!isDevelopment || forceUpdate) {
     autoUpdater.on("update-downloaded", () => {
         if (appSettings.hasDonated) {
             // 🛠 Donors can choose when to install
-            dialog.showMessageBox({
-                type: "info",
-                title: "Update Ready",
-                message: "The update has been downloaded. Would you like to restart the app now to install it?",
-                buttons: ["Restart", "Later"],
-            }).then((result) => {
-                if (result.response === 0) {
-                    autoUpdater.quitAndInstall();
-                }
-            });
+            dialog
+                .showMessageBox({
+                    type: "info",
+                    title: "Update Ready",
+                    message: "The update has been downloaded. Would you like to restart the app now to install it?",
+                    buttons: ["Restart", "Later"],
+                })
+                .then((result) => {
+                    if (result.response === 0) {
+                        autoUpdater.quitAndInstall();
+                    }
+                });
         } else {
             // 🛠 Non-donors get auto-installed updates
             log.log("User hasn't donated, installing update now...");
             autoUpdater.quitAndInstall();
         }
-    });
-
-    autoUpdater.on("update-downloaded", () => {
         updateShortcutIcon();
     });
+    const { exec } = require("child_process");
 
 } else {
-    log.log("Skipping auto-updates in development mode.");
+    log.log("Skipping auto-updates in development mode");
 }
 
 function updateShortcutIcon() {
-    const shortcutPath = path.join(process.env.APPDATA, "Microsoft", "Windows", "Start Menu", "Programs", "YourAppName.lnk");
-    const iconPath = path.join(__dirname, "build", "icon.ico");
+    const shortcutPath = path.join(
+        process.env.APPDATA,
+        "Microsoft",
+        "Windows",
+        "Start Menu",
+        "Programs",
+        "MomsTraderMonitor.lnk" // ✅ Make sure this matches the actual shortcut name
+    );
 
-    const command = `powershell -Command "& {(New-Object -ComObject WScript.Shell).CreateShortcut('${shortcutPath}').IconLocation = '${iconPath}'}"`;
+    const iconPath = path.join(__dirname, "build", "icon.ico"); // ✅ Ensure this icon exists
 
-    exec(command, (error, stdout, stderr) => {
+    const command = `
+        $WScriptShell = New-Object -ComObject WScript.Shell;
+        $Shortcut = $WScriptShell.CreateShortcut('${shortcutPath}');
+        $Shortcut.IconLocation = '${iconPath}';
+        $Shortcut.Save();
+    `;
+
+    exec(`powershell -Command "${command}"`, (error, stdout, stderr) => {
         if (error) {
-            console.error("Error updating shortcut icon:", error);
+            log.error("Error updating shortcut icon:", error);
         } else {
-            console.log("Shortcut icon updated successfully");
+            log.log("Shortcut icon updated successfully.");
         }
     });
 }
