@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         initializeReminderSection(settings.reminderItems || []);
         initializeChecklistSection(settings.checklist || []);
-        initializeCountdownAlertSettings(settings);
+        initializeCountdownSection(settings);
         initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
         initializeCountdownDuration();
         updateSnipperList(snippers);
@@ -257,6 +257,12 @@ function resetChecklist() {
 }
 
 // Countdown Bar Section
+function initializeCountdownSection(settings) {
+
+}
+
+
+// Countdown Bar Section
 // Countdown Bar Section
 function initializeCountdownAlertSettings(settings) {
     document.getElementById("enable-tick-sound").checked = settings.enableTickSound ?? true;
@@ -286,20 +292,10 @@ function initializeCountdownAlertSettings(settings) {
         window.electronAPI.updateSettings({ tickSoundDuration: duration });
     });
 
-    // ✅ Real-time volume updates
-    document.getElementById("countdown-volume-slider").addEventListener("input", () => {
-        const newVolume = parseFloat(document.getElementById("countdown-volume-slider").value);
-        console.log("🔊 Updating tickSoundVolume:", newVolume);
-        window.electronAPI.updateSettings({ tickSoundVolume: newVolume });
-
-        // ✅ Also update volume directly if `tickSound` exists
-        if (window.tickSound) {
-            window.tickSound.volume = newVolume;
-        }
-    });
+    const slider = document.getElementById("countdown-volume-slider");
+    slider.value = settings.volume || 0.5;
+    slider.addEventListener("input", () => window.electronAPI.setCountdownVolume(slider.value));
 }
-
-
 
 // Session Countdowns
 function initializeSessionCountdowns(sessions, sessionVolume) {
