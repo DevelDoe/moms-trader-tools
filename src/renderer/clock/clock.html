@@ -106,17 +106,10 @@
                 return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
             }
 
-            // **Update clock & check session**
-            function updateClock() {
-                const nyTime = getNYTime();
-                document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: false });
-                checkActiveSession(nyTime);
-            }
-
             // Scans sessionCountdowns
-            // find the most relevant session (latest start time).
-            // if a new session is found, it triggers activateSession(session)
-            // if no sessions are found, it clears the active session.
+            // * find the most relevant session (latest start time).
+            // * if a new session is found, it triggers activateSession(session)
+            // * if no sessions are found, it clears the active session.
             function checkActiveSession(now) {
                 console.log("🔎 Checking active session at:", now.toLocaleTimeString("en-US", { hour12: false }));
                 console.log("📋 Sessions available:", sessionCountdowns);
@@ -158,7 +151,11 @@
                 }
             }
 
-            // **Activate a new session**
+            // Activate a new session
+            // * Updates the UI with the session title
+            // * Plays a bell sound if it exists
+            // * Calculates the session's end time.
+            // * Starts an interval to update the countdown every second.
             function activateSession(session) {
                 console.log(`🚀 Activating session: "${session.title}"`);
 
