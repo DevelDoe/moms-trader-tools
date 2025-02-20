@@ -1132,6 +1132,8 @@ if (!isDevelopment || forceUpdate) {
     log.log("Skipping auto-updates in development mode");
 }
 
+const { exec } = require("child_process"); // ✅ Make sure this is required at the top
+
 function updateShortcutIcon() {
     const shortcutPath = path.join(
         process.env.APPDATA,
@@ -1159,3 +1161,4 @@ function updateShortcutIcon() {
         }
     });
 }
+
