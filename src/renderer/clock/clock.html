@@ -54,15 +54,15 @@
             </section>
         </div>
         <script>
-            let sessionCountdowns = [];             // stores all defined sessions (start/end times).
-            let activeSessionStack = [];            // tracks currently active sessions.
-            let activeInterval = null;              
+            let sessionCountdowns = []; // stores all defined sessions (start/end times).
+            let activeSessionStack = []; // tracks currently active sessions.
+            let activeInterval = null;
             let bellSound = null;
             let warningSound = null;
             let fiveMinuteWarningPlayed = false;
 
             document.addEventListener("DOMContentLoaded", async () => {
-                listenForSessionUpdates();  // listen for session updates from the backend and updates the session list.
+                listenForSessionUpdates(); // listen for session updates from the backend and updates the session list.
                 syncClock();
                 console.log("🕒 Clock initialized.");
 
@@ -86,25 +86,13 @@
                 }
             });
 
-            // Keeps the clock synchronized with New York time.
-            // It ensures the updates happen precisely at the start of the next second to reduce lag.
-            function syncClock() {
-                function updateClockWithSync() {
-                    const nyTime = getNYTime();
-                    console.log("NY time: ", nyTime)
-                    document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: false });
-
-                    // 🔍 Ensure the next update happens precisely at the start of the next second
-                    const msUntilNextSecond = 1000 - nyTime.getMilliseconds();
-                    setTimeout(() => requestAnimationFrame(updateClockWithSync), msUntilNextSecond);
-                }
-
-                updateClockWithSync(); // Start immediately with sync
-            }
-
-            // Gets EST time
-            function getNYTime() {
-                return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+            // It listens for session updates from the Electron backend and updates the session list.
+            function listenForSessionUpdates() {
+                window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
+                    console.log("listenForSessionUpdates, updatedSessions:", updatedSessions);
+                    sessionCountdowns = updatedSessions;
+                    console.log("listenForSessionUpdates, sessionCountdowns:", sessionCountdowns);
+                });
             }
 
             // Scans sessionCountdowns
@@ -150,6 +138,30 @@
                 } else {
                     clearActiveSession();
                 }
+            }
+
+            // Keeps the clock synchronized with New York time.
+            // It ensures the updates happen precisely at the start of the next second to reduce lag.
+            function syncClock() {
+                function updateClockWithSync() {
+                    const nyTime = getNYTime();
+                    console.log("NY time: ", nyTime);
+                    document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: false });
+
+                    // 🔍 Ensure session check is in sync with the clock
+                    checkActiveSession(nyTime);
+
+                    // 🔄 Ensure the next update happens precisely at the start of the next second
+                    const msUntilNextSecond = 1000 - nyTime.getMilliseconds();
+                    setTimeout(() => requestAnimationFrame(updateClockWithSync), msUntilNextSecond);
+                }
+
+                updateClockWithSync(); // Start immediately with sync
+            }
+
+            // Gets EST time
+            function getNYTime() {
+                return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
             }
 
             // Activate a new session
@@ -245,16 +257,6 @@
                 document.getElementById("session-title").textContent = "No Active Sessions";
                 document.getElementById("session-timer").textContent = "";
                 console.log("🚫 No active sessions.");
-            }
-
-            // It listens for session updates from the Electron backend and updates the session list.
-            function listenForSessionUpdates() {
-                window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
-                    console.log("listenForSessionUpdates, updatedSessions:", updatedSessions);
-                    sessionCountdowns = updatedSessions;
-                    console.log("listenForSessionUpdates, sessionCountdowns:", sessionCountdowns);
-                    checkActiveSession(getNYTime());
-                });
             }
         </script>
     </body>
