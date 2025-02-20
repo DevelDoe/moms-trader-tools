@@ -57,9 +57,9 @@
   ],
   "sessionCountdowns": [
     {
-      "start": "00:40",
-      "end": "06:40",
-      "title": "Outer Long session"
+      "start": "06:41",
+      "end": "07:41",
+      "title": "Long Outer"
     }
   ],
   "reminderItems": [
