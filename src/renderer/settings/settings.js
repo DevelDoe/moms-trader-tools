@@ -287,6 +287,7 @@ function initializeCountdownAlertSettings(settings) {
 }
 
 
+
 // Session Countdowns
 function initializeSessionCountdowns(sessions, sessionVolume) {
     const sessionList = document.getElementById("session-list");
