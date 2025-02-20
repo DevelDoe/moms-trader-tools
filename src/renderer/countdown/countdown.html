@@ -105,9 +105,9 @@
 
                         // Update one-minute countdown digits **separately** without removing span elements
                         document.getElementById("one-minute-part").innerHTML = `
-            <span id="tens-digit">${tensDigit}</span>
-            <span id="ones-digit">${onesDigit}</span>
-        `;
+                <span id="tens-digit">${tensDigit}</span>
+                <span id="ones-digit">${onesDigit}</span>
+            `;
 
                         // Apply colors **to each digit separately**
                         applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true); // One-minute follows new color rules
@@ -136,10 +136,16 @@
                 function applyColors(remaining, element, isOneMinutePart = false) {
                     if (isOneMinutePart) {
                         // Apply new color rules for the one-minute countdown
-                        if (remaining >= 40) {
-                            element.style.color = "#006666"; 
+                        if (remaining >= 50) {
+                            element.style.color = "orange";
+                        } else if (remaining >= 40) {
+                            element.style.color = "#006666";
+                        } else if (remaining >= 30) {
+                            element.style.color = "#FF280";
                         } else if (remaining >= 20) {
-                            element.style.color = "orange"; 
+                            element.style.color = "orange";
+                        } else if (remaining >= 10) {
+                            element.style.color = "#006666";
                         } else {
                             element.style.color = "#FF2800";
                         }
@@ -184,7 +190,6 @@
                 console.log("Countdown started");
                 startRealTimeCountdown();
 
-
                 // ✅ Fetch the transparency setting on load
                 const settings = await window.electronAPI.getSettings();
                 updateBackground(settings.countdownTransparent);
@@ -205,7 +210,6 @@
                 function updateBackground(isTransparent) {
                     document.body.style.backgroundColor = isTransparent ? "transparent" : "#1c1d23";
                 }
-                  
             });
         </script>
     </body>
