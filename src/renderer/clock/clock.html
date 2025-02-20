@@ -92,7 +92,7 @@
                 }
 
                 try {
-                    // update this with a volume bar
+                    // TODO update this with a volume bar
                     const warningSoundPath = await window.electronAPI.get5minSoundPath();
                     warningSound = new Audio(warningSoundPath);
                     warningSound.volume = 0.8;
