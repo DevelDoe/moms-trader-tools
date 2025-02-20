@@ -118,7 +118,7 @@
                                 isLockTickActive = true;
                                 activateLockTickEffect();
                             }
-                            playTickSound();
+                            // playTickSound();
                         } else if (isLockTickActive) {
                             isLockTickActive = false;
                             deactivateLockTickEffect();
@@ -147,6 +147,7 @@
                             element.style.color = "orange";
                         } else if (remaining > 10) {
                             element.style.color = "#006666";
+                            playTickSound()
                         } else {
                             element.style.color = "#FF2800";
                         }
