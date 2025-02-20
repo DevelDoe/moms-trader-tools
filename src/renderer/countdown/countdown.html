@@ -138,15 +138,11 @@
                 }
 
                 function playTickSound() {
-                    if (!tickSound || !enableTickSound) return;
+                    if (!tickSound) return;
                     tickSound.currentTime = 0;
                     tickSound.play().catch((error) => {
                         console.warn("Tick sound playback failed:", error);
                     });
-
-                    setTimeout(() => {
-                        tickSound.pause();
-                    }, tickSoundDuration);
                 }
 
                 function applyColors(remaining, element, isOneMinutePart = false) {
