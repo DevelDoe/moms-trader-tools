@@ -42,4 +42,3 @@ function createClockWindow(taskbarWindow, transparent = true) {
 }
 
 module.exports = { createClockWindow };
-
