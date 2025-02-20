@@ -62,13 +62,15 @@
             let fiveMinuteWarningPlayed = false;
 
             document.addEventListener("DOMContentLoaded", async () => {
-                console.log("Syncing clock");
-                syncClock(); // ⏳ First, sync the clock properly before anything else.
-
-                setTimeout(() => {
-                    listenForSessionUpdates(); // 🔄 Listen for session updates from the backend and updates the list.
-                    console.log("🕒 Clock initialized.");
-                }, 100); // Small delay ensures syncClock() runs first.
+                window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
+                    console.log("Syncing clock");
+                    syncClock(); // ⏳ First, sync the clock properly before anything else.
+                    setTimeout(() => {
+                        console.log("listen For Session Updates");
+                        listenForSessionUpdates(); // 🔄 Listen for session updates from the backend and updates the list.
+                        console.log("🕒 Clock initialized.");
+                    }, 100); // Small delay ensures syncClock() runs first.
+                });
 
                 try {
                     const bellSoundPath = await window.electronAPI.getBellSoundPath();
@@ -119,7 +121,12 @@
             // * If a new session is found, it triggers activateSession(session).
             // * If no sessions are found, it clears the active session.
             function checkActiveSession(now) {
-                console.log("⏳ checkActiveSession: now : ", now)
+                // ✅ Ensure `now` is valid
+                if (!now || isNaN(now.getTime())) {
+                    console.error("❌ checkActiveSession: `now` is invalid!", now);
+                    return;
+                }
+
                 console.log("🔎 checkActiveSession: Checking active session at:", now.toLocaleTimeString("en-US", { hour12: false }));
                 console.log("📋 checkActiveSession: Sessions available:", sessionCountdowns);
 
@@ -130,17 +137,27 @@
                     const [startH, startM] = session.start.split(":").map(Number);
                     const [endH, endM] = session.end.split(":").map(Number);
 
+                    // ✅ Ensure session start and end are correct
+                    if (isNaN(startH) || isNaN(startM) || isNaN(endH) || isNaN(endM)) {
+                        console.error(`❌ checkActiveSession: Invalid session time for "${session.title}"`, session);
+                        return;
+                    }
+
                     const sessionStart = new Date(now);
                     sessionStart.setHours(startH, startM, 0, 0);
 
                     const sessionEnd = new Date(now);
                     sessionEnd.setHours(endH, endM, 0, 0);
 
+                    console.log(
+                        `🕒 checkActiveSession: Session "${session.title}" | Start: ${sessionStart.toLocaleTimeString()} | End: ${sessionEnd.toLocaleTimeString()} | Now: ${now.toLocaleTimeString()}`
+                    );
+
                     if (sessionStart <= now && now <= sessionEnd) {
                         console.log(`✅ checkActiveSession: Session "${session.title}" is active.`);
 
-                        // Convert previous priority session start time to Date for comparison
-                        const prevStart = prioritySession ? new Date(now).setHours(...prioritySession.start.split(":").map(Number), 0, 0) : null;
+                        // ✅ Ensure `prioritySession` has valid data before comparing
+                        let prevStart = prioritySession ? new Date(now).setHours(...prioritySession.start.split(":").map(Number), 0, 0) : null;
 
                         // 🔥 Choose the session with the latest start time
                         if (!prioritySession || sessionStart > prevStart) {
@@ -151,11 +168,12 @@
                 });
 
                 if (prioritySession) {
-                    console.log(`🔥 New priority session: "${prioritySession.title}"`);
+                    console.log(`🔥 checkActiveSession: New priority session: "${prioritySession.title}"`);
                     if (!lastSession || prioritySession.title !== lastSession.title) {
                         activateSession(prioritySession);
                     }
                 } else {
+                    console.log("🚫 checkActiveSession: No active session found, clearing...");
                     clearActiveSession();
                 }
             }
