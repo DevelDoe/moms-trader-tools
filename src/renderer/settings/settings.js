@@ -415,8 +415,8 @@ async function addSessionCountdown() {
     // ✅ Save updated sessions
     saveSettings({ sessionCountdowns: updatedSessions });
 
-    // ✅ Notify the clock only for session updates
-    window.electronAPI.send("update-session-countdowns", updatedSessions);
+    // ✅ Instead of sending an event here, notify `main.js`
+    window.electronAPI.send("request-update-session-countdowns", updatedSessions);
 
     // ✅ Refresh the session list
     initializeSessionCountdowns(updatedSessions, settings.sessionVolume);
