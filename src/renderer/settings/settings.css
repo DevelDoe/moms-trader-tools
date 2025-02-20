@@ -219,3 +219,53 @@ body::-webkit-scrollbar {
 .tooltip-icon:hover {
     color: #ffa726;
 }
+
+
+
+/* Countdown Settings Section */
+#countdown-settings .form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background-color: #1c1d23;
+    border-radius: 8px;
+    color: #fff;
+}
+
+/* Form Group Styling */
+#countdown-settings .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Label Styling */
+#countdown-settings .form-label {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* Input Fields */
+#countdown-settings .form-input {
+    padding: 0.5rem;
+    border: 1px solid #575757;
+    border-radius: 4px;
+    background-color: #2a2b32;
+    color: #fff;
+    font-size: 1rem;
+}
+
+/* Input Focus */
+#countdown-settings .form-input:focus {
+    border-color: #ff9800;
+    outline: none;
+}
+
+/* Range Slider Styling */
+#countdown-volume-slider {
+    width: 100%;
+    accent-color: #ff9800;
+}
