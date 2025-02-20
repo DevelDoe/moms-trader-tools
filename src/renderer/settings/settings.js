@@ -257,8 +257,6 @@ function resetChecklist() {
 }
 
 
-
-// Countdown Bar Section
 // Countdown Bar Section
 function initializeCountdownAlertSettings(settings) {
     document.getElementById("enable-tick-sound").checked = settings.enableTickSound ?? true;
