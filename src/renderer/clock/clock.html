@@ -90,6 +90,11 @@
                 }
             });
 
+            // Gets EST time
+            function getNYTime() {
+                return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+            }
+
             // Keeps the clock synchronized with New York time.
             // It ensures the updates happen precisely at the start of the next second to reduce lag.
             function syncClock() {
@@ -107,11 +112,6 @@
                 }
 
                 updateClockWithSync(); // Start immediately with sync
-            }
-
-            // Gets EST time
-            function getNYTime() {
-                return new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
             }
 
             // It listens for session updates from the Electron backend and updates the session list.
