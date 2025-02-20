@@ -545,6 +545,18 @@ function updateSessionWindows() {
     }
 }
 
+ipcMain.on("request-update-session-countdowns", (event, updatedSessions) => {
+    console.log("🔄 main.js: Received request to update session countdowns:", updatedSessions);
+
+    // ✅ Save the new sessions to global app settings
+    appSettings.sessionCountdowns = updatedSessions;
+
+    // ✅ Broadcast the updated sessions to all windows
+    BrowserWindow.getAllWindows().forEach((win) => {
+        win.webContents.send("update-session-countdowns", updatedSessions);
+    });
+});
+
 // Resumption
 
 ipcMain.on("toggle-resumption", () => {
