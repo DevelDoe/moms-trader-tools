@@ -91,6 +91,7 @@
             function syncClock() {
                 function updateClockWithSync() {
                     const nyTime = getNYTime();
+                    console.log("NY time: ", nyTime)
                     document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: false });
 
                     // 🔍 Ensure the next update happens precisely at the start of the next second
