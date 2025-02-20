@@ -1029,7 +1029,12 @@ ipcMain.on("restart-app", () => {
 });
 
 // UPDATES - Only runs in production mode
-if (!isDevelopment) {
+if (!isDevelopment || forceUpdate) {
+    if (forceUpdate) {
+        autoUpdater.forceDevUpdateConfig = true;
+        autoUpdater.allowDowngrade = true;
+    }
+    
     log.log("Production mode detected, checking for updates...");
     autoUpdater.checkForUpdatesAndNotify();
 
