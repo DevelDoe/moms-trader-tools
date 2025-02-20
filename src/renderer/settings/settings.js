@@ -256,10 +256,6 @@ function resetChecklist() {
     });
 }
 
-// Countdown Bar Section
-function initializeCountdownSection(settings) {
-
-}
 
 
 // Countdown Bar Section
