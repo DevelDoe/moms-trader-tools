@@ -263,7 +263,6 @@ function resetChecklist() {
 function initializeCountdownAlertSettings(settings) {
     document.getElementById("enable-tick-sound").checked = settings.enableTickSound ?? true;
     document.getElementById("countdown-ranges").value = settings.countdownRanges?.map(r => `${r.start}-${r.end}`).join(", ") || "50-60, 10-20";
-    document.getElementById("countdown-volume-slider").value = settings.tickSoundVolume ?? 0.5;
 
     document.getElementById("enable-tick-sound").addEventListener("change", () => {
         window.electronAPI.updateSettings({ enableTickSound: document.getElementById("enable-tick-sound").checked });
