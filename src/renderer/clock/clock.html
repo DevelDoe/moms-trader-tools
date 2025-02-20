@@ -252,6 +252,7 @@
                 window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
                     console.log("listenForSessionUpdates, updatedSessions:", updatedSessions);
                     sessionCountdowns = updatedSessions;
+                    console.log("listenForSessionUpdates, sessionCountdowns:", sessionCountdowns);
                     checkActiveSession(getNYTime());
                 });
             }
