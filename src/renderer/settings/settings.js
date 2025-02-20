@@ -426,7 +426,7 @@ async function addSessionCountdown() {
     // ✅ Reset input fields
     document.getElementById("session-time").value = "";
     document.getElementById("session-title").value = "";
-    document.getElementById("countdown-hours").value = "1";
+    document.getElementById("countdown-hours").value = "0";
     document.getElementById("countdown-minutes").value = "0";
 }
 
