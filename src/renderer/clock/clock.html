@@ -113,10 +113,6 @@
                     const nyTime = getNYTime();
                     console.log("syncClock: NY time: ", nyTime);
                     document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: true });
-
-                    // 🔍 Ensure session check is in sync with the clock
-                    checkActiveSession(nyTime);
-
                     // 🔄 Ensure the next update happens precisely at the start of the next second
                     const msUntilNextSecond = 1000 - nyTime.getMilliseconds();
                     setTimeout(() => requestAnimationFrame(updateClockWithSync), msUntilNextSecond);
