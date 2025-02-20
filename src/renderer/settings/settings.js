@@ -411,24 +411,28 @@ async function addSessionCountdown() {
     // Retrieve existing sessions, add the new session, and save
     const settings = await window.electronAPI.getSettings();
     const updatedSessions = [...(settings.sessionCountdowns || []), session];
+
+    // ✅ Save updated sessions
     saveSettings({ sessionCountdowns: updatedSessions });
+
+    // ✅ Notify the clock only for session updates
+    window.electronAPI.send("update-session-countdowns", updatedSessions);
 
     // ✅ Refresh the session list
     initializeSessionCountdowns(updatedSessions, settings.sessionVolume);
-
-    // ✅ Show restart message and button (keeps it visible)
     showRestartNotification();
 
     setTimeout(() => {
         restartMessage.style.display = "none";
-    }, 5000); // Hide after 5 seconds
+    }, 5000);
 
     // ✅ Reset input fields
     document.getElementById("session-time").value = "";
     document.getElementById("session-title").value = "";
-    document.getElementById("countdown-hours").value = "1"; // Reset to 1 hour
-    document.getElementById("countdown-minutes").value = "0"; // Reset to 0 minutes
+    document.getElementById("countdown-hours").value = "1";
+    document.getElementById("countdown-minutes").value = "0";
 }
+
 
 // ✅ Function to show restart message & button
 function showRestartNotification() {
