@@ -28,7 +28,8 @@
             <div id="general" class="tabcontent">
                 <section id="audio">
                     <h2>Adudio</h2>
-                    
+                    <label for="volume-slider">🔊 Countdown Volume:</label>
+                    <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.5" />
                     <div id="clock-bell-volume">
                         <label for="session-volume-slider">🔊 Session Bell Volume:</label>
                         <input id="session-volume-slider" type="range" min="0" max="1" step="0.01" value="0" />
@@ -86,6 +87,10 @@
 
             <!-- Countdown Settings -->
             <div id="countdown-settings" class="tabcontent">
+                <label>
+                    <input type="checkbox" id="countdown-transparent-toggle" />
+                    Enable Transparent Background
+                </label>
                 <label>
                     <input type="checkbox" id="enable-tick-sound" checked />
                     Enable Tick Sound
