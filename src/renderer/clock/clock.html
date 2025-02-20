@@ -62,9 +62,12 @@
             let fiveMinuteWarningPlayed = false;
 
             document.addEventListener("DOMContentLoaded", async () => {
-                listenForSessionUpdates(); // listen for session updates from the backend and updates the session list.
-                syncClock();
-                console.log("🕒 Clock initialized.");
+                syncClock(); // ⏳ First, sync the clock properly before anything else.
+
+                setTimeout(() => {
+                    listenForSessionUpdates(); // 🔄 Now, start listening for session updates.
+                    console.log("🕒 Clock initialized.");
+                }, 100); // Small delay ensures syncClock() runs first.
 
                 try {
                     const bellSoundPath = await window.electronAPI.getBellSoundPath();
