@@ -66,7 +66,7 @@
                 syncClock(); // ⏳ First, sync the clock properly before anything else.
 
                 setTimeout(() => {
-                    listenForSessionUpdates(); // 🔄 Now, start listening for session updates.
+                    listenForSessionUpdates(); // 🔄 Listen for session updates from the backend and updates the list.
                     console.log("🕒 Clock initialized.");
                 }, 100); // Small delay ensures syncClock() runs first.
 
