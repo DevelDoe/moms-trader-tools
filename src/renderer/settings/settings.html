@@ -86,22 +86,39 @@
             </div>
 
             <!-- Countdown Settings -->
+            <!-- Countdown Settings -->
             <div id="countdown-settings" class="tabcontent">
-                <label>
-                    <input type="checkbox" id="enable-tick-sound" checked />
-                    Enable Tick Sound
-                </label>
+                <div class="form-container">
+                    <h2>Countdown Settings</h2>
 
-                <label for="countdown-ranges">🔊 Tick Sound Bands (Seconds Ranges):</label>
-                <input id="countdown-ranges" type="text" placeholder="50-60, 10-20" />
+                    <!-- Enable Tick Sound -->
+                    <div class="form-group">
+                        <label for="enable-tick-sound" class="form-label">
+                            <input type="checkbox" id="enable-tick-sound" checked />
+                            Enable Tick Sound
+                        </label>
+                    </div>
 
-                <label for="countdown-volume-slider">🔊 Countdown Volume:</label>
-                <input id="countdown-volume-slider" type="range" min="0" max="1" step="0.01" value="0.5" />
+                    <!-- Tick Sound Bands (Seconds Ranges) -->
+                    <div class="form-group">
+                        <label for="countdown-ranges" class="form-label">🔊 Tick Sound Bands (Seconds Ranges):</label>
+                        <input id="countdown-ranges" type="text" class="form-input" placeholder="50-60, 10-20" />
+                    </div>
 
-                <label>
-                    <input type="checkbox" id="countdown-transparent-toggle" />
-                    Enable Transparent Background
-                </label>
+                    <!-- Countdown Volume Slider -->
+                    <div class="form-group">
+                        <label for="countdown-volume-slider" class="form-label">🔊 Countdown Volume:</label>
+                        <input id="countdown-volume-slider" type="range" min="0" max="1" step="0.01" value="0.5" class="form-input" />
+                    </div>
+
+                    <!-- Enable Transparent Background -->
+                    <div class="form-group">
+                        <label for="countdown-transparent-toggle" class="form-label">
+                            <input type="checkbox" id="countdown-transparent-toggle" />
+                            Enable Transparent Background
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <!-- Clock -->
