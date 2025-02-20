@@ -6,10 +6,10 @@
     "scripts": {
         "start": "cross-env NODE_ENV=development DEBUG=true forceUpdate=true electron .",
         "package": "cross-env NODE_ENV=production DEBUG=false forceUpdate=false electron-packager . Moms_Trader_Tools --platform=win32 --arch=x64 --out=dist --overwrite",
-        "package-all": "cross-env NODE_ENV=production DEBUG=false electron-packager . Moms_Trader_Tools --all --out=dist --overwrite",
-        "package-mac": "cross-env NODE_ENV=production DEBUG=false electron-packager . Moms_Trader_Tools --platform=darwin --arch=x64 --out=dist --overwrite",
-        "package-linux": "cross-env NODE_ENV=production DEBUG=false electron-packager . Moms_Trader_Tools --platform=linux --arch=x64 --out=dist --overwrite",
-        "publish": "cross-env NODE_ENV=production DEBUG=false electron-builder -p always"
+        "package-all": "cross-env NODE_ENV=production DEBUG=false forceUpdate=false electron-packager . Moms_Trader_Tools --all --out=dist --overwrite",
+        "package-mac": "cross-env NODE_ENV=production DEBUG=false forceUpdate=false electron-packager . Moms_Trader_Tools --platform=darwin --arch=x64 --out=dist --overwrite",
+        "package-linux": "cross-env NODE_ENV=production DEBUG=false forceUpdate=false electron-packager . Moms_Trader_Tools --platform=linux --arch=x64 --out=dist --overwrite",
+        "publish": "cross-env NODE_ENV=production DEBUG=false forceUpdate=false electron-builder -p always"
     },
     "author": "Morgan A Ray",
     "license": "MIT",
