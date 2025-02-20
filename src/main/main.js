@@ -439,11 +439,16 @@ ipcMain.on("toggle-countdown", () => {
 });
 
 ipcMain.on("countdown-volume-change", (event, volume) => {
-    log.log("Received volume change:", volume);
+    log.log("📩 Received volume change:", volume);
+
     if (windows.countdown) {
+        log.log("🔊 Sending volume update to countdown window...");
         windows.countdown.webContents.send("update-countdown-volume", volume);
+    } else {
+        log.warn("❌ Countdown window not found, cannot send volume update.");
     }
 });
+
 
 ipcMain.handle("get-tick-sound-path", () => {
     return path.join(app.getAppPath(), "assets/sounds/tick.mp3");
