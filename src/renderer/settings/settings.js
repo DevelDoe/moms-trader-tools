@@ -152,7 +152,8 @@ function initializeReminderSection(items) {
         });
 
         listItem.appendChild(removeButton);
-        reminderList.appendChild(listItem);
+        reminderList.appendChild(listItem);initializeCountdownSection
+
     });
 }
 
@@ -260,7 +261,6 @@ function resetChecklist() {
 function initializeCountdownSection(settings) {
     document.getElementById("enable-tick-sound").checked = settings.enableTickSound ?? true;
     document.getElementById("countdown-ranges").value = settings.countdownRanges?.map(r => `${r.start}-${r.end}`).join(", ") || "50-60, 10-20";
-    document.getElementById("tick-sound-duration").value = settings.tickSoundDuration ?? 100;
 
     document.getElementById("enable-tick-sound").addEventListener("change", () => {
         window.electronAPI.updateSettings({ enableTickSound: document.getElementById("enable-tick-sound").checked });
@@ -279,11 +279,6 @@ function initializeCountdownSection(settings) {
         window.electronAPI.updateSettings({ countdownRanges: newRanges });
     });
 
-    document.getElementById("tick-sound-duration").addEventListener("input", () => {
-        const duration = parseInt(document.getElementById("tick-sound-duration").value, 10);
-        console.log("🔄 Updating tickSoundDuration:", duration);
-        window.electronAPI.updateSettings({ tickSoundDuration: duration });
-    });
 
     const slider = document.getElementById("countdown-volume-slider");
     slider.value = settings.volume || 0.5;
