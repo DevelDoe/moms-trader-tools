@@ -43,34 +43,16 @@
       "tooltip": "Large bid and ask orders at key price levels can act as support or resistance. Monitoring these can help anticipate potential reversals or breakouts."
     },
     {
-      "text": "EMA",
-      "type": "reminder",
-      "state": "default",
-      "tooltip": "Helps identify trends by smoothing out price action. A rising EMA suggests bullish momentum, while a falling EMA indicates bearish pressure. It can also act as dynamic support or resistance and are often trigger points."
-    },
-    {
       "text": "Time bar",
       "type": "reminder",
       "state": "default",
       "tooltip": "The remaining time in a candle is crucial for confirming signals. A setup that looks strong mid-bar can completely change by the close. Waiting for the candle to complete prevents premature entries based on incomplete patterns and false moves."
     },
     {
-      "text": "VWAP",
-      "type": "reminder",
-      "state": "default",
-      "tooltip": "VWAP is a key intraday indicator that helps traders assess fair value and a stock’s strength or weakness. Institutional traders often use it as a benchmark for buy/sell decisions. Most trades cluster around VWAP, making it a crucial level for entries and exits."
-    },
-    {
       "text": "Float",
       "type": "optional",
       "state": "state-yellow",
       "tooltip": "Understanding float helps traders anticipate supply/demand imbalances, identify potential short squeezes, and gauge the risk level of a trade. Low float stocks tend to be more volatile due to limited supply, while high float stocks are generally more stable."
-    },
-    {
-      "text": "Catalyst",
-      "type": "optional",
-      "state": "state-yellow",
-      "tooltip": "A strong news catalyst can drive volume and momentum, making a stock more volatile and tradable. Positive news can fuel bullish moves, while negative news can trigger sell-offs. Traders should assess the strength of the catalyst, its impact on the stock, and how the market react."
     }
   ],
   "sessionCountdowns": [
@@ -118,16 +100,6 @@
       "start": "09:00",
       "end": "09:30",
       "title": "Breaking News E"
-    },
-    {
-      "start": "17:30",
-      "end": "17:31",
-      "title": "test"
-    },
-    {
-      "start": "17:32",
-      "end": "17:38",
-      "title": "6 min test"
     }
   ],
   "reminderItems": [
@@ -190,9 +162,33 @@
     {
       "text": "MTJ: Volume, ticker and sectors",
       "type": "reminder"
+    },
+    {
+      "text": "MTM: add clear daily",
+      "type": "critical"
+    },
+    {
+      "text": "MTT: always on top, snipper window",
+      "type": "reminder"
+    },
+    {
+      "text": "MTM: long headlines needs to be concated",
+      "type": "critical"
+    },
+    {
+      "text": "MTT: Clock, conduct test",
+      "type": "reminder"
+    },
+    {
+      "text": "MTM: Sort all tickers by symbol",
+      "type": "critical"
+    },
+    {
+      "text": "MTM: Get news on cleared list.",
+      "type": "critical"
     }
   ],
-  "sessionVolume": 1,
+  "sessionVolume": 0.82,
   "snippers": [],
   "reminderTransparent": false,
   "countdownTransparent": true
