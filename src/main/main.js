@@ -3,7 +3,7 @@
 const { app, BrowserWindow, ipcMain, desktopCapturer, dialog } = require("electron");
 const createLogger = require("../hlps/logger");
 const { autoUpdater } = require("electron-updater");
-
+const { exec } = require("child_process");
 
 
 const { createSplashWindow } = require("./windows/splash/splash");
