@@ -132,7 +132,6 @@
             // * If a new session is found, it triggers activateSession(session).
             // * If no sessions are found, it clears the active session.
             function checkActiveSession(now) {
-                // ✅ Ensure `now` is valid
                 if (!now || isNaN(now.getTime())) {
                     console.error("❌ checkActiveSession: `now` is invalid!", now);
                     return;
@@ -148,7 +147,6 @@
                     const [startH, startM] = session.start.split(":").map(Number);
                     const [endH, endM] = session.end.split(":").map(Number);
 
-                    // ✅ Ensure session start and end are correct
                     if (isNaN(startH) || isNaN(startM) || isNaN(endH) || isNaN(endM)) {
                         console.error(`❌ checkActiveSession: Invalid session time for "${session.title}"`, session);
                         return;
@@ -167,10 +165,8 @@
                     if (sessionStart <= now && now <= sessionEnd) {
                         console.log(`✅ checkActiveSession: Session "${session.title}" is active.`);
 
-                        // ✅ Ensure `prioritySession` has valid data before comparing
                         let prevStart = prioritySession ? new Date(now).setHours(...prioritySession.start.split(":").map(Number), 0, 0) : null;
 
-                        // 🔥 Choose the session with the latest start time
                         if (!prioritySession || sessionStart > prevStart) {
                             console.log(`🚀 checkActiveSession: "${session.title}" is taking priority over "${prioritySession ? prioritySession.title : "none"}"`);
                             prioritySession = session;
@@ -179,10 +175,14 @@
                 });
 
                 if (prioritySession) {
-                    console.log(`🔥 checkActiveSession: New priority session: "${prioritySession.title}"`);
-                    if (!lastSession || prioritySession.title !== lastSession.title) {
-                        activateSession(prioritySession);
+                    // 🔄 **Fix Reactivation Bug**
+                    if (lastSession && prioritySession.title === lastSession.title) {
+                        console.log(`🔄 checkActiveSession: "${prioritySession.title}" is already active.`);
+                        return;
                     }
+
+                    console.log(`🔥 checkActiveSession: New priority session: "${prioritySession.title}"`);
+                    activateSession(prioritySession);
                 } else {
                     console.log("🚫 checkActiveSession: No active session found, clearing...");
                     clearActiveSession();
