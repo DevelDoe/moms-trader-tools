@@ -258,7 +258,39 @@ function resetChecklist() {
 
 // Countdown Bar Section
 function initializeCountdownSection(settings) {
-    const slider = document.getElementById("volume-slider");
+   
+}
+
+// Countdown Bar Section
+function initializeCountdownSettings(settings) {
+    document.getElementById("enable-tick-sound").checked = settings.enableTickSound ?? true;
+    document.getElementById("countdown-ranges").value = settings.countdownRanges?.map(r => `${r.start}-${r.end}`).join(", ") || "50-60, 10-20";
+    document.getElementById("tick-sound-duration").value = settings.tickSoundDuration ?? 100;
+
+    document.getElementById("enable-tick-sound").addEventListener("change", () => {
+        window.electronAPI.updateSettings({ enableTickSound: document.getElementById("enable-tick-sound").checked });
+        console.log("✅ Updated enableTickSound:", document.getElementById("enable-tick-sound").checked);
+    });
+
+    // ✅ Immediately update countdown ranges on input
+    document.getElementById("countdown-ranges").addEventListener("input", () => {
+        const newRanges = document.getElementById("countdown-ranges").value
+            .split(",")
+            .map(range => range.trim().split("-").map(v => parseInt(v.trim(), 10)))
+            .filter(arr => arr.length === 2 && arr.every(Number.isFinite))
+            .map(([start, end]) => ({ start, end }));
+
+        console.log("🔄 Updating countdownRanges:", newRanges);
+        window.electronAPI.updateSettings({ countdownRanges: newRanges });
+    });
+
+    document.getElementById("tick-sound-duration").addEventListener("input", () => {
+        const duration = parseInt(document.getElementById("tick-sound-duration").value, 10);
+        console.log("🔄 Updating tickSoundDuration:", duration);
+        window.electronAPI.updateSettings({ tickSoundDuration: duration });
+    });
+
+    const slider = document.getElementById("countdown-volume-slider");
     slider.value = settings.volume || 0.5;
     slider.addEventListener("input", () => window.electronAPI.setCountdownVolume(slider.value));
 }
