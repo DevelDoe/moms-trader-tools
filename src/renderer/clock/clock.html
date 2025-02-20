@@ -186,15 +186,6 @@
                 }
             }
 
-            // It listens for session updates from the Electron backend and updates the session list.
-            function listenForSessionUpdates() {
-                window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
-                    console.log("listenForSessionUpdates, updatedSessions:", updatedSessions);
-                    sessionCountdowns = updatedSessions;
-                    console.log("listenForSessionUpdates, sessionCountdowns:", sessionCountdowns);
-                });
-            }
-
             // Activate a new session
             // * Updates the UI with the session title.
             // * Plays a bell sound if it exists.
