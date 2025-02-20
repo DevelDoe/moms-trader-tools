@@ -4,6 +4,8 @@ const { app, BrowserWindow, ipcMain, desktopCapturer, dialog } = require("electr
 const createLogger = require("../hlps/logger");
 const { autoUpdater } = require("electron-updater");
 
+
+
 const { createSplashWindow } = require("./windows/splash/splash");
 const { createReminderWindow } = require("./windows/reminder/reminder");
 const { createSettingsWindow } = require("./windows/settings/settings");
@@ -31,6 +33,7 @@ autoUpdater.setFeedURL({
 
 const isDevelopment = process.env.NODE_ENV === "development";
 const isDebug = process.env.DEBUG === "true";
+const forceUpdate = true;
 
 // Use system settings file for production, separate file for development
 const SETTINGS_FILE = isDevelopment
@@ -1034,7 +1037,7 @@ if (!isDevelopment || forceUpdate) {
         autoUpdater.forceDevUpdateConfig = true;
         autoUpdater.allowDowngrade = true;
     }
-    
+
     log.log("Production mode detected, checking for updates...");
     autoUpdater.checkForUpdatesAndNotify();
 
