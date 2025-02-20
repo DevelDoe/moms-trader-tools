@@ -75,7 +75,7 @@
                     { start: 10, end: 20 },
                 ];
                 let tickSoundDuration = settings.tickSoundDuration || 100;
-                let tickSoundVolume = 0;
+                let tickSoundVolume = settings.tickSoundVolume || 0.5;
                 let enableTickSound = settings.enableTickSound ?? true;
         
                 let tickSound = null; // ✅ Declare tickSound globally
@@ -83,7 +83,7 @@
                 try {
                     const tickSoundPath = await window.electronAPI.getTickSoundPath();
                     tickSound = new Audio(tickSoundPath);
-                    tickSound.volume = 0.5; // Default volume
+                    tickSound.volume = 0; // Default volume
                 } catch (error) {
                     console.error("Error loading tick sound:", error);
                 }
