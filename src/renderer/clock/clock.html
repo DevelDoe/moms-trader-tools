@@ -62,7 +62,7 @@
             let fiveMinuteWarningPlayed = false;
 
             document.addEventListener("DOMContentLoaded", async () => {
-                listenForSessionUpdates();
+                listenForSessionUpdates();  // listen for session updates from the backend and updates the session list.
                 syncClock();
                 console.log("🕒 Clock initialized.");
 
@@ -250,7 +250,7 @@
             // It listens for session updates from the Electron backend and updates the session list.
             function listenForSessionUpdates() {
                 window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
-                    console.log("🔄 Session Data Received:", updatedSessions);
+                    console.log("listenForSessionUpdates, updatedSessions:", updatedSessions);
                     sessionCountdowns = updatedSessions;
                     checkActiveSession(getNYTime());
                 });
