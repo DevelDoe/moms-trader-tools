@@ -100,7 +100,7 @@
             function syncClock() {
                 function updateClockWithSync() {
                     const nyTime = getNYTime();
-                    console.log("NY time: ", nyTime);
+                    console.log("syncClock: NY time: ", nyTime);
                     document.getElementById("clock").textContent = nyTime.toLocaleTimeString("en-US", { hour12: true });
 
                     // 🔍 Ensure session check is in sync with the clock
