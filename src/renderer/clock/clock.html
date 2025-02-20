@@ -62,16 +62,24 @@
             let fiveMinuteWarningPlayed = false;
 
             document.addEventListener("DOMContentLoaded", async () => {
+                console.log("🚀 Waiting for session updates before starting...");
+
+                // ✅ Start everything only when session updates arrive
                 window.electronAPI.onUpdateSessionCountdowns((updatedSessions) => {
-                    console.log("Syncing clock");
-                    syncClock(); // ⏳ First, sync the clock properly before anything else.
-                    setTimeout(() => {
-                        console.log("listen For Session Updates");
-                        listenForSessionUpdates(); // 🔄 Listen for session updates from the backend and updates the list.
-                        console.log("🕒 Clock initialized.");
-                    }, 100); // Small delay ensures syncClock() runs first.
+                    console.log("📥 Received session updates, initializing clock...");
+
+                    // ✅ Populate `sessionCountdowns` first
+                    sessionCountdowns = updatedSessions;
+
+                    // ✅ Now start the clock since sessions are loaded
+                    syncClock();
+                    console.log("🕒 Clock syncing started.");
+
+                    // ✅ First session check
+                    checkActiveSession(getNYTime());
                 });
 
+                // ✅ Load sounds only once on page load
                 try {
                     const bellSoundPath = await window.electronAPI.getBellSoundPath();
                     bellSound = new Audio(bellSoundPath);
