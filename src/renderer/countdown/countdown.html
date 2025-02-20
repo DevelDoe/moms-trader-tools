@@ -78,7 +78,8 @@
 
                 let tickSound = null;
                 try {
-                    const tickSoundPath = await window.electronAPI.getTickSoundPath();
+                    let tickSound = new Audio(tickSoundPath);
+
                     tickSound = new Audio(tickSoundPath);
                     tickSound.volume = tickSoundVolume;
                 } catch (error) {
