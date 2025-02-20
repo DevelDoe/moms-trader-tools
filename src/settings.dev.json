@@ -55,18 +55,7 @@
       "tooltip": "Understanding float helps traders anticipate supply/demand imbalances, identify potential short squeezes, and gauge the risk level of a trade. Low float stocks tend to be more volatile due to limited supply, while high float stocks are generally more stable."
     }
   ],
-  "sessionCountdowns": [
-    {
-      "start": "06:32",
-      "end": "06:34",
-      "title": "inside"
-    },
-    {
-      "start": "06:35",
-      "end": "06:41",
-      "title": "5 min test"
-    }
-  ],
+  "sessionCountdowns": [],
   "reminderItems": [
     {
       "text": "MTM: check sector and country",
