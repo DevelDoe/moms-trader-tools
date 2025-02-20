@@ -63,156 +63,98 @@
         </div>
 
         <script>
-            document.addEventListener("DOMContentLoaded", async () => {
-                console.log("Countdown script loaded");
+document.addEventListener("DOMContentLoaded", async () => {
+    console.log("Countdown script loaded");
 
-                let tickSound = null;
+    // ✅ Fetch user settings
+    const settings = await window.electronAPI.getSettings();
+    const countdownRanges = settings.countdownRanges || [{ start: 50, end: 60 }, { start: 10, end: 20 }];
+    const tickSoundDuration = settings.tickSoundDuration || 100;
+    const tickSoundVolume = settings.tickSoundVolume || 0.5;
+    const enableTickSound = settings.enableTickSound ?? true;
 
-                // Initialize the tick sound and handle Electron API integration
-                try {
-                    const tickSoundPath = await window.electronAPI.getTickSoundPath();
-                    tickSound = new Audio(tickSoundPath);
-                    tickSound.volume = 0;
+    let tickSound = null;
+    try {
+        const tickSoundPath = await window.electronAPI.getTickSoundPath();
+        tickSound = new Audio(tickSoundPath);
+        tickSound.volume = tickSoundVolume;
+    } catch (error) {
+        console.error("Error loading tick sound:", error);
+    }
 
-                    // Listen for volume updates from Electron main process
-                    window.electronAPI.onCountdownVolumeUpdate((volume) => {
-                        console.log("Countdown Volume updated:", volume);
-                        tickSound.volume = volume;
-                    });
-                } catch (error) {
-                    console.error("Error loading tick sound:", error);
-                }
+    function startRealTimeCountdown() {
+        function updateDisplay() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            const minutes = now.getMinutes();
 
-                function startRealTimeCountdown() {
-                    let isLockTickActive = false;
+            // Calculate five-minute countdown
+            const secondsSinceLastFiveMinutes = (minutes % 5) * 60 + seconds;
+            const totalSecondsFiveMinute = 300 - secondsSinceLastFiveMinutes - 1;
+            const fiveMinuteRemaining = Math.floor(totalSecondsFiveMinute / 60);
 
-                    function updateDisplay() {
-                        const now = new Date();
-                        const seconds = now.getSeconds();
-                        const minutes = now.getMinutes();
+            // Calculate full seconds countdown for the last minute
+            const oneMinuteRemaining = 60 - seconds; 
+            const tensDigit = Math.floor(oneMinuteRemaining / 10);
+            const onesDigit = oneMinuteRemaining % 10;
 
-                        // Calculate five-minute countdown
-                        const secondsSinceLastFiveMinutes = (minutes % 5) * 60 + seconds;
-                        const totalSecondsFiveMinute = 300 - secondsSinceLastFiveMinutes - 1;
-                        const fiveMinuteRemaining = Math.floor(totalSecondsFiveMinute / 60);
-
-                        // Calculate full seconds countdown for the last minute
-                        const oneMinuteRemaining = 60 - seconds; // ✅ Fixes the lag issue
-                        const tensDigit = Math.floor(oneMinuteRemaining / 10);
-                        const onesDigit = oneMinuteRemaining % 10;
-
-                        document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
-
-                        // Update one-minute countdown digits **separately** without removing span elements
-                        document.getElementById("one-minute-part").innerHTML = `
+            document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
+            document.getElementById("one-minute-part").innerHTML = `
                 <span id="tens-digit">${tensDigit}</span>
                 <span id="ones-digit">${onesDigit}</span>
             `;
 
-                        // Apply colors **to each digit separately**
-                        applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true); // One-minute follows new color rules
-                        applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part")); // Five-minute remains unchanged
+            applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true);
+            applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part"));
 
-                        if (oneMinuteRemaining <= 10) {
-                            if (!isLockTickActive) {
-                                isLockTickActive = true;
-                                activateLockTickEffect();
-                            }
-                            // playTickSound();
-                        } else if (isLockTickActive) {
-                            isLockTickActive = false;
-                            deactivateLockTickEffect();
-                        }
+            // ✅ Check if current second is inside any defined band
+            if (enableTickSound && isInCountdownRange(oneMinuteRemaining)) {
+                playTickSound();
+            }
 
-                        // **⚡ Dynamic tick adjustment for exact precision**
-                        const nowMillis = new Date().getTime();
-                        const nextTick = 1000 - (nowMillis % 1000); // Calculate remaining time until next full second
-                        setTimeout(updateDisplay, nextTick);
-                    }
+            const nowMillis = new Date().getTime();
+            const nextTick = 1000 - (nowMillis % 1000); 
+            setTimeout(updateDisplay, nextTick);
+        }
 
-                    updateDisplay(); // Start the loop
-                }
+        updateDisplay();
+    }
 
-                function applyColors(remaining, element, isOneMinutePart = false) {
-                    if (isOneMinutePart) {
-                        // Apply new color rules for the one-minute countdown
-                        if (remaining > 50) {
-                            element.style.color = "orange";
-                        } else if (remaining > 40) {
-                            playTickSound()
-                            element.style.color = "#006666";
-                        } else if (remaining > 30) {
-                            element.style.color = "#FF2800";
-                        } else if (remaining > 20) {
-                            element.style.color = "orange";
-                        } else if (remaining > 10) {
-                            element.style.color = "#006666";
-                            playTickSound()
-                        } else {
-                            element.style.color = "#FF2800";
-                        }
-                    } else {
-                        // Keep five-minute part unchanged
-                        const colorMap = {
-                            5: "orange",
-                            4: "#006666",
-                            3: "#FF2800",
-                            2: "orange",
-                            1: "#006666",
-                            0: "#FF2800",
-                        };
-                        element.style.color = colorMap[remaining] || "transparent";
-                    }
-                }
+    function isInCountdownRange(second) {
+        return countdownRanges.some(({ start, end }) => second >= start && second <= end);
+    }
 
-                function playTickSound() {
-                    if (!tickSound) return;
-                    tickSound.currentTime = 0;
-                    tickSound.play().catch((error) => {
-                        console.warn("Tick sound playback failed:", error);
-                    });
-                }
+    function playTickSound() {
+        if (!tickSound || !enableTickSound) return;
+        tickSound.currentTime = 0;
+        tickSound.play().catch((error) => {
+            console.warn("Tick sound playback failed:", error);
+        });
 
-                function activateLockTickEffect() {
-                    document.getElementById("five-minute-part").style.fontWeight = "bold";
-                    document.getElementById("one-minute-part").style.fontWeight = "bold";
+        setTimeout(() => {
+            tickSound.pause();
+        }, tickSoundDuration);
+    }
 
-                    // Add blinking effect to the one-minute part
-                    document.getElementById("one-minute-part").classList.add("blinking");
-                }
+    startRealTimeCountdown();
 
-                function deactivateLockTickEffect() {
-                    document.getElementById("five-minute-part").style.fontWeight = "normal";
-                    document.getElementById("one-minute-part").style.fontWeight = "normal";
+    window.electronAPI.onSettingsUpdated((updatedSettings) => {
+        console.log("📩 Received updated settings:", updatedSettings);
+        if (updatedSettings.countdownRanges !== undefined) {
+            countdownRanges = updatedSettings.countdownRanges;
+        }
+        if (updatedSettings.enableTickSound !== undefined) {
+            enableTickSound = updatedSettings.enableTickSound;
+        }
+        if (updatedSettings.tickSoundDuration !== undefined) {
+            tickSoundDuration = updatedSettings.tickSoundDuration;
+        }
+        if (updatedSettings.tickSoundVolume !== undefined) {
+            tickSound.volume = updatedSettings.tickSoundVolume;
+        }
+    });
 
-                    // Remove blinking effect from the one-minute part
-                    document.getElementById("one-minute-part").classList.remove("blinking");
-                }
-
-                console.log("Countdown started");
-                startRealTimeCountdown();
-
-                // ✅ Fetch the transparency setting on load
-                const settings = await window.electronAPI.getSettings();
-                updateBackground(settings.countdownTransparent);
-
-                // ✅ Listen for setting changes
-                window.electronAPI.onSettingsUpdated((updatedSettings) => {
-                    console.log("📩 Received updated settings:", updatedSettings);
-                    if (updatedSettings.countdownTransparent !== undefined) {
-                        updateBackground(updatedSettings.countdownTransparent);
-                    }
-                });
-
-                // ✅ Listen for direct updates from settings UI
-                window.electronAPI.on("update-countdown-transparency", (isTransparent) => {
-                    updateBackground(isTransparent);
-                });
-
-                function updateBackground(isTransparent) {
-                    document.body.style.backgroundColor = isTransparent ? "transparent" : "#1c1d23";
-                }
-            });
-        </script>
+});
+ </script>
     </body>
 </html>
