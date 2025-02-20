@@ -1033,7 +1033,7 @@ ipcMain.on("restart-app", () => {
 ////////////////////////////////////////////////////////////////////////////////////
 // UPDATES
 
-if (!isDevelopment || forceUpdate) {
+if (!isDevelopment || !forceUpdate) {
     if (forceUpdate) {
         autoUpdater.forceDevUpdateConfig = true;
         autoUpdater.allowDowngrade = true;
