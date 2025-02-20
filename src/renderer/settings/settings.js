@@ -287,7 +287,7 @@ function initializeCountdownAlertSettings(settings) {
     });
 
     // ✅ Real-time volume updates
-    document.getElementById("volume-slider").addEventListener("input", () => {
+    document.getElementById("countdown-volume-slider").addEventListener("input", () => {
         const newVolume = parseFloat(document.getElementById("volume-slider").value);
         console.log("🔊 Updating tickSoundVolume:", newVolume);
         window.electronAPI.updateSettings({ tickSoundVolume: newVolume });
