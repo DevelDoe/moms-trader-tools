@@ -64,11 +64,11 @@
         <script>
             document.addEventListener("DOMContentLoaded", async () => {
                 console.log("Countdown script loaded");
-
+        
                 // ✅ Fetch user settings
                 const settings = await window.electronAPI.getSettings();
                 updateBackground(settings.countdownTransparent);
-
+        
                 let countdownRanges = settings.countdownRanges || [
                     { start: 50, end: 60 },
                     { start: 10, end: 20 },
@@ -76,9 +76,9 @@
                 let tickSoundDuration = settings.tickSoundDuration || 100;
                 let tickSoundVolume = settings.tickSoundVolume || 0.5;
                 let enableTickSound = settings.enableTickSound ?? true;
-
+        
                 let tickSound = null; // ✅ Declare tickSound globally
-
+        
                 try {
                     const tickSoundPath = await window.electronAPI.getTickSoundPath();
                     tickSound = new Audio(tickSoundPath);
@@ -86,7 +86,7 @@
                 } catch (error) {
                     console.error("Error loading tick sound:", error);
                 }
-
+        
                 // ✅ Listen for volume updates and apply them immediately
                 window.electronAPI.onCountdownVolumeUpdate((volume) => {
                     console.log("🔊 Updating tick sound volume:", volume);
@@ -96,49 +96,48 @@
                         console.warn("❌ Tick sound not initialized yet.");
                     }
                 });
-
+        
                 function startRealTimeCountdown() {
                     function updateDisplay() {
                         const now = new Date();
                         const seconds = now.getSeconds();
                         const minutes = now.getMinutes();
-
+        
                         // Calculate five-minute countdown
                         const secondsSinceLastFiveMinutes = (minutes % 5) * 60 + seconds;
                         const totalSecondsFiveMinute = 300 - secondsSinceLastFiveMinutes - 1;
                         const fiveMinuteRemaining = Math.floor(totalSecondsFiveMinute / 60);
-
+        
                         // Calculate full seconds countdown for the last minute
                         const oneMinuteRemaining = 60 - seconds;
                         const tensDigit = Math.floor(oneMinuteRemaining / 10);
                         const onesDigit = oneMinuteRemaining % 10;
-
+        
                         document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
                         document.getElementById("one-minute-part").innerHTML = `
                             <span id="tens-digit">${tensDigit}</span>
                             <span id="ones-digit">${onesDigit}</span>
                         `;
-
+        
                         applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true);
-                        applyColors(fiveMinuteRemaining, document.getElementById("five-minute-part"));
-
+        
                         // ✅ Check if current second is inside any defined band
                         if (enableTickSound && isInCountdownRange(oneMinuteRemaining)) {
                             playTickSound();
                         }
-
+        
                         const nowMillis = new Date().getTime();
                         const nextTick = 1000 - (nowMillis % 1000);
                         setTimeout(updateDisplay, nextTick);
                     }
-
+        
                     updateDisplay();
                 }
-
+        
                 function isInCountdownRange(second) {
                     return countdownRanges.some(({ start, end }) => second >= start && second <= end);
                 }
-
+        
                 function playTickSound() {
                     if (!tickSound) return;
                     tickSound.currentTime = 0;
@@ -146,28 +145,42 @@
                         console.warn("Tick sound playback failed:", error);
                     });
                 }
-
+        
                 function applyColors(remaining, element, isOneMinutePart = false) {
-                    const isActive = isInCountdownRange(remaining);
-
-                    if (isActive) {
-                        element.style.color = "#00CC66"; // ✅ Green when inside the range
-                        element.classList.remove("blinking"); // Stop blinking when active
+                    if (isOneMinutePart) {
+                        // ✅ If the current second is in a countdown range, use red, otherwise green
+                        const isActive = isInCountdownRange(remaining);
+        
+                        if (isActive) {
+                            element.style.color = "#FF2800"; // 🔴 Red
+                            element.classList.add("blinking");
+                        } else {
+                            element.style.color = "#00CC66"; // ✅ Green
+                            element.classList.remove("blinking");
+                        }
                     } else {
-                        element.style.color = "#FF2800"; // 🔴 Red when outside range
-                        element.classList.add("blinking"); // Start blinking when not active
+                        // ✅ Five-minute countdown remains unchanged
+                        const colorMap = {
+                            5: "orange",
+                            4: "#006666",
+                            3: "#FF2800",
+                            2: "orange",
+                            1: "#006666",
+                            0: "#FF2800",
+                        };
+                        element.style.color = colorMap[remaining] || "transparent";
                     }
                 }
-
+        
                 function updateBackground(isTransparent) {
                     document.body.style.backgroundColor = isTransparent ? "transparent" : "#1c1d23";
                 }
-
+        
                 startRealTimeCountdown();
-
+        
                 window.electronAPI.onSettingsUpdated((updatedSettings) => {
                     console.log("📩 Received updated settings:", updatedSettings);
-
+        
                     if (updatedSettings.countdownRanges !== undefined) {
                         countdownRanges = updatedSettings.countdownRanges;
                     }
@@ -189,5 +202,6 @@
                 });
             });
         </script>
+        
     </body>
 </html>
