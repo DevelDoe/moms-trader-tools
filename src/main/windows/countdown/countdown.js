@@ -22,7 +22,7 @@ function createCountdownWindow(taskbarWindow) {
 
     countdownWindow.loadFile(path.join(__dirname, "../../../renderer/countdown/countdown.html"));
     
-    // countdownWindow.webContents.openDevTools({ mode: "detach" });
+    countdownWindow.webContents.openDevTools({ mode: "detach" });
 
 
     // Dynamically position the countdown window relative to the taskbar
