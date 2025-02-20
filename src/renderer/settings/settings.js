@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         initializeReminderSection(settings.reminderItems || []);
         initializeChecklistSection(settings.checklist || []);
-        initializeCountdownSection(settings);
+        initializeCountdownAlertSettings(settings);
         initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
         initializeCountdownDuration();
         updateSnipperList(snippers);
@@ -257,11 +257,35 @@ function resetChecklist() {
 }
 
 // Countdown Bar Section
-function initializeCountdownSection(settings) {
-    const slider = document.getElementById("volume-slider");
-    slider.value = settings.volume || 0.5;
-    slider.addEventListener("input", () => window.electronAPI.setCountdownVolume(slider.value));
+function initializeCountdownAlertSettings(settings) {
+    document.getElementById("enable-tick-sound").checked = settings.enableTickSound ?? true;
+    document.getElementById("countdown-ranges").value = settings.countdownRanges?.map(r => `${r.start}-${r.end}`).join(", ") || "50-60, 10-20";
+    document.getElementById("tick-sound-duration").value = settings.tickSoundDuration ?? 100;
+    document.getElementById("volume-slider").value = settings.tickSoundVolume ?? 0.5;
+
+    document.getElementById("enable-tick-sound").addEventListener("change", () => {
+        window.electronAPI.updateSettings({ enableTickSound: document.getElementById("enable-tick-sound").checked });
+    });
+
+    document.getElementById("countdown-ranges").addEventListener("change", () => {
+        const newRanges = document.getElementById("countdown-ranges").value
+            .split(",")
+            .map(range => range.trim().split("-").map(v => parseInt(v.trim(), 10)))
+            .filter(arr => arr.length === 2 && arr.every(Number.isFinite))
+            .map(([start, end]) => ({ start, end }));
+
+        window.electronAPI.updateSettings({ countdownRanges: newRanges });
+    });
+
+    document.getElementById("tick-sound-duration").addEventListener("change", () => {
+        window.electronAPI.updateSettings({ tickSoundDuration: parseInt(document.getElementById("tick-sound-duration").value, 10) });
+    });
+
+    document.getElementById("volume-slider").addEventListener("input", () => {
+        window.electronAPI.updateSettings({ tickSoundVolume: parseFloat(document.getElementById("volume-slider").value) });
+    });
 }
+
 
 // Session Countdowns
 function initializeSessionCountdowns(sessions, sessionVolume) {
