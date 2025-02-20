@@ -278,7 +278,12 @@
                     clearInterval(activeInterval);
                     activeInterval = null;
                 }
-                activeSessionStack = [];
+
+                if (activeSessionStack.length > 0) {
+                    console.log(`🛑 Clearing session: "${activeSessionStack[activeSessionStack.length - 1].title}"`);
+                }
+
+                activeSessionStack = []; // ✅ Reset session stack
                 document.getElementById("session-title").textContent = "No Active Sessions";
                 document.getElementById("session-timer").textContent = "";
                 console.log("🚫 No active sessions.");
