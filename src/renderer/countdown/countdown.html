@@ -69,7 +69,6 @@
                 const settings = await window.electronAPI.getSettings();
                 updateBackground(settings.countdownTransparent);
 
-
                 let countdownRanges = settings.countdownRanges || [
                     { start: 50, end: 60 },
                     { start: 10, end: 20 },
@@ -176,6 +175,10 @@
                         };
                         element.style.color = colorMap[remaining] || "transparent";
                     }
+                }
+
+                function updateBackground(isTransparent) {
+                    document.body.style.backgroundColor = isTransparent ? "transparent" : "#1c1d23";
                 }
 
                 startRealTimeCountdown();
