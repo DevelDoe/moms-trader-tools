@@ -8,7 +8,7 @@ const isDebug = process.env.DEBUG === "true";
 // ✅ Log file path
 const logFilePath = path.join(
     process.env.APPDATA || path.join(os.homedir(), ".config"),
-    "MomsTraderTools",
+    "Moms_Trader_Tools",
     "logs",
     "app.log"
 );
