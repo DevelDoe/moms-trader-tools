@@ -163,7 +163,7 @@ function saveSettings() {
     if (!Array.isArray(appSettings.reminderItems)) appSettings.reminderItems = [];
     if (!Array.isArray(appSettings.snippers)) appSettings.snippers = [];
 
-    log.log("Final settings before writing:");
+    log.log("Final settings before writing:", appSettings);
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
 }
 
