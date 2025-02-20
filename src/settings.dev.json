@@ -60,6 +60,11 @@
       "start": "06:41",
       "end": "07:41",
       "title": "Long Outer"
+    },
+    {
+      "start": "06:43",
+      "end": "06:49",
+      "title": "Inner short"
     }
   ],
   "reminderItems": [
