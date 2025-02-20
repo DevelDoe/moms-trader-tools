@@ -85,6 +85,16 @@
                     console.error("Error loading tick sound:", error);
                 }
 
+                // ✅ Listen for volume updates and apply them immediately
+                window.electronAPI.onCountdownVolumeUpdate((volume) => {
+                    console.log("🔊 Updating tick sound volume:", volume);
+                    if (tickSound) {
+                        tickSound.volume = volume;
+                    } else {
+                        console.warn("❌ Tick sound not initialized yet.");
+                    }
+                });
+
                 function startRealTimeCountdown() {
                     function updateDisplay() {
                         const now = new Date();
