@@ -78,9 +78,9 @@
                 let tickSound = null; // ✅ Declare tickSound globally
 
                 try {
-                    const tickSoundPath = await window.electronAPI.getTickSoundPath(); // ✅ Define tickSoundPath properly
+                    const tickSoundPath = await window.electronAPI.getTickSoundPath();
                     tickSound = new Audio(tickSoundPath);
-                    tickSound.volume = tickSoundVolume;
+                    tickSound.volume = 0.5; // Default volume
                 } catch (error) {
                     console.error("Error loading tick sound:", error);
                 }
@@ -170,7 +170,6 @@
                 }
 
                 startRealTimeCountdown();
-
 
                 window.electronAPI.onSettingsUpdated((updatedSettings) => {
                     console.log("📩 Received updated settings:", updatedSettings);
