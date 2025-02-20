@@ -119,9 +119,9 @@
             // * If a new session is found, it triggers activateSession(session).
             // * If no sessions are found, it clears the active session.
             function checkActiveSession(now) {
-                console.lot("⏳ checkActiveSession, now : ", now)
-                console.log("🔎 Checking active session at:", now.toLocaleTimeString("en-US", { hour12: false }));
-                console.log("📋 Sessions available:", sessionCountdowns);
+                console.lot("⏳ checkActiveSession: now : ", now)
+                console.log("🔎 checkActiveSession: Checking active session at:", now.toLocaleTimeString("en-US", { hour12: false }));
+                console.log("📋 checkActiveSession: Sessions available:", sessionCountdowns);
 
                 let prioritySession = null;
                 let lastSession = activeSessionStack.length > 0 ? activeSessionStack[activeSessionStack.length - 1] : null;
@@ -137,14 +137,14 @@
                     sessionEnd.setHours(endH, endM, 0, 0);
 
                     if (sessionStart <= now && now <= sessionEnd) {
-                        console.log(`✅ Session "${session.title}" is active.`);
+                        console.log(`✅ checkActiveSession: Session "${session.title}" is active.`);
 
                         // Convert previous priority session start time to Date for comparison
                         const prevStart = prioritySession ? new Date(now).setHours(...prioritySession.start.split(":").map(Number), 0, 0) : null;
 
                         // 🔥 Choose the session with the latest start time
                         if (!prioritySession || sessionStart > prevStart) {
-                            console.log(`🚀 "${session.title}" is taking priority over "${prioritySession ? prioritySession.title : "none"}"`);
+                            console.log(`🚀 checkActiveSession: "${session.title}" is taking priority over "${prioritySession ? prioritySession.title : "none"}"`);
                             prioritySession = session;
                         }
                     }
