@@ -175,7 +175,7 @@
   "countdownRanges": [
     {
       "start": 10,
-      "end": 60
+      "end": 20
     }
   ]
 }
