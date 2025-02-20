@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         initializeReminderSection(settings.reminderItems || []);
         initializeChecklistSection(settings.checklist || []);
-        initializeCountdownSection(settings);
+        initializeCountdownSettings(settings);
         initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
         initializeCountdownDuration();
         updateSnipperList(snippers);
