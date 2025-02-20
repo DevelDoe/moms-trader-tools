@@ -67,6 +67,9 @@
 
                 // ✅ Fetch user settings
                 const settings = await window.electronAPI.getSettings();
+                updateBackground(settings.countdownTransparent);
+
+
                 let countdownRanges = settings.countdownRanges || [
                     { start: 50, end: 60 },
                     { start: 10, end: 20 },
@@ -194,6 +197,9 @@
                         if (tickSound) {
                             tickSound.volume = updatedSettings.tickSoundVolume; // ✅ Ensure volume updates
                         }
+                    }
+                    if (updatedSettings.countdownTransparent !== undefined) {
+                        updateBackground(updatedSettings.countdownTransparent);
                     }
                 });
             });
