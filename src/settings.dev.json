@@ -166,6 +166,10 @@
     {
       "text": "MTM: Get news on cleared list.",
       "type": "critical"
+    },
+    {
+      "text": "MTT: Close snippers and reopen",
+      "type": "reminder"
     }
   ],
   "sessionVolume": 0.82,
