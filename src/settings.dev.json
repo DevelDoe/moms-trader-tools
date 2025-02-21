@@ -170,6 +170,10 @@
     {
       "text": "MTT: Close snippers and reopen",
       "type": "reminder"
+    },
+    {
+      "text": "MTM: news acting wird when only active tickers toggle",
+      "type": "critical"
     }
   ],
   "sessionVolume": 0.82,
