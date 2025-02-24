@@ -17,32 +17,33 @@
                 position: relative;
             }
             #countdown {
-                font-size: 32px;
-                margin: 3px;
+                margin: 0;
                 -webkit-app-region: drag; /* Makes the window draggable */
             }
             .countdown-part {
                 display: inline-block; /* Makes the two parts stay next to each other */
                 margin: 0;
                 padding: 0;
-                letter-spacing: -3px;
+                letter-spacing: -2px;
             }
             #five-minute-part {
                 font-weight: 700 !important;
-                font-size: 18px !important;
+                font-size: 16px !important;
                 padding-bottom: 2px;
                 position: absolute;
-                top: 17px;
-                left: 6px;
-                color: orange;
+                top: 10px;
+                left: 4px;
+                color: yellow;
             }
             #one-minute-part {
-                margin-left: 10px;
+                margin-left: 11px;
+                font-size: 23px;
+                color: magenta;
             }
             span {
                 margin-left: -4px;
             }
-            @keyframes blink {
+            /* @keyframes blink {
                 0%,
                 100% {
                     opacity: 0;
@@ -54,7 +55,7 @@
 
             .blinking {
                 animation: blink 1s infinite;
-            }
+            } */
         </style>
     </head>
     <body>
@@ -65,11 +66,11 @@
         <script>
             document.addEventListener("DOMContentLoaded", async () => {
                 console.log("Countdown script loaded");
-        
+
                 // ✅ Fetch user settings
                 const settings = await window.electronAPI.getSettings();
                 updateBackground(settings.countdownTransparent);
-        
+
                 let countdownRanges = settings.countdownRanges || [
                     { start: 50, end: 60 },
                     { start: 10, end: 20 },
@@ -77,9 +78,9 @@
                 let tickSoundDuration = settings.tickSoundDuration || 100;
                 let tickSoundVolume = settings.tickSoundVolume || 0.5;
                 let enableTickSound = settings.enableTickSound ?? true;
-        
+
                 let tickSound = null; // ✅ Declare tickSound globally
-        
+
                 try {
                     const tickSoundPath = await window.electronAPI.getTickSoundPath();
                     tickSound = new Audio(tickSoundPath);
@@ -87,7 +88,7 @@
                 } catch (error) {
                     console.error("Error loading tick sound:", error);
                 }
-        
+
                 // ✅ Listen for volume updates and apply them immediately
                 window.electronAPI.onCountdownVolumeUpdate((volume) => {
                     console.log("🔊 Updating tick sound volume:", volume);
@@ -97,48 +98,48 @@
                         console.warn("❌ Tick sound not initialized yet.");
                     }
                 });
-        
+
                 function startRealTimeCountdown() {
                     function updateDisplay() {
                         const now = new Date();
                         const seconds = now.getSeconds();
                         const minutes = now.getMinutes();
-        
+
                         // Calculate five-minute countdown
                         const secondsSinceLastFiveMinutes = (minutes % 5) * 60 + seconds;
                         const totalSecondsFiveMinute = 300 - secondsSinceLastFiveMinutes - 1;
                         const fiveMinuteRemaining = Math.floor(totalSecondsFiveMinute / 60);
-        
+
                         // Calculate full seconds countdown for the last minute
                         const oneMinuteRemaining = 60 - seconds;
                         const tensDigit = Math.floor(oneMinuteRemaining / 10);
                         const onesDigit = oneMinuteRemaining % 10;
-        
+
                         document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
                         document.getElementById("one-minute-part").innerHTML = `
                             <span id="tens-digit">${tensDigit}</span>
                             <span id="ones-digit">${onesDigit}</span>
                         `;
-        
+
                         applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true);
-        
+
                         // ✅ Check if current second is inside any defined band
                         if (enableTickSound && isInCountdownRange(oneMinuteRemaining)) {
                             playTickSound();
                         }
-        
+
                         const nowMillis = new Date().getTime();
                         const nextTick = 1000 - (nowMillis % 1000);
                         setTimeout(updateDisplay, nextTick);
                     }
-        
+
                     updateDisplay();
                 }
-        
+
                 function isInCountdownRange(second) {
                     return countdownRanges.some(({ start, end }) => second >= start && second <= end);
                 }
-        
+
                 function playTickSound() {
                     if (!tickSound) return;
                     tickSound.currentTime = 0;
@@ -146,42 +147,42 @@
                         console.warn("Tick sound playback failed:", error);
                     });
                 }
-        
+
                 function applyColors(remaining, element, isOneMinutePart = false) {
                     if (isOneMinutePart) {
                         // ✅ If the current second is in a countdown range, use red, otherwise green
                         const isActive = isInCountdownRange(remaining);
-        
+
                         if (isActive) {
-                            element.style.color = "#FF2800"; // 🔴 Red
+                            element.style.color = "magenta"; // 🔴 Red
                             // element.classList.add("blinking");
                         } else {
-                            element.style.color = "#00CC66"; // ✅ Green
+                            element.style.color = "cyan"; // ✅ Green
                             // element.classList.remove("blinking");
                         }
                     } else {
                         // ✅ Five-minute countdown remains unchanged
                         const colorMap = {
-                            5: "orange",
-                            4: "#006666",
-                            3: "#FF2800",
-                            2: "orange",
-                            1: "#006666",
-                            0: "#FF2800",
+                            5: "yellow",
+                            4: "yellow",
+                            3: "yellow",
+                            2: "yellow",
+                            1: "yellow",
+                            0: "yellow",
                         };
                         element.style.color = colorMap[remaining] || "transparent";
                     }
                 }
-        
+
                 function updateBackground(isTransparent) {
                     document.body.style.backgroundColor = isTransparent ? "transparent" : "#1c1d23";
                 }
-        
+
                 startRealTimeCountdown();
-        
+
                 window.electronAPI.onSettingsUpdated((updatedSettings) => {
                     console.log("📩 Received updated settings:", updatedSettings);
-        
+
                     if (updatedSettings.countdownRanges !== undefined) {
                         countdownRanges = updatedSettings.countdownRanges;
                     }
@@ -203,6 +204,5 @@
                 });
             });
         </script>
-        
     </body>
 </html>
