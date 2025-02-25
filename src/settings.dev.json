@@ -172,10 +172,6 @@
       "type": "reminder"
     },
     {
-      "text": "MTM: news acting wird when only active tickers toggle",
-      "type": "critical"
-    },
-    {
       "text": "MTM: Former Runner State",
       "type": "reminder"
     }
