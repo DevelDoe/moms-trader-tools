@@ -178,10 +178,6 @@
     {
       "text": "MTM: Former Runner State",
       "type": "reminder"
-    },
-    {
-      "text": "MTM: News toggle auto collaps",
-      "type": "critical"
     }
   ],
   "sessionVolume": 0.82,
