@@ -179,10 +179,10 @@
   "countdownRanges": [
     {
       "start": 0,
-      "end": 0
+      "end": 20
     },
     {
-      "start": 40,
+      "start": 4,
       "end": 60
     }
   ],
