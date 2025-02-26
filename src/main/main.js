@@ -948,7 +948,7 @@ app.on("ready", () => {
         // });
 
         // Hide all windows except the taskbar
-        Object.values(windows).forEach((window) => window?.close());
+        Object.values(windows).forEach((window) => window?.hide());
 
         // 🟢 Ensure Taskbar is visible
         if (windows.taskbar) {
