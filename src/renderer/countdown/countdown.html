@@ -140,13 +140,13 @@
                     return countdownRanges.some(({ start, end }) => second >= start && second <= end);
                 }
 
-                function playTickSound() {
-                    if (!tickSound) return;
-                    tickSound.currentTime = 0;
-                    tickSound.play().catch((error) => {
-                        console.warn("Tick sound playback failed:", error);
-                    });
-                }
+                // function playTickSound() {
+                //     if (!tickSound) return;
+                //     tickSound.currentTime = 0;
+                //     tickSound.play().catch((error) => {
+                //         console.warn("Tick sound playback failed:", error);
+                //     });
+                // }
 
                 function applyColors(remaining, element, isOneMinutePart = false) {
                     if (isOneMinutePart) {
@@ -177,6 +177,56 @@
                 function updateBackground(isTransparent) {
                     document.body.style.backgroundColor = isTransparent ? "transparent" : "#1c1d23";
                 }
+
+                function playTickSound(secondsRemaining) {
+                    if (secondsRemaining <= 0) return; // No beep when time runs out
+
+                    const context = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = context.createOscillator();
+                    const gainNode = context.createGain();
+
+                    const minFrequency = 100;
+                    const maxFrequency = 500;
+
+                    // Map seconds to frequency: (10s → 100Hz, 50s → 500Hz)
+                    let frequency = minFrequency + (secondsRemaining / 60) * (maxFrequency - minFrequency);
+
+                    oscillator.type = "sine"; // Can be 'square', 'sawtooth', 'triangle', or 'sine'
+                    oscillator.frequency.value = frequency;
+                    gainNode.gain.value = 0.2; // Adjust volume (0.0 - 1.0)
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(context.destination);
+
+                    oscillator.start();
+                    setTimeout(() => {
+                        oscillator.stop();
+                        context.close(); // Free resources
+                    }, 100); // Short beep duration
+                }
+
+                // ✅ Hook it into your countdown function
+                function startRealTimeCountdown() {
+                    function updateDisplay() {
+                        const now = new Date();
+                        const seconds = now.getSeconds();
+                        const oneMinuteRemaining = 60 - seconds;
+
+                        document.getElementById("one-minute-part").textContent = oneMinuteRemaining;
+
+                        if (oneMinuteRemaining > 0) {
+                            playDynamicBeep(oneMinuteRemaining);
+                        }
+
+                        const nowMillis = new Date().getTime();
+                        const nextTick = 1000 - (nowMillis % 1000);
+                        setTimeout(updateDisplay, nextTick);
+                    }
+
+                    updateDisplay();
+                }
+
+                startRealTimeCountdown();
 
                 startRealTimeCountdown();
 
