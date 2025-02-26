@@ -81,7 +81,6 @@
                 let tickSoundDuration = settings.tickSoundDuration || 100;
                 let tickSoundVolume = 0;
                 let enableTickSound = settings.enableTickSound ?? true;
-                console.log(tickSoundVolume)
 
                 // ✅ Listen for volume updates and apply them immediately
                 window.electronAPI.onCountdownVolumeUpdate((volume) => {
