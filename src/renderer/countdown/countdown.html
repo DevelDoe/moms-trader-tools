@@ -142,7 +142,7 @@
                     const maxFrequency = 500;
 
                     // Logarithmic scaling for better perception
-                    let frequency = minFrequency * Math.pow(maxFrequency / minFrequency, secondsRemaining / 60);
+                    let frequency = minFrequency * Math.pow(maxFrequency / minFrequency, secondsRemaining / 60) * 4;
 
                     oscillator.type = "sine"; // Can be 'square', 'sawtooth', 'triangle', or 'sine'
                     oscillator.frequency.value = frequency;
