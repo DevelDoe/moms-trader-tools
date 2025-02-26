@@ -63,44 +63,43 @@
             <span id="five-minute-part" class="countdown-part dragable"></span>
             <span id="one-minute-part" class="countdown-part dragable"></span>
             <button onclick="testToneGenerator()">Test Beep</button>
-
         </div>
         <script>
             document.addEventListener("DOMContentLoaded", async () => {
                 function testToneGenerator() {
-    console.log("🔊 Playing test tones...");
+                    console.log("🔊 Playing test tones...");
 
-    const context = new (window.AudioContext || window.webkitAudioContext)();
-    const gainNode = context.createGain();
-    gainNode.gain.value = 0.2; // Set volume
+                    const context = new (window.AudioContext || window.webkitAudioContext)();
+                    const gainNode = context.createGain();
+                    gainNode.gain.value = 0.2; // Set volume
 
-    let frequencies = [100, 200, 300, 400, 500, 600]; // Test tones
+                    let frequencies = [100, 200, 300, 400, 500, 600]; // Test tones
 
-    function playTone(index) {
-        if (index >= frequencies.length) {
-            console.log("✅ Test complete.");
-            context.close();
-            return;
-        }
+                    function playTone(index) {
+                        if (index >= frequencies.length) {
+                            console.log("✅ Test complete.");
+                            context.close();
+                            return;
+                        }
 
-        const oscillator = context.createOscillator();
-        oscillator.type = "sine"; // Other options: 'square', 'triangle', 'sawtooth'
-        oscillator.frequency.value = frequencies[index];
+                        const oscillator = context.createOscillator();
+                        oscillator.type = "sine"; // Other options: 'square', 'triangle', 'sawtooth'
+                        oscillator.frequency.value = frequencies[index];
 
-        oscillator.connect(gainNode);
-        gainNode.connect(context.destination);
+                        oscillator.connect(gainNode);
+                        gainNode.connect(context.destination);
 
-        console.log(`🎶 Playing: ${frequencies[index]} Hz`);
+                        console.log(`🎶 Playing: ${frequencies[index]} Hz`);
 
-        oscillator.start();
-        setTimeout(() => {
-            oscillator.stop();
-            playTone(index + 1);
-        }, 500); // Play each tone for 500ms
-    }
+                        oscillator.start();
+                        setTimeout(() => {
+                            oscillator.stop();
+                            playTone(index + 1);
+                        }, 500); // Play each tone for 500ms
+                    }
 
-    playTone(0);
-}
+                    playTone(0);
+                }
                 console.log("Countdown script loaded");
 
                 // ✅ Fetch user settings
