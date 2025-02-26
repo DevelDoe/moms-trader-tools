@@ -433,7 +433,7 @@ ipcMain.on("toggle-countdown", () => {
             // Set volume to 0.5 when window is shown
             Object.values(windows).forEach((window) => {
                 if (window && window.webContents) {
-                    window.webContents.send("update-countdown-volume", 0.5);
+                    window.webContents.send("update-countdown-volume", 0.2);
                 }
             });
         }
