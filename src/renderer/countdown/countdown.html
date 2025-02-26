@@ -64,10 +64,11 @@
             <span id="one-minute-part" class="countdown-part dragable"></span>
         </div>
         <script>
-
             document.addEventListener("DOMContentLoaded", async () => {
-                
                 console.log("Countdown script loaded");
+
+                // ✅ Initialize global AudioContext (so browser allows sound)
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
                 // ✅ Fetch user settings
                 const settings = await window.electronAPI.getSettings();
@@ -119,8 +120,6 @@
 
                     updateDisplay();
                 }
-
-               
 
                 function isInCountdownRange(second) {
                     return countdownRanges.some(({ start, end }) => second >= start && second <= end);
