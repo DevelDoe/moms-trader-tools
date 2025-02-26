@@ -65,143 +65,137 @@
         </div>
         <script>
             document.addEventListener("DOMContentLoaded", async () => {
-                console.log("Countdown script loaded");
+    console.log("Countdown script loaded");
 
-                // ✅ Fetch user settings
-                const settings = await window.electronAPI.getSettings();
-                updateBackground(settings.countdownTransparent);
+    // ✅ Fetch user settings
+    const settings = await window.electronAPI.getSettings();
+    updateBackground(settings.countdownTransparent);
 
-                let countdownRanges = settings.countdownRanges || [
-                    { start: 50, end: 60 },
-                    { start: 10, end: 20 },
-                ];
-                let tickSoundDuration = settings.tickSoundDuration || 100;
-                let tickSoundVolume = settings.tickSoundVolume || 0.5;
-                let enableTickSound = settings.enableTickSound ?? true;
+    let countdownRanges = settings.countdownRanges || [
+        { start: 50, end: 60 },
+        { start: 10, end: 20 },
+    ];
+    let tickSoundDuration = settings.tickSoundDuration || 100;
+    let tickSoundVolume = settings.tickSoundVolume || 0.5;
+    let enableTickSound = settings.enableTickSound ?? true;
 
-                let tickSound = null; // ✅ Declare tickSound globally
+    let activeOscillator = null; // To prevent overlapping beeps
 
-                try {
-                    const tickSoundPath = await window.electronAPI.getTickSoundPath();
-                    tickSound = new Audio(tickSoundPath);
-                    tickSound.volume = 0; // Default volume
-                } catch (error) {
-                    console.error("Error loading tick sound:", error);
-                }
+    function startRealTimeCountdown() {
+        function updateDisplay() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            const minutes = now.getMinutes();
 
-                // ✅ Listen for volume updates and apply them immediately
-                window.electronAPI.onCountdownVolumeUpdate((volume) => {
-                    console.log("🔊 Updating tick sound volume:", volume);
-                    if (tickSound) {
-                        tickSound.volume = volume;
-                    } else {
-                        console.warn("❌ Tick sound not initialized yet.");
-                    }
-                });
+            // Calculate five-minute countdown
+            const secondsSinceLastFiveMinutes = (minutes % 5) * 60 + seconds;
+            const totalSecondsFiveMinute = 300 - secondsSinceLastFiveMinutes - 1;
+            const fiveMinuteRemaining = Math.floor(totalSecondsFiveMinute / 60);
 
-                function startRealTimeCountdown() {
-                    function updateDisplay() {
-                        const now = new Date();
-                        const seconds = now.getSeconds();
-                        const minutes = now.getMinutes();
+            // Calculate full seconds countdown for the last minute
+            const oneMinuteRemaining = 60 - seconds;
+            const tensDigit = Math.floor(oneMinuteRemaining / 10);
+            const onesDigit = oneMinuteRemaining % 10;
 
-                        // Calculate five-minute countdown
-                        const secondsSinceLastFiveMinutes = (minutes % 5) * 60 + seconds;
-                        const totalSecondsFiveMinute = 300 - secondsSinceLastFiveMinutes - 1;
-                        const fiveMinuteRemaining = Math.floor(totalSecondsFiveMinute / 60);
+            document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
+            document.getElementById("one-minute-part").innerHTML = `
+                <span id="tens-digit">${tensDigit}</span>
+                <span id="ones-digit">${onesDigit}</span>
+            `;
 
-                        // Calculate full seconds countdown for the last minute
-                        const oneMinuteRemaining = 60 - seconds;
-                        const tensDigit = Math.floor(oneMinuteRemaining / 10);
-                        const onesDigit = oneMinuteRemaining % 10;
+            applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true);
 
-                        document.getElementById("five-minute-part").textContent = fiveMinuteRemaining;
-                        document.getElementById("one-minute-part").innerHTML = `
-                            <span id="tens-digit">${tensDigit}</span>
-                            <span id="ones-digit">${onesDigit}</span>
-                        `;
+            // ✅ Check if current second is inside any defined band
+            if (enableTickSound && isInCountdownRange(oneMinuteRemaining)) {
+                playDynamicBeep(oneMinuteRemaining);
+            }
 
-                        applyColors(oneMinuteRemaining, document.getElementById("one-minute-part"), true);
+            const nowMillis = new Date().getTime();
+            const nextTick = 1000 - (nowMillis % 1000);
+            setTimeout(updateDisplay, nextTick);
+        }
 
-                        // ✅ Check if current second is inside any defined band
-                        if (enableTickSound && isInCountdownRange(oneMinuteRemaining)) {
-                            playTickSound();
-                        }
+        updateDisplay();
+    }
 
-                        const nowMillis = new Date().getTime();
-                        const nextTick = 1000 - (nowMillis % 1000);
-                        setTimeout(updateDisplay, nextTick);
-                    }
+    function isInCountdownRange(second) {
+        return countdownRanges.some(({ start, end }) => second >= start && second <= end);
+    }
 
-                    updateDisplay();
-                }
+    function playDynamicBeep(secondsRemaining) {
+        if (secondsRemaining <= 0) return; // No beep when time runs out
 
-                function isInCountdownRange(second) {
-                    return countdownRanges.some(({ start, end }) => second >= start && second <= end);
-                }
+        // Stop previous beep if still active
+        if (activeOscillator) {
+            activeOscillator.stop();
+            activeOscillator = null;
+        }
 
-                function playTickSound() {
-                    if (!tickSound) return;
-                    tickSound.currentTime = 0;
-                    tickSound.play().catch((error) => {
-                        console.warn("Tick sound playback failed:", error);
-                    });
-                }
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = context.createOscillator();
+        const gainNode = context.createGain();
 
-                function applyColors(remaining, element, isOneMinutePart = false) {
-                    if (isOneMinutePart) {
-                        // ✅ If the current second is in a countdown range, use red, otherwise green
-                        const isActive = isInCountdownRange(remaining);
+        const minFrequency = 100;
+        const maxFrequency = 500;
 
-                        if (isActive) {
-                            element.style.color = "magenta"; // 🔴 Red
-                            // element.classList.add("blinking");
-                        } else {
-                            element.style.color = "cyan"; // ✅ Green
-                            // element.classList.remove("blinking");
-                        }
-                    } else {
-                        // ✅ Five-minute countdown remains unchanged
-                        const colorMap = {
-                            5: "yellow",
-                            4: "yellow",
-                            3: "yellow",
-                            2: "yellow",
-                            1: "yellow",
-                            0: "yellow",
-                        };
-                        element.style.color = colorMap[remaining] || "transparent";
-                    }
-                }
+        // Logarithmic scaling for better perception
+        let frequency = minFrequency * Math.pow(maxFrequency / minFrequency, secondsRemaining / 60);
 
-                function updateBackground(isTransparent) {
-                    document.body.style.backgroundColor = isTransparent ? "transparent" : "#1c1d23";
-                }
+        oscillator.type = "sine"; // Can be 'square', 'sawtooth', 'triangle', or 'sine'
+        oscillator.frequency.value = frequency;
+        gainNode.gain.value = tickSoundVolume; // Adjustable volume
 
-                startRealTimeCountdown();
+        oscillator.connect(gainNode);
+        gainNode.connect(context.destination);
 
-                window.electronAPI.onSettingsUpdated((updatedSettings) => {
-                    console.log("📩 Received updated settings:", updatedSettings);
+        oscillator.start();
+        activeOscillator = oscillator; // Keep track of the active oscillator
 
-                    if (updatedSettings.countdownRanges !== undefined) {
-                        countdownRanges = updatedSettings.countdownRanges;
-                    }
-                    if (updatedSettings.enableTickSound !== undefined) {
-                        enableTickSound = updatedSettings.enableTickSound;
-                    }
-                    if (updatedSettings.tickSoundDuration !== undefined) {
-                        tickSoundDuration = updatedSettings.tickSoundDuration;
-                    }
-                    if (updatedSettings.tickSoundVolume !== undefined) {
-                        console.log(`🔊 Updating tick sound volume to: ${updatedSettings.tickSoundVolume}`);
-                        if (tickSound) {
-                            tickSound.volume = updatedSettings.tickSoundVolume; // ✅ Ensure volume updates
-                        }
-                    }
-                    if (updatedSettings.countdownTransparent !== undefined) {
-                        updateBackground(updatedSettings.countdownTransparent);
-                    }
-                });
+        setTimeout(() => {
+            oscillator.stop();
+            context.close(); // Free resources
+            if (activeOscillator === oscillator) activeOscillator = null; // Clear reference
+        }, tickSoundDuration);
+    }
+
+    function applyColors(remaining, element, isOneMinutePart = false) {
+        if (isOneMinutePart) {
+            const isActive = isInCountdownRange(remaining);
+            element.style.color = isActive ? "magenta" : "cyan";
+        } else {
+            const colorMap = { 5: "yellow", 4: "yellow", 3: "yellow", 2: "yellow", 1: "yellow", 0: "yellow" };
+            element.style.color = colorMap[remaining] || "transparent";
+        }
+    }
+
+    function updateBackground(isTransparent) {
+        document.body.style.backgroundColor = isTransparent ? "transparent" : "#1c1d23";
+    }
+
+    startRealTimeCountdown();
+
+    window.electronAPI.onSettingsUpdated((updatedSettings) => {
+        console.log("📩 Received updated settings:", updatedSettings);
+
+        if (updatedSettings.countdownRanges !== undefined) {
+            countdownRanges = updatedSettings.countdownRanges;
+        }
+        if (updatedSettings.enableTickSound !== undefined) {
+            enableTickSound = updatedSettings.enableTickSound;
+        }
+        if (updatedSettings.tickSoundDuration !== undefined) {
+            tickSoundDuration = updatedSettings.tickSoundDuration;
+        }
+        if (updatedSettings.tickSoundVolume !== undefined) {
+            console.log(`🔊 Updating tick sound volume to: ${updatedSettings.tickSoundVolume}`);
+            tickSoundVolume = updatedSettings.tickSoundVolume;
+        }
+        if (updatedSettings.countdownTransparent !== undefined) {
+            updateBackground(updatedSettings.countdownTransparent);
+        }
+    });
+});
+});
             });
         </script>
     </body>
