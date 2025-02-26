@@ -176,6 +176,11 @@
   "snippers": [],
   "reminderTransparent": false,
   "countdownTransparent": false,
-  "countdownRanges": [],
+  "countdownRanges": [
+    {
+      "start": 0,
+      "end": 69
+    }
+  ],
   "enableTickSound": false
 }
