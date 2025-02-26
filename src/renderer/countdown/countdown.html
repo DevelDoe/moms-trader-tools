@@ -205,29 +205,6 @@
                     }, 100); // Short beep duration
                 }
 
-                // ✅ Hook it into your countdown function
-                function startRealTimeCountdown() {
-                    function updateDisplay() {
-                        const now = new Date();
-                        const seconds = now.getSeconds();
-                        const oneMinuteRemaining = 60 - seconds;
-
-                        document.getElementById("one-minute-part").textContent = oneMinuteRemaining;
-
-                        if (oneMinuteRemaining > 0) {
-                            playDynamicBeep(oneMinuteRemaining);
-                        }
-
-                        const nowMillis = new Date().getTime();
-                        const nextTick = 1000 - (nowMillis % 1000);
-                        setTimeout(updateDisplay, nextTick);
-                    }
-
-                    updateDisplay();
-                }
-
-                startRealTimeCountdown();
-
                 startRealTimeCountdown();
 
                 window.electronAPI.onSettingsUpdated((updatedSettings) => {
