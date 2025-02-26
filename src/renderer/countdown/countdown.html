@@ -147,6 +147,7 @@
                     oscillator.type = "sine"; // Can be 'square', 'sawtooth', 'triangle', or 'sine'
                     oscillator.frequency.value = frequency;
                     gainNode.gain.value = tickSoundVolume; // Adjustable volume
+                    console.log(gainNode.gain.value)
 
                     oscillator.connect(gainNode);
                     gainNode.connect(context.destination);
