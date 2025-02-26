@@ -182,5 +182,5 @@
       "end": 60
     }
   ],
-  "enableTickSound": true
+  "enableTickSound": false
 }
