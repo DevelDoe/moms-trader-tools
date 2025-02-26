@@ -110,7 +110,7 @@
 
                         // ✅ Check if current second is inside any defined band
                         if (enableTickSound && isInCountdownRange(oneMinuteRemaining)) {
-                            playDynamicBeep(oneMinuteRemaining);
+                            playDynamicBeep(oneMinuteRemaining, tickSoundVolume);
                         }
 
                         const nowMillis = new Date().getTime();
@@ -125,7 +125,7 @@
                     return countdownRanges.some(({ start, end }) => second >= start && second <= end);
                 }
 
-                function playDynamicBeep(secondsRemaining) {
+                function playDynamicBeep(secondsRemaining, tickSoundVolume) {
                     if (secondsRemaining <= 0) return; // No beep when time runs out
 
                     // Stop previous beep if still active
