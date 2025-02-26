@@ -87,7 +87,7 @@
                 window.electronAPI.onCountdownVolumeUpdate((volume) => {
                     console.log("🔊 Updating tick sound volume:", volume);
                     if (tickSound) {
-                        tickSound.volume = volume;
+                        tickSoundVolume = volume;
                     } else {
                         console.warn("❌ Tick sound not initialized yet.");
                     }
