@@ -142,7 +142,7 @@
                     const maxFrequency = 500;
 
                     // Logarithmic scaling for better perception
-                    let frequency = minFrequency * Math.pow(maxFrequency / minFrequency, secondsRemaining / 60);
+                    let frequency = minFrequency * Math.pow(maxFrequency / minFrequency, secondsRemaining / 60)*2;
                     oscillator.type = "sine";
                     oscillator.frequency.value = frequency;
                     gainNode.gain.value = Math.max(tickSoundVolume, 0.2); // Ensure audible volume
