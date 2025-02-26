@@ -82,6 +82,16 @@
                 let tickSoundVolume = settings.tickSoundVolume || 0.5;
                 let enableTickSound = settings.enableTickSound ?? true;
                 console.log(tickSoundVolume)
+
+                // ✅ Listen for volume updates and apply them immediately
+                window.electronAPI.onCountdownVolumeUpdate((volume) => {
+                    console.log("🔊 Updating tick sound volume:", volume);
+                    if (tickSound) {
+                        tickSound.volume = volume;
+                    } else {
+                        console.warn("❌ Tick sound not initialized yet.");
+                    }
+                });
                 
                 let activeOscillator = null; // To prevent overlapping beeps
 
