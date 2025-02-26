@@ -125,7 +125,7 @@
 
                         // ✅ Check if current second is inside any defined band
                         if (enableTickSound && isInCountdownRange(oneMinuteRemaining)) {
-                            playTickSound();
+                            playTickSound(seconds);
                         }
 
                         const nowMillis = new Date().getTime();
