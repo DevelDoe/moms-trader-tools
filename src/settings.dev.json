@@ -179,8 +179,8 @@
   "countdownRanges": [
     {
       "start": 0,
-      "end": 69
+      "end": 60
     }
   ],
-  "enableTickSound": false
+  "enableTickSound": true
 }
