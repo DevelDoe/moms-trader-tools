@@ -180,6 +180,10 @@
     {
       "start": 0,
       "end": 10
+    },
+    {
+      "start": 40,
+      "end": 5
     }
   ],
   "enableTickSound": true
