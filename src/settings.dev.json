@@ -182,6 +182,10 @@
     {
       "text": "MTM: settings for acanner, filter ....",
       "type": "optional"
+    },
+    {
+      "text": "MTM: open charts by using traderview",
+      "type": "critical"
     }
   ],
   "sessionVolume": 0.82,
