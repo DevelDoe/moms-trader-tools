@@ -150,7 +150,7 @@
                     // Logarithmic scaling for better perception
                     let frequency = minFrequency * Math.pow(maxFrequency / minFrequency, secondsRemaining / 60) * 4;
 
-                    oscillator.type = "square"; // Can be 'square', 'sawtooth', 'triangle', or 'sine'
+                    oscillator.type = "triangle"; // Can be 'square', 'sawtooth', 'triangle', or 'sine'
                     oscillator.frequency.value = frequency;
                     gainNode.gain.value = tickSoundVolume; // Adjustable volume
 
