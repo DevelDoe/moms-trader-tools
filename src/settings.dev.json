@@ -178,6 +178,10 @@
     {
       "text": "MTM: clock transparencey",
       "type": "reminder"
+    },
+    {
+      "text": "MTM: settings for acanner, filter ....",
+      "type": "optional"
     }
   ],
   "sessionVolume": 0.82,
