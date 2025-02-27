@@ -170,6 +170,10 @@
     {
       "text": "MTM: Former Runner State",
       "type": "reminder"
+    },
+    {
+      "text": "MTT: add get meta btn for mtp",
+      "type": "optional"
     }
   ],
   "sessionVolume": 0.82,
