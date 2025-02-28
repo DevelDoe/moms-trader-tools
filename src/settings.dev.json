@@ -104,10 +104,6 @@
       "type": "critical"
     },
     {
-      "text": "MTM: long headlines needs to be concated",
-      "type": "critical"
-    },
-    {
       "text": "MTT: Clock, conduct test",
       "type": "reminder"
     },
