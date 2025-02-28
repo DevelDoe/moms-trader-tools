@@ -104,20 +104,12 @@
       "type": "critical"
     },
     {
-      "text": "MTT: Close snippers and reopen",
-      "type": "reminder"
-    },
-    {
       "text": "MTM: Former Runner State",
       "type": "reminder"
     },
     {
       "text": "MTT: add get meta btn for mtp",
       "type": "optional"
-    },
-    {
-      "text": "MTM: clock transparencey",
-      "type": "reminder"
     },
     {
       "text": "MTM: settings for acanner, filter ....",
