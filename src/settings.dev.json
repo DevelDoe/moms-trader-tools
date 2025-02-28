@@ -88,10 +88,6 @@
       "type": "critical"
     },
     {
-      "text": "MTT&MTM: show version",
-      "type": "reminder"
-    },
-    {
       "text": "MTM: notifications(windows toast), alerts(carddeck sound for updates)",
       "type": "reminder"
     },
