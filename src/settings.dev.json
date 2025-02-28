@@ -92,10 +92,6 @@
       "type": "reminder"
     },
     {
-      "text": "MTT: save countdown volume",
-      "type": "critical"
-    },
-    {
       "text": "MTM: Update to its own splashscreen",
       "type": "reminder"
     },
