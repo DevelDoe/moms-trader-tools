@@ -194,6 +194,10 @@
     {
       "text": "MTT: Open web page headless",
       "type": "critical"
+    },
+    {
+      "text": "MTT: Notes shoud create new notes every time. not one bid",
+      "type": "critical"
     }
   ],
   "sessionVolume": 0.82,
