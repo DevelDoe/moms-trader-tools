@@ -92,10 +92,6 @@
       "type": "reminder"
     },
     {
-      "text": "MTM: Filter: float, score",
-      "type": "critical"
-    },
-    {
       "text": "MTT: save countdown volume",
       "type": "critical"
     },
