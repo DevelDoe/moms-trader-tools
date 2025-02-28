@@ -186,6 +186,10 @@
     {
       "text": "MTM: open charts by using traderview",
       "type": "critical"
+    },
+    {
+      "text": "MTP: scanner sockets needs to be secure",
+      "type": "reminder"
     }
   ],
   "sessionVolume": 0.82,
