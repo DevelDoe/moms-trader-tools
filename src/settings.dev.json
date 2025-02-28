@@ -104,10 +104,6 @@
       "type": "critical"
     },
     {
-      "text": "MTT: always on top, snipper window",
-      "type": "reminder"
-    },
-    {
       "text": "MTM: long headlines needs to be concated",
       "type": "critical"
     },
