@@ -92,20 +92,12 @@
       "type": "reminder"
     },
     {
-      "text": "MTM: Object destroyed updates",
-      "type": "critical"
-    },
-    {
       "text": "MTM: notifications(windows toast), alerts(carddeck sound for updates)",
       "type": "reminder"
     },
     {
       "text": "MTT: Settings font sieze",
       "type": "critical"
-    },
-    {
-      "text": "MTM: drawer size like taskbar of mtt, only show last 3. on hover show more..",
-      "type": "reminder"
     },
     {
       "text": "MTT: Prio Sector",
