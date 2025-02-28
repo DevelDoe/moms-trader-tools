@@ -100,10 +100,6 @@
       "type": "critical"
     },
     {
-      "text": "MTT: Prio Sector",
-      "type": "critical"
-    },
-    {
       "text": "MTT: High Volume in relation to Float?",
       "type": "critical"
     },
