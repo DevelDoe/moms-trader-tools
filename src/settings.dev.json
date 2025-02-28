@@ -84,10 +84,6 @@
   ],
   "reminderItems": [
     {
-      "text": "MTM: API GET NEWS WHEN WE GET NEW TICKER",
-      "type": "critical"
-    },
-    {
       "text": "MTM: NEWS: blocklist highlightlist must filter in the store and only add news entry to ticker",
       "type": "reminder"
     },
