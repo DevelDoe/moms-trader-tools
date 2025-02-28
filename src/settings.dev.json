@@ -84,10 +84,6 @@
   ],
   "reminderItems": [
     {
-      "text": "MTM: check sector and country",
-      "type": "optional"
-    },
-    {
       "text": "MTM: API GET NEWS WHEN WE GET NEW TICKER",
       "type": "critical"
     },
