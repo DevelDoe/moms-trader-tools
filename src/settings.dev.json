@@ -104,10 +104,6 @@
       "type": "critical"
     },
     {
-      "text": "MTM: add clear daily",
-      "type": "critical"
-    },
-    {
       "text": "MTT: always on top, snipper window",
       "type": "reminder"
     },
