@@ -84,10 +84,6 @@
   ],
   "reminderItems": [
     {
-      "text": "MTM: NEWS: blocklist highlightlist must filter in the store and only add news entry to ticker",
-      "type": "reminder"
-    },
-    {
       "text": "MTT: Clock resizeble",
       "type": "critical"
     },
