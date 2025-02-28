@@ -104,10 +104,6 @@
       "type": "critical"
     },
     {
-      "text": "MTJ: Volume, ticker and sectors",
-      "type": "reminder"
-    },
-    {
       "text": "MTM: add clear daily",
       "type": "critical"
     },
