@@ -104,10 +104,6 @@
       "type": "critical"
     },
     {
-      "text": "MTM: Sort all tickers by symbol",
-      "type": "critical"
-    },
-    {
       "text": "MTT: Close snippers and reopen",
       "type": "reminder"
     },
