@@ -92,10 +92,6 @@
       "type": "reminder"
     },
     {
-      "text": "MTM: Update to its own splashscreen",
-      "type": "reminder"
-    },
-    {
       "text": "MTM: Object destroyed updates",
       "type": "critical"
     },
