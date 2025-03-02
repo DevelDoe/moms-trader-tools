@@ -84,10 +84,6 @@
   ],
   "reminderItems": [
     {
-      "text": "MTT: Clock resizeble",
-      "type": "critical"
-    },
-    {
       "text": "MTM: notifications(windows toast), alerts(carddeck sound for updates)",
       "type": "reminder"
     },
