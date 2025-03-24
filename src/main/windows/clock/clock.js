@@ -6,12 +6,12 @@ const path = require("path");
 function createClockWindow(taskbarWindow, transparent = true) {
     const clockWindow = new BrowserWindow({
         width: 405,
-        height: 53,
+        height: 43,
         show: false,
         frame: false,
         transparent,
         alwaysOnTop: true,
-        resizable: false,
+        resizable: true,
         webPreferences: {
             preload: path.join(__dirname, "../../../renderer/common/preload.js"),
             contextIsolation: true, // Required for contextBridge
@@ -22,7 +22,7 @@ function createClockWindow(taskbarWindow, transparent = true) {
 
     clockWindow.loadFile(path.join(__dirname, "../../../renderer/clock/clock.html"));
 
-    // clockWindow.webContents.openDevTools({ mode: "detach" });
+    clockWindow.webContents.openDevTools({ mode: "detach" });
 
     // Dynamically position the clock window relative to the taskbar
     if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {
@@ -33,8 +33,8 @@ function createClockWindow(taskbarWindow, transparent = true) {
         clockWindow.setBounds({
             x: clockX,
             y: clockY,
-            width: 406,
-            height: 53,
+            width: 340,
+            height: 40,
         });
     }
 

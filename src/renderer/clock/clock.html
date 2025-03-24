@@ -8,27 +8,37 @@
         <style>
             body {
                 font-family: Arial, sans-serif;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
+                height: 100%;
+                width: 100%;
+                margin: 0 auto;
                 font-size: 2rem;
                 color: #ffffff;
                 background-color: #1c1d23;
+                padding: 0;
+                scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* Internet Explorer 10+ */
             }
+
+            body::-webkit-scrollbar {
+  display: none;                /* Chrome, Safari and Opera */
+}
 
             #clock {
                 margin: 0 auto;
                 padding: 0;
-                margin-bottom: -15px;
+                margin-bottom: -13px;
                 font-size: 18px;
                 font-weight: bolder;
                 color: #f23645;
+                scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     
+            }
+
+            .clock-container {
             }
 
             #session-countdown-display {
-                margin-top: 10px;
+                margin-top: 7px;
                 font-size: 24px;
                 display: inline-block;
                 font-weight: bolder;
