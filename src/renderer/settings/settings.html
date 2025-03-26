@@ -16,12 +16,25 @@
 
             <!-- Tab navigation -->
             <div class="tab">
-                <button class="tablinks active" onclick="openTab(event, 'general')">General</button>
+                <button class="tablinks" onclick="openTab(event, 'general')">General</button>
+                <button class="tablinks" onclick="openTab(event, 'windows-settings')">Windows</button>
                 <button class="tablinks" onclick="openTab(event, 'reminder-settings')">Notes</button>
                 <button class="tablinks" onclick="openTab(event, 'checklist-settings')">Checklist</button>
                 <button class="tablinks" onclick="openTab(event, 'countdown-settings')">Countdown</button>
                 <button class="tablinks" onclick="openTab(event, 'session-countdowns')">Clock</button>
                 <button class="tablinks" onclick="openTab(event, 'snipper-management')">Snipper</button>
+                <button class="tablinks" onclick="openTab(event, 'gallery-management')">Gallery</button>
+            </div>
+
+            <!-- Windows Settings -->
+            <div id="windows-settings" class="tabcontent">
+                <h2>Windows Settings</h2>
+                <button id="toggleNotes" class="window-toggle">Notes</button>
+                <button id="toggleGallery" class="window-toggle">Gallery</button>
+                <button id="toggleChecklist" class="window-toggle">Checklist</button>
+                <button id="toggleCountdown" class="window-toggle">Countdown</button>
+                <button id="toggleClock" class="window-toggle">Clock</button>
+                <button id="toggleResumption" class="window-toggle">Resumption</button>
             </div>
 
             <!-- General Settings -->
@@ -35,6 +48,15 @@
                         <input id="session-volume-slider" type="range" min="0" max="1" step="0.01" value="0" />
                     </div>
                 </section>
+            </div>
+
+            <!-- Gallery Management -->
+            <div id="gallery-management" class="tabcontent">
+                <input type="file" id="imageUploadInput" accept="image/*" />
+                <button id="captureRegionBtn">Capture Region</button>
+
+                <!-- Gallery Section -->
+                <div id="gallery-container"></div>
             </div>
 
             <!-- Reminder Settings -->

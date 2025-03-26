@@ -2,15 +2,10 @@ const { contextBridge, ipcRenderer, desktopCapturer } = require("electron");
 
 console.log("✅ Preload script loaded");
 
-
 contextBridge.exposeInMainWorld("electronAPI", {
-    send: (channel, data) => {
-        ipcRenderer.send(channel, data);
-    },
-    on: (channel, callback) => {
-        ipcRenderer.on(channel, (event, ...args) => callback(...args));
-    },
-    
+    send: (channel, data) => ipcRenderer.send(channel, data),
+    on: (channel, callback) => ipcRenderer.on(channel, (event, ...args) => callback(...args)),
+
     // splash
     closeSplash: () => ipcRenderer.send("close-splash"),
 
@@ -21,16 +16,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     // 🔄 Toggling Windows
     toggleSettings: () => ipcRenderer.send("toggle-settings"),
-    toggleReminder: () => ipcRenderer.send("toggle-reminder"),
+    toggleNotes: () => ipcRenderer.send("toggle-notes"),
     toggleChecklist: () => ipcRenderer.send("toggle-checklist"),
     toggleCountdown: () => ipcRenderer.send("toggle-countdown"),
     toggleClock: () => ipcRenderer.send("toggle-clock"),
     toggleResumption: () => ipcRenderer.send("toggle-resumption"),
+    toggleGallery: () => ipcRenderer.send("toggle-gallery"),
 
-    // 📌 Reminder
-    sendReminderReady: () => ipcRenderer.send("reminder-ready"),
-    onUpdateReminderItems: (callback) => ipcRenderer.on("update-reminder-items", (_, items) => callback(items)),
-    refreshReminderWindow: () => ipcRenderer.send("refresh-reminder-window"),
+    // 📌 Notes
+    sendReminderReady: () => ipcRenderer.send("notes-ready"),
+    onUpdateReminderItems: (callback) => ipcRenderer.on("update-notes-items", (_, items) => callback(items)),
+    refreshReminderWindow: () => ipcRenderer.send("refresh-notes-window"),
 
     // ✅ Checklist
     loadChecklistState: () => ipcRenderer.invoke("load-checklist-state"),
@@ -41,7 +37,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onChecklistUpdated: (callback) => ipcRenderer.on("update-checklist", (_, checklist) => callback(checklist)),
     resetToLegacyChecklist: () => ipcRenderer.send("reset-to-legacy-checklist"),
     resizeChecklistToContent: (width, height) => ipcRenderer.send("resize-checklist-to-content", { width, height }),
-
 
     // ⏳ Countdown
     getTickSoundPath: async () => await ipcRenderer.invoke("get-tick-sound-path"),
@@ -74,6 +69,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getScreens: () => ipcRenderer.invoke("get-screens"),
     selectScreen: (sourceId) => ipcRenderer.send("screen-selected", sourceId),
 
+    // gallery
+    captureRegion: () => ipcRenderer.invoke("captureRegion"),
+    openMetadataDialog: (screenshotPath) => ipcRenderer.send("open-metadata-dialog", screenshotPath),
+    saveImageMetadata: (metadata) => ipcRenderer.invoke("saveImageMetadata", metadata),
+    discardScreenshot: (path) => ipcRenderer.invoke("discard-screenshot", path),
+
+    getGalleryMeta: () => ipcRenderer.invoke('galleryAPI.getGalleryMeta'),
 
     // ❌ Exit and Restart
     exitApp: () => ipcRenderer.send("exit-app"),
@@ -81,7 +83,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     // 📏 Window Resizing
     resizeWindowToContent: (width, height) => ipcRenderer.send("resize-window-to-content", { width, height }),
-    
 });
 
 // 🖼️ Region Selection API
@@ -91,11 +92,18 @@ contextBridge.exposeInMainWorld("regionAPI", {
         const selectedScreen = await ipcRenderer.invoke("get-selected-screen");
         console.log("[preload.js] Selected screen:", selectedScreen);
         return selectedScreen;
-    }
+    },
 });
 
 // 📸 Snipper Capture API
 contextBridge.exposeInMainWorld("snipperAPI", {
     readyToCapture: () => ipcRenderer.send("ready-to-capture"),
     onRegionSelected: (callback) => ipcRenderer.on("region-selected", (_, bounds) => callback(bounds)),
+});
+
+// Gallery  API
+contextBridge.exposeInMainWorld("galleryAPI", {
+    getGalleryImages: () => ipcRenderer.invoke("galleryAPI.getGalleryImages"),
+    uploadImage: (filePath) => ipcRenderer.invoke("galleryAPI.uploadImage", filePath),
+    deleteImage: (filePath) => ipcRenderer.invoke("galleryAPI.deleteImage", filePath),
 });

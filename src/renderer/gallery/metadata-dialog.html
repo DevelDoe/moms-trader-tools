@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Enter Metadata</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: #1c1d23;
+                color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                text-align: center;
+            }
+            input,
+            button {
+                padding: 12px;
+                margin: 10px;
+                font-size: 16px;
+                width: 85%;
+                max-width: 350px;
+                border-radius: 5px;
+                border: none;
+            }
+            input {
+                background: rgb(30, 35, 45);
+                color: white;
+            }
+            button {
+                background-color: #089981;
+                color: white;
+                cursor: pointer;
+            }
+            #preview-image {
+                max-height: 300px;
+            }
+        </style>
+    </head>
+        <img id="preview-image" src="" style="max-width: 90%; border: 1px solid white; margin: 10px" />
+        <input type="text" id="name" placeholder="Enter Name" />
+        <input type="text" id="symbol" placeholder="Enter Symbol" />
+        <input type="text" id="tags" placeholder="Enter Tags (comma separated)" />
+        <button id="save-btn">Save</button>
+        <button id="cancel-btn">Cancel</button>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const nameInput = document.getElementById("name");
+                const symbolInput = document.getElementById("symbol");
+                const tagsInput = document.getElementById("tags");
+                const saveBtn = document.getElementById("save-btn");
+                const preview = document.getElementById("preview-image");
+
+                let screenshotPath = "";
+
+                window.electronAPI.on("screenshotPath", (path) => {
+                    screenshotPath = path;
+                    preview.src = `file://${screenshotPath}`;
+                });
+
+                saveBtn.addEventListener("click", () => {
+                    const name = nameInput.value.trim();
+                    const symbol = symbolInput.value.trim();
+                    const tags = tagsInput.value.trim();
+
+                    if (!name || !symbol || !tags) {
+                        alert("Please fill in all fields.");
+                        return;
+                    }
+
+                    const metadata = {
+                        name,
+                        symbol,
+                        tags,
+                        screenshotPath,
+                    };
+
+                    window.electronAPI.saveImageMetadata(metadata).then((result) => {
+                        if (result.success) {
+                            window.close();
+                        } else {
+                            alert("Failed to save metadata.");
+                        }
+                    });
+                });
+                const cancelBtn = document.getElementById("cancel-btn");
+
+                cancelBtn.addEventListener("click", async () => {
+                    if (!screenshotPath) return;
+
+                    const confirmCancel = confirm("Discard this screenshot?");
+                    if (!confirmCancel) return;
+
+                    await window.electronAPI.discardScreenshot(screenshotPath);
+                    window.close();
+                });
+            });
+        </script>
+    </body>
+</html>

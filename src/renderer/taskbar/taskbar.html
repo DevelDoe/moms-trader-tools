@@ -13,27 +13,12 @@
                 display: flex;
                 justify-content: left;
                 align-items: left;
-                height: 50px;
-                overflow: hidden; /* Prevents scrolling */
+                height: 500px;
+                overflow: hidden;
                 color: rgb(226, 226, 226);
                 font-weight: 100;
             }
-            .taskbar {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                background-color: transparent;
-                width: 80px;
-                height: 40px; /* Initially collapsed */
-                transition: width 0.3s ease-in-out, height 0.3s ease-in-out;
-                overflow: hidden;
-                box-sizing: border-box;
-                /* box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); */
-                backdrop-filter: blur(5px);
-                -webkit-backdrop-filter: blur(5px);
-                border-left: 3px solid rgb(255, 0, 179);
-                height: 100%;
-            }
+
             #title {
                 cursor: pointer;
                 padding: 10px;
@@ -47,10 +32,8 @@
                 display: flex;
                 flex-direction: column;
                 width: 100vw;
-                opacity: 0; /* Initially hidden */
                 transition: opacity 0.4s ease-in-out;
                 background-color: rgba(28, 29, 35, 1);
-                /* margin-top: 7px; */
             }
 
             .menu-item {
@@ -67,7 +50,7 @@
                 border-left-color: rgb(255, 0, 179);
             }
             #title-text {
-                -webkit-app-region: no-drag; /* Allow hover to be detected */
+                -webkit-app-region: no-drag;
                 padding: 5px;
                 margin-left: 30px;
             }
@@ -77,126 +60,63 @@
                 left: 13px;
                 width: 34px;
             }
+
+            /* Modal Styling */
+            .modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
+
+            .modal input,
+            .modal button {
+                padding: 12px;
+                margin: 10px;
+                font-size: 16px;
+                width: 85%;
+                max-width: 350px;
+                border-radius: 5px;
+                border: none;
+            }
+
+            .modal button {
+                background-color: #089981;
+                color: white;
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
         <div id="taskbar" class="taskbar">
             <div id="title" class="dragable">
                 <img id="title-logo" src="../../../assets/images/logo.png" alt="Moms" />
-                <span id="title-text" class="nodrag">&nbsp;&nbsp;&nbsp; </span>
             </div>
             <div class="menu" id="menu">
-                <div class="menu-item nodrag" onclick="window.electronAPI.toggleReminder()">Notes</div>
-                <div class="menu-item nodrag" onclick="window.electronAPI.toggleChecklist()">Checklist</div>
-                <div class="menu-item nodrag" onclick="window.electronAPI.toggleCountdown()">Countdown</div>
-                <div class="menu-item nodrag" onclick="window.electronAPI.toggleClock()">Clock</div>
-                <div class="menu-item nodrag" onclick="window.electronAPI.toggleResumption()">Resumption</div>
                 <div class="menu-item nodrag" onclick="window.electronAPI.openSnipperDialog()">Snipper</div>
+                <button id="capture-region-btn" onclick="startCaptureRegion()">Capture Region</button>
                 <div class="menu-item nodrag" onclick="window.electronAPI.toggleSettings()">Settings</div>
                 <div class="menu-item nodrag" onclick="window.electronAPI.exitApp()">Exit</div>
             </div>
         </div>
 
         <script>
-            const taskbar = document.getElementById("taskbar");
-            const menu = document.getElementById("menu");
-            const title = document.getElementById("title");
-
-            let expandedWidth = 135;
-            let collapsedWidth = 65;
-            let expandedHeight = 345;
-            let collapsedHeight = 70;
-
-            let isHovering = false;
-            let isMouseOverTitle = false;
-            let isMouseInside = true;
-            let collapseTimeout;
-
-            // ✅ Expand Taskbar
-            function expandTaskbar() {
-                console.log("[Expand] Expanding taskbar...");
-                isHovering = true;
-                isMouseInside = true;
-                clearTimeout(collapseTimeout);
-                taskbar.style.width = `${expandedWidth}px`;
-                taskbar.style.height = `${expandedHeight}px`;
-                menu.style.opacity = "1";
-                window.electronAPI.resizeWindowToContent(expandedWidth, expandedHeight);
-            }
-
-            // ✅ Attempt to Collapse Taskbar
-            function collapseTaskbar() {
-                console.log("[Collapse] Attempting to collapse...");
-
-                collapseTimeout = setTimeout(() => {
-                    if (!isHovering && !isMouseOverTitle && !isMouseInside) {
-                        console.log("[Collapse] Fading out menu...");
-
-                        menu.style.opacity = "0"; // ✅ Start fading out
-
-                        setTimeout(() => {
-                            // ✅ Wait for opacity transition before shrinking the taskbar
-                            if (!isHovering && !isMouseOverTitle && !isMouseInside) {
-                                console.log("[Collapse] Taskbar is collapsing...");
-                                taskbar.style.width = `${collapsedWidth}px`;
-                                taskbar.style.height = `${collapsedHeight}px`;
-
-                                // ✅ 🚀 Delay window resize slightly to allow CSS to catch up
-                                setTimeout(() => {
-                                    window.electronAPI.resizeWindowToContent(collapsedWidth, collapsedHeight);
-                                }, 100); // Adjust if needed
-                            }
-                        }, 200); // Match CSS transition timing
+            function startCaptureRegion() {
+                window.electronAPI.captureRegion().then((result) => {
+                    if (result.success) {
+                        window.electronAPI.openMetadataDialog(result.screenshotPath);
                     } else {
-                        console.log("[Collapse] Skipped: Mouse still inside app.");
+                        alert("Failed to capture region!");
                     }
-                }, 4000); // Prevent flicker when leaving quickly
+                });
             }
-
-            // ✅ Prevent Collapse When Hovering Over Title
-            title.addEventListener("mouseenter", () => {
-                console.log("[Hover] Title hovered - Preventing collapse.");
-                isMouseOverTitle = true;
-                expandTaskbar();
-            });
-
-            // ✅ Delay Collapse When Leaving Title
-            title.addEventListener("mouseleave", () => {
-                console.log("[Hover] Title left - Allowing collapse.");
-                isMouseOverTitle = false;
-                setTimeout(() => {
-                    if (!isHovering && !isMouseInside) {
-                        collapseTaskbar();
-                    }
-                }, 0); // ✅ Delay allows smooth movement
-            });
-
-            // ✅ Ensure Menu Also Prevents Collapse
-            menu.addEventListener("mouseenter", () => {
-                console.log("[Hover] Menu hovered - Expanding.");
-                expandTaskbar();
-            });
-
-            // ✅ Ensure Taskbar Also Expands When Hovered
-            taskbar.addEventListener("mouseenter", () => {
-                console.log("[Hover] Taskbar hovered - Preventing collapse.");
-                isHovering = true;
-                expandTaskbar();
-            });
-
-            // ✅ Detect When Mouse Leaves Entire Window (Forces Collapse)
-            document.addEventListener("mouseleave", () => {
-                console.log("[Window] Mouse left window - resetting hover state.");
-                isMouseInside = false;
-                isHovering = false;
-                collapseTaskbar();
-            });
-
-            // ✅ Detect When Mouse Enters Window (Prevents Collapse)
-            document.addEventListener("mouseenter", () => {
-                console.log("[Window] Mouse entered window - Preventing collapse.");
-                isMouseInside = true;
-            });
         </script>
+        
     </body>
 </html>

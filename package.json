@@ -16,7 +16,9 @@
     "dependencies": {
         "chokidar": "^4.0.3",
         "electron-updater": "^6.3.9",
-        "ignore": "^7.0.3"
+        "ignore": "^7.0.3",
+        "screenshot-desktop": "^1.15.1",
+        "sharp": "^0.33.5"
     },
     "devDependencies": {
         "cross-env": "^7.0.3",

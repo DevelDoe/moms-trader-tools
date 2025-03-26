@@ -1,0 +1,23 @@
+[
+  {
+    "name": "First Picture",
+    "symbol": "SYLA",
+    "tags": "knife",
+    "screenshotPath": "C:\\Users\\andre\\AppData\\Roaming\\Moms_Trader_Tools\\gallery\\screenshot-1743031269568.png",
+    "date": "2025-03-26T23:21:36.180Z"
+  },
+  {
+    "name": "The Second Phase",
+    "symbol": "PHAS",
+    "tags": "red to green",
+    "screenshotPath": "C:\\Users\\andre\\AppData\\Roaming\\Moms_Trader_Tools\\gallery\\screenshot-1743031303622.png",
+    "date": "2025-03-26T23:22:06.507Z"
+  },
+  {
+    "name": "The third image",
+    "symbol": "CURR",
+    "tags": "curl",
+    "screenshotPath": "C:\\Users\\andre\\AppData\\Roaming\\Moms_Trader_Tools\\gallery\\screenshot-1743031332816.png",
+    "date": "2025-03-26T23:22:51.121Z"
+  }
+]

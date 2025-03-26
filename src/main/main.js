@@ -1,25 +1,55 @@
 // ./src/main/main.js
 
+// ------------------------------
+// IMPORTS
+// ------------------------------
 const { app, BrowserWindow, ipcMain, desktopCapturer, dialog } = require("electron");
 const createLogger = require("../hlps/logger");
 const { autoUpdater } = require("electron-updater");
+const screenshot = require("screenshot-desktop");
+const sharp = require("sharp");
 const { exec } = require("child_process");
-
+const path = require("path");
+const fs = require("fs");
 
 const { createSplashWindow } = require("./windows/splash/splash");
-const { createReminderWindow } = require("./windows/reminder/reminder");
+const { createNotesWindow } = require("./windows/notes/notes");
 const { createSettingsWindow } = require("./windows/settings/settings");
 const { createTaskbarWindow } = require("./windows/taskbar/taskbar");
 const { createChecklistWindow } = require("./windows/checklist/checklist");
 const { createCountdownWindow } = require("./windows/countdown/countdown");
 const { createClockWindow } = require("./windows/clock/clock");
 const { createResumptionWindow } = require("./windows/resumption/resumption");
+const { createGalleryWindow } = require("./windows/gallery/gallery");
 
-const path = require("path");
-const fs = require("fs");
+// ------------------------------
+// CONSTANTS AND CONFIGURATION
+// ------------------------------
 
+// Define paths for various settings and data
+const isDevelopment = process.env.NODE_ENV === "development";
+const isDebug = process.env.DEBUG === "true";
+const forceUpdate = process.env.forceUpdate === "true";
+
+// Default settings for fresh installs
+const dataDir = path.join(__dirname, "../../../data");
+const SETTINGS_FILE = isDevelopment ? path.join(__dirname, "../../data/settings.dev.json") : path.join(app.getPath("userData"), "settings.json");
+const FIRST_RUN_FILE = path.join(app.getPath("userData"), "first-run.lock"); // Marker file
+const galleryFolderPath = path.join(app.getPath("userData"), "gallery"); // Gallery path
+const metaPath = isDevelopment ? path.join(__dirname, "../../data/gallery-meta.json") : path.join(app.getPath("userData"), "gallery-meta.json");
+
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// ------------------------------
+// LOGGER SETUP
+// ------------------------------
 const log = createLogger(__filename);
 
+// ------------------------------
+// AUTO-UPDATER CONFIG
+// ------------------------------
 autoUpdater.autoDownload = false; // Enable auto-downloading updates
 autoUpdater.allowPrerelease = true; // Ensure pre-releases are checked
 
@@ -29,82 +59,18 @@ autoUpdater.setFeedURL({
     repo: "moms-trader-tools",
 });
 
+// ------------------------------
+// FRESH INSTALL CHECK
+// ------------------------------
+const DEFAULT_SETTINGS = require("../../data/defaultSettings"); // Default settings for fresh installs
 
-const isDevelopment = process.env.NODE_ENV === "development";
-const isDebug = process.env.DEBUG === "true";
-const forceUpdate = process.env.forceUpdate === "true";
-
-// Use system settings file for production, separate file for development
-const SETTINGS_FILE = isDevelopment
-    ? path.join(__dirname, "../settings.dev.json") 
-    : path.join(app.getPath("userData"), "settings.json"); 
-
-const FIRST_RUN_FILE = path.join(app.getPath("userData"), "first-run.lock"); // Marker file
-
-// Default settings for fresh installs
-const DEFAULT_SETTINGS = {
-    checklist: [
-        { text: "Hijacked", type: "critical", state: "default", tooltip: "This check serves as a reminder to assess your emotional state before trading. Emotional hijacking—whether from rage, FOMO, or overconfidence—can impair judgment and lead to costly mistakes. Developing awareness of your emotions and recognizing your body's signals is key to maintaining discipline.", },
-        { text: "MACD", type: "critical", state: "default", tooltip: "The MACD signal indicator helps identify trend direction and momentum shifts, reducing the risk of trading against the trend. It can assist in avoiding the backside of a move by confirming strength or weakness in price action, helping you time entries and exits more effectively." },
-        { text: "Volume", type: "critical", state: "default", tooltip: "Volume reveals market sentiment and strength. High volume confirms trends—bullish or bearish—while low volume signals weak moves. Tracking volume helps you follow the pack, spot momentum shifts, and avoid false breakouts." },
-        { text: "Extended", type: "optional", state: "state-yellow", tooltip: "A reminder to avoid entering trades on overextended charts, which often results from FOMO. Overextended moves are prone to sharp reversals, making risk management crucial. Look for healthier pullbacks instead of chasing highs." },
-        { text: "Candles", type: "reminder", state: "default", tooltip: "Reading candlestick patterns helps anticipate market moves. Dojis, pin bars, and other formations signal potential reversals, continuations, or indecision. Mastering candle analysis improves trade timing and decision-making." },
-        { text: "Spread", type: "critical", state: "default", tooltip: "A wide or volatile spread can lead to significant losses. Always monitor the spread to avoid unexpected price slippage and ensure precise entries and exits." },
-        { text: "Orders", type: "reminder", state: "default", tooltip: "Large bid and ask orders at key price levels can act as support or resistance. Monitoring these can help anticipate potential reversals or breakouts."},
-        { text: "EMA", type: "reminder", state: "default", tooltip: "Helps identify trends by smoothing out price action. A rising EMA suggests bullish momentum, while a falling EMA indicates bearish pressure. It can also act as dynamic support or resistance and are often trigger points." },
-        { text: "Time bar", type: "reminder", state: "default", tooltip: "The remaining time in a candle is crucial for confirming signals. A setup that looks strong mid-bar can completely change by the close. Waiting for the candle to complete prevents premature entries based on incomplete patterns and false moves." },
-        { text: "VWAP", type: "reminder", state: "default", tooltip: "VWAP is a key intraday indicator that helps traders assess fair value and a stock’s strength or weakness. Institutional traders often use it as a benchmark for buy/sell decisions. Most trades cluster around VWAP, making it a crucial level for entries and exits." },
-        { text: "Float", type: "optional", state: "state-yellow", tooltip: "Understanding float helps traders anticipate supply/demand imbalances, identify potential short squeezes, and gauge the risk level of a trade. Low float stocks tend to be more volatile due to limited supply, while high float stocks are generally more stable." },
-        { text: "Catalyst", type: "optional", state: "state-yellow", tooltip: "A strong news catalyst can drive volume and momentum, making a stock more volatile and tradable. Positive news can fuel bullish moves, while negative news can trigger sell-offs. Traders should assess the strength of the catalyst, its impact on the stock, and how the market react." },
-    ],
-    sessionCountdowns: [
-        {
-            start: "04:00",
-            end: "09:30",
-            title: "Pre Market",
-        },
-        {
-            start: "07:00",
-            end: "09:30",
-            title: "Breaking News",
-        },
-        {
-            start: "09:30",
-            end: "16:00",
-            title: "Open Market",
-        },
-        {
-            start: "15:00",
-            end: "16:00",
-            title: "Power Hour",
-        },
-        {
-            start: "16:00",
-            end: "20:00",
-            title: "Post Market",
-        },
-    ],
-    reminderItems: [
-        {
-            text: "MTT (Moms Traders Tool)",
-            type: "Optional",
-        },
-        {
-            text: "Moms Trader Tools is a comprehensive suite designed to enhance the trading experience for both novice and experienced day traders. With a focus on efficiency and user-friendliness, this toolset aims to streamline your trading process and provide a competitive edge.",
-            type: "optional",
-        },
-    ],
-    snippers: [],
-    countdownTransparent: false,
-};
-
-// 🛠️ **Function to check if it's a fresh install**
 function isFirstInstall() {
     return !fs.existsSync(SETTINGS_FILE) && !fs.existsSync(FIRST_RUN_FILE);
 }
 
-// 🛠️ **Function to initialize settings**
-
+// ------------------------------
+// SETUP FRESH INSTALL
+// ------------------------------
 if (isFirstInstall()) {
     log.log("Fresh install detected! Creating default settings...");
 
@@ -126,15 +92,11 @@ if (isFirstInstall()) {
     log.log("App has been installed before. Keeping existing settings.");
 }
 
-let windows = {}; // To store references to all windows
-let snipperWindows = {}; // Store references to dynamically created snipper windows
-let selectedScreenId = null;
+// ------------------------------
+// SETTINGS LOADING AND SAVING
+// ------------------------------
 let appSettings = loadSettings(); // Load app settings from file
 
-app.commandLine.appendSwitch("disable-gpu-shader-disk-cache");
-app.commandLine.appendSwitch("disable-gpu-process-crash-limit");
-
-// Function to load settings from a file
 function loadSettings() {
     try {
         const data = fs.readFileSync(SETTINGS_FILE, "utf-8");
@@ -145,16 +107,16 @@ function loadSettings() {
         // Ensure all settings properties exist
         if (!Array.isArray(settings.checklist)) settings.checklist = [];
         if (!Array.isArray(settings.sessionCountdowns)) settings.sessionCountdowns = [];
-        if (!Array.isArray(settings.reminderItems)) settings.reminderItems = []; // Ensure this exists
+        if (!Array.isArray(settings.notesItems)) settings.notesItems = [];
         if (!Array.isArray(settings.snippers)) settings.snippers = [];
 
         return settings;
     } catch (err) {
-        log.error("error loading settings:", err);
+        log.error("Error loading settings:", err);
         return {
             checklist: [],
             sessionCountdowns: [],
-            reminderItems: [],
+            notesItems: [],
         };
     }
 }
@@ -162,18 +124,164 @@ function loadSettings() {
 function saveSettings() {
     if (!Array.isArray(appSettings.checklist)) appSettings.checklist = [];
     if (!Array.isArray(appSettings.sessionCountdowns)) appSettings.sessionCountdowns = [];
-    if (!Array.isArray(appSettings.reminderItems)) appSettings.reminderItems = [];
+    if (!Array.isArray(appSettings.notesItems)) appSettings.notesItems = [];
     if (!Array.isArray(appSettings.snippers)) appSettings.snippers = [];
 
     log.log("Final settings before writing:", appSettings);
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(appSettings, null, 2));
 }
 
-// IPC Handlers
+// ------------------------------
+// GALLERY FOLDER CHECK & CREATE
+// ------------------------------
+if (!fs.existsSync(galleryFolderPath)) {
+    fs.mkdirSync(galleryFolderPath, { recursive: true });
+}
+
+// ------------------------------
+// APP COMMAND LINE CONFIGURATION
+// ------------------------------
+app.commandLine.appendSwitch("disable-gpu-shader-disk-cache");
+app.commandLine.appendSwitch("disable-gpu-process-crash-limit");
+
+// ------------------------------
+// WINDOW REFERENCES
+// ------------------------------
+let windows = {}; // Store references to all windows
+let snipperWindows = {}; // Store references to dynamically created snipper windows
+let selectedScreenId = null;
+
+// ------------------------------
+// APP SETUP
+// ------------------------------
+
+app.on("ready", () => {
+    log.log("App is starting...");
+
+    // Show Splash Screen first, then load the main app
+    windows.splash = createSplashWindow(() => {
+        // ✅ Store splash reference
+        log.log("Splash screen closed. Loading main app...");
+
+        // Do NOT redefine `windows` here! Remove `let windows = {};`
+        // 🟢 Create Taskbar Window
+        windows.taskbar = createTaskbarWindow(
+            () => ipcMain.emit("toggle-notes"),
+            () => ipcMain.emit("toggle-settings"),
+            () => ipcMain.emit("toggle-checklist"),
+            () => ipcMain.emit("toggle-countdown"),
+            () => ipcMain.emit("toggle-clock"),
+            () => ipcMain.emit("toggle-resumption")
+        );
+
+        if (!windows.taskbar) {
+            log.error("Taskbar window could not be created.");
+            return;
+        }
+
+        // 🟢 Create Main Windows
+        windows.notes = createNotesWindow(windows.taskbar, appSettings.text);
+        windows.settings = createSettingsWindow(windows.taskbar);
+        windows.checklist = createChecklistWindow(windows.taskbar);
+        windows.countdown = createCountdownWindow(windows.taskbar);
+        windows.clock = createClockWindow(windows.taskbar);
+        windows.resumption = createResumptionWindow(windows.taskbar);
+        windows.gallery = createGalleryWindow(windows.taskbar);
+
+        // windows.notes.webContents.once("dom-ready", () => {
+        //     windows.notes.webContents.send("update-notes-text", appSettings.text);
+        // });
+
+        // Hide all windows except the taskbar
+        Object.values(windows).forEach((window) => window?.hide());
+
+        // 🟢 Ensure Taskbar is visible
+        if (windows.taskbar) {
+            windows.taskbar.show();
+        }
+
+        // Load settings into windows
+        windows.settings.webContents.once("dom-ready", () => {
+            windows.settings.webContents.send("update-checklist", appSettings.checklist);
+        });
+
+        windows.checklist.webContents.once("dom-ready", () => {
+            windows.checklist.webContents.send("load-checklist-state", appSettings.checklist);
+        });
+
+        windows.clock.webContents.once("dom-ready", () => {
+            windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
+        });
+
+        // 🟢 Sync Settings Across Windows
+        Object.values(windows).forEach((window) => {
+            if (window && window.webContents) {
+                window.webContents.send("settings-updated", appSettings);
+            }
+        });
+
+        // 🟢 Restore Snippers
+        if (Array.isArray(appSettings.snippers)) {
+            log.log("Restoring Snippers from saved regions");
+
+            desktopCapturer
+                .getSources({ types: ["screen"] })
+                .then((sources) => {
+                    if (sources.length === 0) {
+                        log.error("No screen sources available for Snipper.");
+                        return;
+                    }
+
+                    appSettings.snippers.forEach((snip) => {
+                        log.log(`Restoring Snipper with saved region bounds`);
+
+                        const source = sources.find((src) => snip.sourceId && src.id === snip.sourceId) || sources[0];
+
+                        if (!source) {
+                            log.error(`No matching source found for Snipper: ${snip.name}`);
+                            return;
+                        }
+
+                        log.log(`Assigning sourceId`);
+
+                        ipcMain.emit("create-snipper-window", null, {
+                            name: snip.name,
+                            bounds: snip,
+                            sourceId: source.id,
+                        });
+                    });
+                })
+                .catch((error) => {
+                    log.error("Error fetching screen sources:", error);
+                });
+        }
+
+        log.log("Snippers restored from settings");
+    });
+});
+
+// ------------------------------
+// IPC HANDLERS
+// ------------------------------
+
+// GENERAL
+app.on("window-all-closed", () => {
+    if (process.platform !== "darwin") app.quit();
+});
+
+ipcMain.on("exit-app", () => {
+    log.log("Exiting the app...");
+    app.quit();
+});
+
+ipcMain.on("restart-app", () => {
+    app.relaunch();
+    app.exit(0);
+});
 
 ipcMain.on("close-splash", () => {
     if (windows.splash) {
-        log.log("Closing Splash Screen")
+        log.log("Closing Splash Screen");
         windows.splash.close();
         delete windows.splash; // Remove reference after closing
     }
@@ -196,9 +304,7 @@ ipcMain.on("resize-window-to-content", (event, { width, height }) => {
     }
 });
 
-
 // Settings
-
 ipcMain.on("toggle-settings", () => {
     const settingsWindow = windows.settings;
     if (settingsWindow) {
@@ -207,9 +313,9 @@ ipcMain.on("toggle-settings", () => {
 });
 
 ipcMain.handle("get-settings", () => {
-    if (!Array.isArray(appSettings.reminderItems)) {
-        log.error("Fixing reminderItems array issue...");
-        appSettings.reminderItems = [];
+    if (!Array.isArray(appSettings.notesItems)) {
+        log.error("Fixing notesItems array issue...");
+        appSettings.notesItems = [];
     }
 
     log.log("Returning settings");
@@ -217,17 +323,17 @@ ipcMain.handle("get-settings", () => {
 });
 
 ipcMain.on("update-settings", (event, newSettings) => {
-    const previousReminderItems = JSON.stringify(appSettings.reminderItems);
+    const previousNotesItems = JSON.stringify(appSettings.notesItems);
     const previousSessionVolume = appSettings.sessionVolume;
 
     appSettings = { ...appSettings, ...newSettings };
     saveSettings();
 
-    // Only send reminder update if `reminderItems` changed
-    if (JSON.stringify(appSettings.reminderItems) !== previousReminderItems) {
-        log.log("Reminder items changed, updating reminder window...");
-        if (windows.reminder) {
-            windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
+    // Only send notes update if `notesItems` changed
+    if (JSON.stringify(appSettings.notesItems) !== previousNotesItems) {
+        log.log("Notes items changed, updating notes window...");
+        if (windows.notes) {
+            windows.notes.webContents.send("update-notes-items", appSettings.notesItems);
         }
     }
 
@@ -243,55 +349,53 @@ ipcMain.on("update-settings", (event, newSettings) => {
 
     // Send full settings update only to windows that need everything
     Object.values(windows).forEach((window) => {
-        if (window && window.webContents && window !== windows.reminder) {
+        if (window && window.webContents && window !== windows.notes) {
             window.webContents.send("settings-updated", appSettings);
         }
     });
 });
 
-// reminder
+// notes
+ipcMain.on("toggle-notes", () => {
+    let notesWindow = windows.notes;
 
-ipcMain.on("toggle-reminder", () => {
-    let reminderWindow = windows.reminder;
-
-    if (reminderWindow) {
-        if (reminderWindow.isVisible()) {
-            reminderWindow.hide();
+    if (notesWindow) {
+        if (notesWindow.isVisible()) {
+            notesWindow.hide();
         } else {
-            reminderWindow.show();
+            notesWindow.show();
 
             setTimeout(() => {
-                log.log("Sending reminder settings after opening...");
-                reminderWindow.webContents.send("update-reminder-settings", {
-                    reminderTransparent: appSettings.reminderTransparent ?? true, // Default to true
+                log.log("Sending notes settings after opening...");
+                notesWindow.webContents.send("update-notes-settings", {
+                    notesTransparent: appSettings.notesTransparent ?? true, // Default to true
                 });
             }, 10); // ✅ Ensure UI loads before sending data
         }
     }
 });
 
-ipcMain.on("reminder-ready", (event) => {
-    log.log("Reminder window is ready!");
+ipcMain.on("notes-ready", (event) => {
+    log.log("notes window is ready!");
 
-    if (windows.reminder) {
-        windows.reminder.webContents.send("update-reminder-items", appSettings.reminderItems);
+    if (windows.notes) {
+        windows.notes.webContents.send("update-notes-items", appSettings.notesItems);
     }
 });
 
-ipcMain.on("refresh-reminder-window", async () => {
-    log.log("Refreshing Reminder window due to settings change...");
+ipcMain.on("refresh-notes-window", async () => {
+    log.log("Refreshing notes window due to settings change...");
 
-    if (windows.reminder) {
-        windows.reminder.close(); // Close the old window
+    if (windows.notes) {
+        windows.notes.close(); // Close the old window
     }
 
     // ✅ Recreate the window with updated settings
-    windows.reminder = await createReminderWindow(windows.taskbar);
-    windows.reminder.show();
+    windows.notes = await createNotesWindow(windows.taskbar);
+    windows.notes.show();
 });
 
 // Checklist
-
 ipcMain.on("toggle-checklist", () => {
     const checklistWindow = windows.checklist;
     if (checklistWindow) {
@@ -301,18 +405,88 @@ ipcMain.on("toggle-checklist", () => {
 
 function getLegacyChecklistItems() {
     return [
-        { text: "Hijacked", type: "critical", state: "default", tooltip: "This check serves as a reminder to assess your emotional state before trading. Emotional hijacking—whether from rage, FOMO, or overconfidence—can impair judgment and lead to costly mistakes. Developing awareness of your emotions and recognizing your body's signals is key to maintaining discipline.", },
-        { text: "MACD", type: "critical", state: "default", tooltip: "The MACD signal indicator helps identify trend direction and momentum shifts, reducing the risk of trading against the trend. It can assist in avoiding the backside of a move by confirming strength or weakness in price action, helping you time entries and exits more effectively." },
-        { text: "Volume", type: "critical", state: "default", tooltip: "Volume reveals market sentiment and strength. High volume confirms trends—bullish or bearish—while low volume signals weak moves. Tracking volume helps you follow the pack, spot momentum shifts, and avoid false breakouts." },
-        { text: "Extended", type: "optional", state: "state-yellow", tooltip: "A reminder to avoid entering trades on overextended charts, which often results from FOMO. Overextended moves are prone to sharp reversals, making risk management crucial. Look for healthier pullbacks instead of chasing highs." },
-        { text: "Candles", type: "reminder", state: "default", tooltip: "Reading candlestick patterns helps anticipate market moves. Dojis, pin bars, and other formations signal potential reversals, continuations, or indecision. Mastering candle analysis improves trade timing and decision-making." },
-        { text: "Spread", type: "critical", state: "default", tooltip: "A wide or volatile spread can lead to significant losses. Always monitor the spread to avoid unexpected price slippage and ensure precise entries and exits." },
-        { text: "Orders", type: "reminder", state: "default", tooltip: "Large bid and ask orders at key price levels can act as support or resistance. Monitoring these can help anticipate potential reversals or breakouts."},
-        { text: "EMA", type: "reminder", state: "default", tooltip: "Helps identify trends by smoothing out price action. A rising EMA suggests bullish momentum, while a falling EMA indicates bearish pressure. It can also act as dynamic support or resistance and are often trigger points." },
-        { text: "Time bar", type: "reminder", state: "default", tooltip: "The remaining time in a candle is crucial for confirming signals. A setup that looks strong mid-bar can completely change by the close. Waiting for the candle to complete prevents premature entries based on incomplete patterns and false moves." },
-        { text: "VWAP", type: "reminder", state: "default", tooltip: "VWAP is a key intraday indicator that helps traders assess fair value and a stock’s strength or weakness. Institutional traders often use it as a benchmark for buy/sell decisions. Most trades cluster around VWAP, making it a crucial level for entries and exits." },
-        { text: "Float", type: "optional", state: "state-yellow", tooltip: "Understanding float helps traders anticipate supply/demand imbalances, identify potential short squeezes, and gauge the risk level of a trade. Low float stocks tend to be more volatile due to limited supply, while high float stocks are generally more stable." },
-        { text: "Catalyst", type: "optional", state: "state-yellow", tooltip: "A strong news catalyst can drive volume and momentum, making a stock more volatile and tradable. Positive news can fuel bullish moves, while negative news can trigger sell-offs. Traders should assess the strength of the catalyst, its impact on the stock, and how the market react." },
+        {
+            text: "Hijacked",
+            type: "critical",
+            state: "default",
+            tooltip:
+                "This check serves as a reminder to assess your emotional state before trading. Emotional hijacking—whether from rage, FOMO, or overconfidence—can impair judgment and lead to costly mistakes. Developing awareness of your emotions and recognizing your body's signals is key to maintaining discipline.",
+        },
+        {
+            text: "MACD",
+            type: "critical",
+            state: "default",
+            tooltip:
+                "The MACD signal indicator helps identify trend direction and momentum shifts, reducing the risk of trading against the trend. It can assist in avoiding the backside of a move by confirming strength or weakness in price action, helping you time entries and exits more effectively.",
+        },
+        {
+            text: "Volume",
+            type: "critical",
+            state: "default",
+            tooltip:
+                "Volume reveals market sentiment and strength. High volume confirms trends—bullish or bearish—while low volume signals weak moves. Tracking volume helps you follow the pack, spot momentum shifts, and avoid false breakouts.",
+        },
+        {
+            text: "Extended",
+            type: "optional",
+            state: "state-yellow",
+            tooltip:
+                "A reminder to avoid entering trades on overextended charts, which often results from FOMO. Overextended moves are prone to sharp reversals, making risk management crucial. Look for healthier pullbacks instead of chasing highs.",
+        },
+        {
+            text: "Candles",
+            type: "reminder",
+            state: "default",
+            tooltip:
+                "Reading candlestick patterns helps anticipate market moves. Dojis, pin bars, and other formations signal potential reversals, continuations, or indecision. Mastering candle analysis improves trade timing and decision-making.",
+        },
+        {
+            text: "Spread",
+            type: "critical",
+            state: "default",
+            tooltip: "A wide or volatile spread can lead to significant losses. Always monitor the spread to avoid unexpected price slippage and ensure precise entries and exits.",
+        },
+        {
+            text: "Orders",
+            type: "reminder",
+            state: "default",
+            tooltip: "Large bid and ask orders at key price levels can act as support or resistance. Monitoring these can help anticipate potential reversals or breakouts.",
+        },
+        {
+            text: "EMA",
+            type: "reminder",
+            state: "default",
+            tooltip:
+                "Helps identify trends by smoothing out price action. A rising EMA suggests bullish momentum, while a falling EMA indicates bearish pressure. It can also act as dynamic support or resistance and are often trigger points.",
+        },
+        {
+            text: "Time bar",
+            type: "reminder",
+            state: "default",
+            tooltip:
+                "The remaining time in a candle is crucial for confirming signals. A setup that looks strong mid-bar can completely change by the close. Waiting for the candle to complete prevents premature entries based on incomplete patterns and false moves.",
+        },
+        {
+            text: "VWAP",
+            type: "reminder",
+            state: "default",
+            tooltip:
+                "VWAP is a key intraday indicator that helps traders assess fair value and a stock’s strength or weakness. Institutional traders often use it as a benchmark for buy/sell decisions. Most trades cluster around VWAP, making it a crucial level for entries and exits.",
+        },
+        {
+            text: "Float",
+            type: "optional",
+            state: "state-yellow",
+            tooltip:
+                "Understanding float helps traders anticipate supply/demand imbalances, identify potential short squeezes, and gauge the risk level of a trade. Low float stocks tend to be more volatile due to limited supply, while high float stocks are generally more stable.",
+        },
+        {
+            text: "Catalyst",
+            type: "optional",
+            state: "state-yellow",
+            tooltip:
+                "A strong news catalyst can drive volume and momentum, making a stock more volatile and tradable. Positive news can fuel bullish moves, while negative news can trigger sell-offs. Traders should assess the strength of the catalyst, its impact on the stock, and how the market react.",
+        },
     ];
 }
 
@@ -338,6 +512,7 @@ ipcMain.on("toggle-checklist-item", (event, { index, newState }) => {
         log.error("Checklist item not found at index:", index);
     }
 });
+
 ipcMain.on("add-checklist-item", (event, item) => {
     if (!Array.isArray(appSettings.checklist)) {
         appSettings.checklist = [];
@@ -369,8 +544,8 @@ function getDefaultChecklistItems() {
     return [
         { text: "Review Orders", type: "critical", state: "default" },
         { text: "Check Volume", type: "critical", state: "default" },
-        { text: "Verify EMA", type: "reminder", state: "default" },
-        { text: "Prepare VWAP", type: "reminder", state: "default" },
+        { text: "Verify EMA", type: "notes", state: "default" },
+        { text: "Prepare VWAP", type: "notes", state: "default" },
         { text: "Float Size", type: "optional", state: "state-yellow" },
         { text: "Spread Analysis", type: "critical", state: "default" },
     ];
@@ -412,10 +587,7 @@ ipcMain.on("resize-checklist-to-content", (event, { width, height }) => {
     }
 });
 
-
-
 // Countdown
-
 ipcMain.on("toggle-countdown", () => {
     const countdownWindow = windows.countdown;
 
@@ -474,7 +646,6 @@ ipcMain.on("refresh-countdown-window", async () => {
 });
 
 // Clock
-
 ipcMain.on("toggle-clock", async () => {
     const clockWindow = windows.clock;
     if (clockWindow) {
@@ -560,7 +731,6 @@ ipcMain.on("request-update-session-countdowns", (event, updatedSessions) => {
 });
 
 // Resumption
-
 ipcMain.on("toggle-resumption", () => {
     const resumptionWindow = windows.resumption;
     if (resumptionWindow) {
@@ -573,8 +743,6 @@ ipcMain.handle("get-beep-sound-path", () => {
 });
 
 // Snipper
-
-// Open Snipper Dialog
 ipcMain.on("open-snipper-dialog", (event) => {
     log.log("Opening Snipper Dialog...");
     const dialogWindow = createSnipperDialogWindow();
@@ -912,133 +1080,229 @@ function createSnipperDialogWindow() {
 
     return dialogWindow;
 }
-app.on("ready", () => {
-    log.log("App is starting...");
 
-    // Show Splash Screen first, then load the main app
-    windows.splash = createSplashWindow(() => { // ✅ Store splash reference
-        log.log("Splash screen closed. Loading main app...");
+// GALLERY
+ipcMain.on("toggle-gallery", () => {
+    if (windows.gallery) {
+        log.log("Toggle Gallery Window");
+        windows.gallery.isVisible() ? windows.gallery.hide() : windows.gallery.show();
+    }
+});
 
-        // Do NOT redefine `windows` here! Remove `let windows = {};`
-        // 🟢 Create Taskbar Window
-        windows.taskbar = createTaskbarWindow(
-            () => ipcMain.emit("toggle-reminder"),
-            () => ipcMain.emit("toggle-settings"),
-            () => ipcMain.emit("toggle-checklist"),
-            () => ipcMain.emit("toggle-countdown"),
-            () => ipcMain.emit("toggle-clock"),
-            () => ipcMain.emit("toggle-resumption")
-        );
+// Handle gallery operations
+ipcMain.handle("galleryAPI.getGalleryImages", () => {
+    try {
+        const files = fs.readdirSync(galleryFolderPath);
+        // Filter to only include image files (e.g., .png, .jpg, .jpeg)
+        const imageFiles = files.filter((file) => /\.(png|jpe?g)$/i.test(file));
+        // Return full paths to the images
+        return imageFiles.map((file) => path.join(galleryFolderPath, file));
+    } catch (error) {
+        console.error("Failed to load gallery images:", error);
+        return [];
+    }
+});
 
-        if (!windows.taskbar) {
-            log.error("Taskbar window could not be created.");
-            return;
+ipcMain.handle("galleryAPI.uploadImage", (event, filePath) => {
+    try {
+        const fileName = `image-${Date.now()}.png`; // Create a unique filename based on timestamp
+        const destinationPath = path.join(galleryFolderPath, fileName);
+
+        // Copy the uploaded file to the gallery folder
+        fs.copyFileSync(filePath, destinationPath);
+
+        // Return the path of the saved image
+        return destinationPath;
+    } catch (error) {
+        console.error("Error uploading image:", error);
+        throw new Error("Failed to upload image");
+    }
+});
+
+ipcMain.handle("galleryAPI.deleteImage", (event, filePath) => {
+    try {
+        if (!filePath) {
+            throw new Error("No file path provided");
         }
 
-        // 🟢 Create Main Windows
-        windows.reminder = createReminderWindow(windows.taskbar, appSettings.text);
-        windows.settings = createSettingsWindow(windows.taskbar);
-        windows.checklist = createChecklistWindow(windows.taskbar);
-        windows.countdown = createCountdownWindow(windows.taskbar);
-        windows.clock = createClockWindow(windows.taskbar);
-        windows.resumption = createResumptionWindow(windows.taskbar);
+        // Log the file path for debugging
+        console.log("Deleting image at path:", filePath);
 
-        // windows.reminder.webContents.once("dom-ready", () => {
-        //     windows.reminder.webContents.send("update-reminder-text", appSettings.text);
-        // });
+        // Delete the image file
+        fs.unlinkSync(filePath);
+        console.log(`Image deleted successfully: ${filePath}`);
 
-        // Hide all windows except the taskbar
-        Object.values(windows).forEach((window) => window?.hide());
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to delete image:", error);
+        return { success: false, error: error.message };
+    }
+});
 
-        // 🟢 Ensure Taskbar is visible
-        if (windows.taskbar) {
-            windows.taskbar.show();
-        }
+ipcMain.handle("captureRegion", async () => {
+    return new Promise((resolve) => {
+        regionCaptureCallback = resolve;
 
-        // Load settings into windows
-        windows.settings.webContents.once("dom-ready", () => {
-            windows.settings.webContents.send("update-checklist", appSettings.checklist);
+        const regionWindow = new BrowserWindow({
+            fullscreen: true,
+            transparent: true,
+            frame: false,
+            alwaysOnTop: true,
+            skipTaskbar: true,
+            webPreferences: {
+                preload: path.join(__dirname, "../renderer/common/preload.js"),
+                contextIsolation: true,
+            },
+            backgroundColor: '#80000000',
         });
 
-        windows.checklist.webContents.once("dom-ready", () => {
-            windows.checklist.webContents.send("load-checklist-state", appSettings.checklist);
+        regionWindow.loadFile(path.join(__dirname, "../renderer/gallery/region-selection.html"));
+
+        // regionWindow.webContents.openDevTools({ mode: "detach" });
+
+        regionWindow.webContents.once("dom-ready", () => {
+            regionWindow.webContents.send("start-region-selection");
         });
 
-        windows.clock.webContents.once("dom-ready", () => {
-            windows.clock.webContents.send("update-session-countdowns", appSettings.sessionCountdowns);
-        });
-
-        // 🟢 Sync Settings Across Windows
-        Object.values(windows).forEach((window) => {
-            if (window && window.webContents) {
-                window.webContents.send("settings-updated", appSettings);
-            }
-        });
-
-        // 🟢 Restore Snippers
-        if (Array.isArray(appSettings.snippers)) {
-            log.log("Restoring Snippers from saved regions");
-
-            desktopCapturer
-                .getSources({ types: ["screen"] })
-                .then((sources) => {
-                    if (sources.length === 0) {
-                        log.error("No screen sources available for Snipper.");
-                        return;
-                    }
-
-                    appSettings.snippers.forEach((snip) => {
-                        log.log(`Restoring Snipper with saved region bounds`);
-
-                        const source = sources.find((src) => snip.sourceId && src.id === snip.sourceId) || sources[0];
-
-                        if (!source) {
-                            log.error(`No matching source found for Snipper: ${snip.name}`);
-                            return;
-                        }
-
-                        log.log(`Assigning sourceId`);
-
-                        ipcMain.emit("create-snipper-window", null, {
-                            name: snip.name,
-                            bounds: snip,
-                            sourceId: source.id,
-                        });
-                    });
-                })
-                .catch((error) => {
-                    log.error("Error fetching screen sources:", error);
-                });
-        }
-
-        log.log("Snippers restored from settings");
+        // Save the reference so we can close it later
+        global._regionWindow = regionWindow;
     });
 });
 
-// Quit the app when all windows are closed
-app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") app.quit();
+// Handle region-selected
+ipcMain.on("region-selected", async (event, regionBounds) => {
+    const regionWindow = global._regionWindow;
+    if (regionWindow) regionWindow.close();
+
+    try {
+        const screenshotBuffer = await screenshot({ format: "png" });
+        const screenshotPath = path.join(galleryFolderPath, `screenshot-${Date.now()}.png`);
+
+        const croppedBuffer = await sharp(screenshotBuffer)
+            .extract({
+                left: regionBounds.x,
+                top: regionBounds.y,
+                width: regionBounds.width,
+                height: regionBounds.height,
+            })
+            .toBuffer();
+
+        fs.writeFileSync(screenshotPath, croppedBuffer);
+
+        console.log("✅ Region captured to:", screenshotPath);
+        regionCaptureCallback?.({ success: true, screenshotPath });
+    } catch (err) {
+        console.error("❌ Screenshot error:", err);
+        regionCaptureCallback?.({ success: false, error: err.message });
+    }
+
+    regionCaptureCallback = null;
+    global._regionWindow = null;
 });
 
-ipcMain.on("exit-app", () => {
-    log.log("Exiting the app...");
-    app.quit();
+ipcMain.on("open-metadata-dialog", (event, screenshotPath) => {
+    const metadataDialog = new BrowserWindow({
+        width: 600,
+        height: 650,
+        modal: true,
+        show: true,
+        frame: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            preload: path.join(__dirname, "../renderer/common/preload.js"),
+        },
+    });
+
+    metadataDialog.loadFile(path.join(__dirname, "../renderer/gallery/metadata-dialog.html"));
+
+    metadataDialog.webContents.openDevTools({ mode: "detach" });
+
+    metadataDialog.webContents.once("dom-ready", () => {
+        metadataDialog.webContents.send("screenshotPath", screenshotPath);
+    });
 });
 
-ipcMain.on("restart-app", () => {
-    app.relaunch();
-    app.exit(0);
+ipcMain.handle("saveImageMetadata", async (event, metadata) => {
+    const { name, symbol, tags, screenshotPath } = metadata;
+
+    // ✅ Write only to central gallery-meta.json
+    const data = { name, symbol, tags, screenshotPath, date: new Date() };
+
+    // Ensure gallery-meta.json exists
+    const metaDir = path.dirname(metaPath);
+    if (!fs.existsSync(metaDir)) {
+        fs.mkdirSync(metaDir, { recursive: true });
+    }
+
+    if (!fs.existsSync(metaPath)) {
+        fs.writeFileSync(metaPath, JSON.stringify([], null, 2));
+    }
+
+    // Append to list
+    let metaList = [];
+    try {
+        metaList = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
+    } catch (err) {
+        console.error("❌ Failed to read existing gallery-meta.json:", err);
+    }
+
+    metaList.push(data);
+
+    // Save updated
+    try {
+        fs.writeFileSync(metaPath, JSON.stringify(metaList, null, 2));
+        console.log("✅ gallery-meta.json updated:", data);
+    } catch (err) {
+        console.error("❌ Failed to write gallery-meta.json:", err);
+    }
+
+    return { success: true };
 });
 
-////////////////////////////////////////////////////////////////////////////////////
-// UPDATES
+
+ipcMain.handle("discard-screenshot", async (_, screenshotPath) => {
+    try {
+        const jsonPath = screenshotPath.replace(".png", ".json");
+
+        if (fs.existsSync(screenshotPath)) fs.unlinkSync(screenshotPath);
+        if (fs.existsSync(jsonPath)) fs.unlinkSync(jsonPath);
+
+        // Update gallery-meta.json
+        if (fs.existsSync(metaPath)) {
+            const list = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
+            const updated = list.filter(entry => entry.screenshotPath !== screenshotPath);
+            fs.writeFileSync(metaPath, JSON.stringify(updated, null, 2));
+            console.log("🗑️ Removed entry from gallery-meta.json");
+        }
+
+        return { success: true };
+    } catch (err) {
+        console.error("❌ Failed to discard screenshot:", err);
+        return { success: false, error: err.message };
+    }
+});
+
+ipcMain.handle('galleryAPI.getGalleryMeta', async () => {
+    try {
+        if (!fs.existsSync(metaPath)) return [];
+        const raw = fs.readFileSync(metaPath, 'utf-8');
+        return JSON.parse(raw);
+    } catch (e) {
+        console.error('Failed to load gallery-meta.json:', e);
+        return [];
+    }
+});
+
+// ------------------------------
+// UPDATE
+// ------------------------------
 
 if (!isDevelopment || forceUpdate) {
     if (forceUpdate) {
         autoUpdater.forceDevUpdateConfig = true;
         autoUpdater.allowDowngrade = true;
     }
-   
+
     log.log("Production mode detected, checking for updates...");
     autoUpdater.checkForUpdatesAndNotify();
 
@@ -1127,7 +1391,6 @@ if (!isDevelopment || forceUpdate) {
         updateShortcutIcon();
     });
     const { exec } = require("child_process");
-
 } else {
     log.log("Skipping auto-updates in development mode");
 }
@@ -1159,4 +1422,3 @@ function updateShortcutIcon() {
         }
     });
 }
-

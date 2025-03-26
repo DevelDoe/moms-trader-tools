@@ -6,10 +6,10 @@ body::-webkit-scrollbar {
 }
 
 .settings-container {
-    max-width: 600px;
     margin: 0 auto;
     color: #fff;
     position: relative;
+    margin: 20px;
 }
 .settings-container li {
     font-size: 16px;
@@ -197,7 +197,23 @@ body::-webkit-scrollbar {
     color: #ffeb3b;
 }
 .controls button {
-    padding: 0.6rem 1rem;
+    padding: 0.6rem 1rem;#gallery-container {
+        display: flex;
+        flex-wrap: wrap; /* To allow images to wrap and fit in multiple rows */
+        gap: 10px; /* Space between images */
+        justify-content: center; /* Center images horizontally */
+        padding: 10px;
+    }
+    
+    .gallery-image {
+        max-width: 100%; /* Ensures images do not exceed container width */
+        max-height: 200px; /* Limits height to prevent overflow */
+        object-fit: contain; /* Makes sure images are scaled proportionally */
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: adds a nice shadow around the images */
+    }
+
+    
     background-color: #f23645;
     border: none;
     border-radius: 4px;
@@ -268,4 +284,106 @@ body::-webkit-scrollbar {
 #countdown-volume-slider {
     width: 100%;
     accent-color: #ff9800;
+}
+
+
+/* // GALLERY  */
+
+/* Style for the gallery container */
+#gallery-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Style for each gallery item (image and delete button) */
+.gallery-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #2a2b32;
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    text-align: center;
+    width: 120px;
+    width: 100%;
+}
+
+.gallery-item img {
+    width: 100%;
+}
+
+.gallery-thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-bottom: 5px;
+}
+
+.delete-btn {
+    background-color: #f23645;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.delete-btn:hover {
+    background-color: #d6343a;
+}
+
+/* Slideshow View */
+#slideshow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+#slideshow-image {
+    max-width: 90%;
+    max-height: 90%;
+}
+
+#close-slideshow-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #f23645;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#close-slideshow-btn:hover {
+    background-color: #d6343a;
+}
+
+
+/* WINDOW STYLES  */
+/* Style for the Windows Settings toggle buttons */
+.window-toggle {
+    background-color: #777; /* Gray color when inactive */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.window-toggle.active {
+    background-color: rgb(255, 0, 179); /* Light up when active */
 }

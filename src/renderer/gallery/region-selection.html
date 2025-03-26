@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Select Region</title>
+        <style>
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+                width: 100%;
+                height: 100%;
+                cursor: crosshair;
+                overflow: hidden;
+            }
+            #selection-box {
+                position: absolute;
+                border: 2px dashed red;
+                background-color: rgba(255, 255, 255, 0.2); 
+                display: none;
+                z-index: 9999;
+                pointer-events: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="selection-box"></div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                let startX = 0,
+                    startY = 0,
+                    endX = 0,
+                    endY = 0;
+                const selectionBox = document.getElementById("selection-box");
+                let isSelecting = false;
+
+                document.addEventListener("mousedown", (e) => {
+                    isSelecting = true;
+                    startX = e.clientX;
+                    startY = e.clientY;
+
+                    selectionBox.style.left = `${startX}px`;
+                    selectionBox.style.top = `${startY}px`;
+                    selectionBox.style.width = "0px";
+                    selectionBox.style.height = "0px";
+                    selectionBox.style.display = "block";
+                    selectionBox.style.opacity = "1";
+                });
+
+                document.addEventListener("mousemove", (e) => {
+                    if (!isSelecting) return;
+
+                    endX = e.clientX;
+                    endY = e.clientY;
+
+                    selectionBox.style.left = `${Math.min(startX, endX)}px`;
+                    selectionBox.style.top = `${Math.min(startY, endY)}px`;
+                    selectionBox.style.width = `${Math.abs(endX - startX)}px`;
+                    selectionBox.style.height = `${Math.abs(endY - startY)}px`;
+                });
+
+                document.addEventListener("mouseup", () => {
+                    if (!isSelecting) return;
+                    isSelecting = false;
+
+                    const regionBounds = {
+                        x: Math.min(startX, endX),
+                        y: Math.min(startY, endY),
+                        width: Math.abs(endX - startX),
+                        height: Math.abs(endY - startY),
+                    };
+
+                    console.log("📸 Region selected:", regionBounds);
+
+                    // Fade out the box before closing the window
+                    selectionBox.style.transition = "opacity 0.2s ease-in-out";
+                    selectionBox.style.opacity = "0";
+
+                    // Delay sending and closing to allow fade
+                    setTimeout(() => {
+                        window.electronAPI.send("region-selected", regionBounds);
+                        window.close();
+                    }, 200);
+                });
+            });
+        </script>
+    </body>
+</html>

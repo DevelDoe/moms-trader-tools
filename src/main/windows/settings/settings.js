@@ -8,8 +8,8 @@ let settingsWindow;
 function createSettingsWindow(taskbarWindow) {
     if (!settingsWindow) {
         settingsWindow = new BrowserWindow({
-            width: 640,
-            height: 500,
+            width: 1280,
+            height: 720,
             frame: false,
             show: false,
             alwaysOnTop: true,
@@ -23,9 +23,17 @@ function createSettingsWindow(taskbarWindow) {
             },
         });
 
+        // Add listener for Ctrl+R to reload window
+        settingsWindow.webContents.on('before-input-event', (event, input) => {
+            if (input.key === 'r' && input.control) {
+                event.preventDefault(); // Prevent default behavior
+                settingsWindow.reload(); // Reload the window content
+            }
+        });
+
         settingsWindow.loadFile(path.join(__dirname, "../../../renderer/settings/settings.html"));
 
-        // settingsWindow.webContents.openDevTools({ mode: "detach" });
+        settingsWindow.webContents.openDevTools({ mode: "detach" });
 
         // Dynamically position the settings window relative to the taskbar
         if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {
@@ -36,8 +44,8 @@ function createSettingsWindow(taskbarWindow) {
             settingsWindow.setBounds({
                 x: settingsX,
                 y: settingsY,
-                width: 640,
-                height: 610,
+                width: 960,
+                height: 540,
             });
         } else {
             console.warn("Taskbar window is undefined or does not support getBounds. Positioning skipped.");

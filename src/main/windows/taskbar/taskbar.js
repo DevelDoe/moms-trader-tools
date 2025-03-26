@@ -2,13 +2,13 @@ const { BrowserWindow, Menu, ipcMain } = require("electron");
 const path = require("path");
 
 function createTaskbarWindow(toggleReminder, toggleSettings) {
-    const taskbarWindow = new BrowserWindow({
+    const window = new BrowserWindow({
         width: 65, // Initial size
-        height: 73,
+        height: 193,
         frame: false,
         alwaysOnTop: true,
         transparent: true,
-        resizable: false, // Allow resizing dynamically
+        resizable: true, 
         webPreferences: {
             preload: path.join(__dirname, "../../../renderer/common/preload.js"),
             contextIsolation: true,
@@ -17,13 +17,21 @@ function createTaskbarWindow(toggleReminder, toggleSettings) {
         },
     });
 
-    taskbarWindow.loadFile(path.join(__dirname, "../../../renderer/taskbar/taskbar.html"));
+    window.loadFile(path.join(__dirname, "../../../renderer/taskbar/taskbar.html"));
 
-    // taskbarWindow.webContents.openDevTools({ mode: "detach" });
+    window.webContents.openDevTools({ mode: "detach" });
 
     // IPC Listener for resizing the taskbar
     ipcMain.on("resize-taskbar", (event, width, height) => {
-        taskbarWindow.setBounds({ width, height });
+        window.setBounds({ width, height });
+    });
+
+    // Add listener for Ctrl+R to reload window
+    window.webContents.on("before-input-event", (event, input) => {
+        if (input.key === "r" && input.control) {
+            event.preventDefault(); // Prevent default behavior
+            window.reload(); // Reload the window content
+        }
     });
 
     const menuTemplate = [
@@ -39,7 +47,7 @@ function createTaskbarWindow(toggleReminder, toggleSettings) {
     const menu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(menu);
 
-    return taskbarWindow;
+    return window;
 }
 
 module.exports = { createTaskbarWindow };

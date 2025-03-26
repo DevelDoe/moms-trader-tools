@@ -3,7 +3,7 @@ const path = require("path");
 
 let reminderWindow = null; // Store reference to the reminder window
 
-function createReminderWindow(taskbarWindow, transparent = true) {
+function createNotesWindow(taskbarWindow, transparent = true) {
     if (reminderWindow) {
         reminderWindow.close(); // Close the existing window if open
     }
@@ -24,7 +24,7 @@ function createReminderWindow(taskbarWindow, transparent = true) {
         },
     });
 
-    reminderWindow.loadFile(path.join(__dirname, "../../../renderer/reminder/reminder.html"));
+    reminderWindow.loadFile(path.join(__dirname, "../../../renderer/notes/notes.html"));
 
     // reminderWindow.webContents.openDevTools({ mode: "detach" });
 
@@ -43,4 +43,4 @@ function createReminderWindow(taskbarWindow, transparent = true) {
     return reminderWindow;
 }
 
-module.exports = { createReminderWindow };
+module.exports = { createNotesWindow };
