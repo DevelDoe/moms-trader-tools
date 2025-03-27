@@ -34,20 +34,16 @@ const forceUpdate = process.env.forceUpdate === "true";
 // Default settings for fresh installs
 const userDataPath = app.getPath("userData");
 
+// Safe writeable paths
 const dataPath = path.join(userDataPath, "data");
-const SETTINGS_FILE = isDevelopment
-  ? path.join(__dirname, "../../data/settings.dev.json")
-  : path.join(userDataPath, "settings.json");
-
+const SETTINGS_FILE = path.join(userDataPath, isDevelopment ? "settings.dev.json" : "settings.json");
 const FIRST_RUN_FILE = path.join(userDataPath, "first-run.lock");
 const galleryFolderPath = path.join(userDataPath, "gallery");
-const metaPath = isDevelopment
-  ? path.join(__dirname, "../../data/gallery-meta.json")
-  : path.join(userDataPath, "gallery-meta.json");
-  
-if (!fs.existsSync(dataPath)) {
-    fs.mkdirSync(dataPath, { recursive: true });
-}
+const metaPath = path.join(userDataPath, "gallery-meta.json");
+
+// Ensure folders exist
+if (!fs.existsSync(dataPath)) fs.mkdirSync(dataPath, { recursive: true });
+if (!fs.existsSync(galleryFolderPath)) fs.mkdirSync(galleryFolderPath, { recursive: true });
 
 // ------------------------------
 // LOGGER SETUP
