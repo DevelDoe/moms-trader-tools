@@ -32,14 +32,21 @@ const isDebug = process.env.DEBUG === "true";
 const forceUpdate = process.env.forceUpdate === "true";
 
 // Default settings for fresh installs
-const dataPath = path.join(app.getPath('userData'), 'data');
-const SETTINGS_FILE = isDevelopment ? path.join(__dirname, "../../data/settings.dev.json") : path.join(app.getPath("userData"), "settings.json");
-const FIRST_RUN_FILE = path.join(app.getPath("userData"), "first-run.lock"); // Marker file
-const galleryFolderPath = path.join(app.getPath("userData"), "gallery"); // Gallery path
-const metaPath = isDevelopment ? path.join(__dirname, "../../data/gallery-meta.json") : path.join(app.getPath("userData"), "gallery-meta.json");
+const userDataPath = app.getPath("userData");
 
-if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+const dataPath = path.join(userDataPath, "data");
+const SETTINGS_FILE = isDevelopment
+  ? path.join(__dirname, "../../data/settings.dev.json")
+  : path.join(userDataPath, "settings.json");
+
+const FIRST_RUN_FILE = path.join(userDataPath, "first-run.lock");
+const galleryFolderPath = path.join(userDataPath, "gallery");
+const metaPath = isDevelopment
+  ? path.join(__dirname, "../../data/gallery-meta.json")
+  : path.join(userDataPath, "gallery-meta.json");
+  
+if (!fs.existsSync(dataPath)) {
+    fs.mkdirSync(dataPath, { recursive: true });
 }
 
 // ------------------------------
