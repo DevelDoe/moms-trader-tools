@@ -33,16 +33,18 @@ const forceUpdate = process.env.forceUpdate === "true";
 
 // Default settings for fresh installs
 
-const dataDir = path.join(__dirname, "../data");
+const dataDir = isDevelopment
+    ? path.join(__dirname, "../data")
+    : app.getPath("userData");
+
 const FIRST_RUN_FILE = path.join(app.getPath("userData"), "first-run.lock"); // Marker file
 const SETTINGS_FILE = isDevelopment ? path.join(__dirname, "../data/settings.dev.json") : path.join(app.getPath("userData"), "settings.json");
 const galleryFolderPath = path.join(app.getPath("userData"), "gallery");
 const metaPath = isDevelopment ? path.join(__dirname, "../data/gallery-meta.json") : path.join(app.getPath("userData"), "gallery-meta.json");
 
-if (!isDevelopment) {
-    if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-    }
+// ✅ Only create it in dev – prod's `userData` is already created
+if (isDevelopment && !fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
 }
 
 // ------------------------------
