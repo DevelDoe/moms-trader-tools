@@ -32,7 +32,7 @@ const isDebug = process.env.DEBUG === "true";
 const forceUpdate = process.env.forceUpdate === "true";
 
 // Default settings for fresh installs
-const dataDir = path.join(__dirname, "../../../data");
+const dataPath = path.join(app.getPath('userData'), 'data');
 const SETTINGS_FILE = isDevelopment ? path.join(__dirname, "../../data/settings.dev.json") : path.join(app.getPath("userData"), "settings.json");
 const FIRST_RUN_FILE = path.join(app.getPath("userData"), "first-run.lock"); // Marker file
 const galleryFolderPath = path.join(app.getPath("userData"), "gallery"); // Gallery path
