@@ -39,8 +39,10 @@ const SETTINGS_FILE = isDevelopment ? path.join(__dirname, "../data/settings.dev
 const galleryFolderPath = path.join(app.getPath("userData"), "gallery");
 const metaPath = isDevelopment ? path.join(__dirname, "../data/gallery-meta.json") : path.join(app.getPath("userData"), "gallery-meta.json");
 
-if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+if (!isDevelopment) {
+    if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+    }
 }
 
 // ------------------------------
