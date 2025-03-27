@@ -32,18 +32,16 @@ const isDebug = process.env.DEBUG === "true";
 const forceUpdate = process.env.forceUpdate === "true";
 
 // Default settings for fresh installs
-const userDataPath = app.getPath("userData");
 
-// Safe writeable paths
-const dataPath = path.join(userDataPath, "data");
-const SETTINGS_FILE = path.join(userDataPath, isDevelopment ? "settings.dev.json" : "settings.json");
-const FIRST_RUN_FILE = path.join(userDataPath, "first-run.lock");
-const galleryFolderPath = path.join(userDataPath, "gallery");
-const metaPath = path.join(userDataPath, "gallery-meta.json");
+const dataDir = path.join(__dirname, "../data");
+const FIRST_RUN_FILE = path.join(app.getPath("userData"), "first-run.lock"); // Marker file
+const SETTINGS_FILE = isDevelopment ? path.join(__dirname, "../data/settings.dev.json") : path.join(app.getPath("userData"), "settings.json");
+const galleryFolderPath = path.join(app.getPath("userData"), "gallery");
+const metaPath = isDevelopment ? path.join(__dirname, "../data/gallery-meta.json") : path.join(app.getPath("userData"), "gallery-meta.json");
 
-// Ensure folders exist
-if (!fs.existsSync(dataPath)) fs.mkdirSync(dataPath, { recursive: true });
-if (!fs.existsSync(galleryFolderPath)) fs.mkdirSync(galleryFolderPath, { recursive: true });
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+}
 
 // ------------------------------
 // LOGGER SETUP
@@ -65,7 +63,7 @@ autoUpdater.setFeedURL({
 // ------------------------------
 // FRESH INSTALL CHECK
 // ------------------------------
-const DEFAULT_SETTINGS = require("../../data/defaultSettings"); // Default settings for fresh installs
+const DEFAULT_SETTINGS = require("../data/defaultSettings"); // Default settings for fresh installs
 
 function isFirstInstall() {
     return !fs.existsSync(SETTINGS_FILE) && !fs.existsSync(FIRST_RUN_FILE);

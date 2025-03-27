@@ -34,6 +34,7 @@
         },
         "files": [
             "src/**/*",
+            "!src/data/**",
             "assets/**/*",
             "node_modules/**/*",
             "package.json"
