@@ -5,6 +5,7 @@ function createTaskbarWindow(toggleReminder, toggleSettings) {
     const window = new BrowserWindow({
         width: 65, // Initial size
         height: 193,
+        show:true,
         frame: false,
         alwaysOnTop: true,
         transparent: true,
@@ -19,7 +20,7 @@ function createTaskbarWindow(toggleReminder, toggleSettings) {
 
     window.loadFile(path.join(__dirname, "../../../renderer/taskbar/taskbar.html"));
 
-    window.webContents.openDevTools({ mode: "detach" });
+    // window.webContents.openDevTools({ mode: "detach" });
 
     // IPC Listener for resizing the taskbar
     ipcMain.on("resize-taskbar", (event, width, height) => {

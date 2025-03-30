@@ -33,9 +33,7 @@ const forceUpdate = process.env.forceUpdate === "true";
 
 // Default settings for fresh installs
 
-const dataDir = isDevelopment
-    ? path.join(__dirname, "../data")
-    : app.getPath("userData");
+const dataDir = isDevelopment ? path.join(__dirname, "../data") : app.getPath("userData");
 
 const FIRST_RUN_FILE = path.join(app.getPath("userData"), "first-run.lock"); // Marker file
 const SETTINGS_FILE = isDevelopment ? path.join(__dirname, "../data/settings.dev.json") : path.join(app.getPath("userData"), "settings.json");
@@ -112,7 +110,16 @@ function loadSettings() {
         // Ensure all settings properties exist
         if (!Array.isArray(settings.checklist)) settings.checklist = [];
         if (!Array.isArray(settings.sessionCountdowns)) settings.sessionCountdowns = [];
-        if (!Array.isArray(settings.notesItems)) settings.notesItems = [];
+        // Migrate old reminderItems to notesItems if needed
+        if (!Array.isArray(settings.notesItems)) {
+            if (Array.isArray(settings.reminderItems)) {
+                settings.notesItems = settings.reminderItems;
+                delete settings.reminderItems;
+                log.log("🔄 Migrated reminderItems → notesItems");
+            } else {
+                settings.notesItems = [];
+            }
+        }
         if (!Array.isArray(settings.snippers)) settings.snippers = [];
 
         return settings;
@@ -176,7 +183,8 @@ app.on("ready", () => {
             () => ipcMain.emit("toggle-checklist"),
             () => ipcMain.emit("toggle-countdown"),
             () => ipcMain.emit("toggle-clock"),
-            () => ipcMain.emit("toggle-resumption")
+            () => ipcMain.emit("toggle-resumption"),
+            () => ipcMain.emit("toggle-gallery")
         );
 
         if (!windows.taskbar) {
@@ -197,13 +205,8 @@ app.on("ready", () => {
         //     windows.notes.webContents.send("update-notes-text", appSettings.text);
         // });
 
-        // Hide all windows except the taskbar
-        Object.values(windows).forEach((window) => window?.hide());
-
-        // 🟢 Ensure Taskbar is visible
-        if (windows.taskbar) {
-            windows.taskbar.show();
-        }
+        // ✅ Hide all windows by default
+        // Object.values(windows).forEach((win) => win?.hide());
 
         // Load settings into windows
         windows.settings.webContents.once("dom-ready", () => {
@@ -262,6 +265,28 @@ app.on("ready", () => {
         }
 
         log.log("Snippers restored from settings");
+
+        // ✅ Then show the windows saved as active
+        const savedWindowStates = appSettings.windows || {};
+
+        // console.log(savedWindowStates);
+
+        for (const [key, value] of Object.entries(savedWindowStates)) {
+            const windowKey = key.toLowerCase();
+            const win = windows[windowKey];
+
+            if (win && value === true) {
+                // log.log("window key: ", windowKey);
+                // log.log("window: ", win);
+
+                // Wait for content to be ready
+                win.webContents.once("dom-ready", () => {
+                    win.show();
+                    ipcMain.emit("toggle-" + windowKey); // 👈 triggers toggle logic
+                    log.log(`Showing saved window: ${key} (after dom-ready)`);
+                });
+            }
+        }
     });
 });
 
@@ -1158,7 +1183,7 @@ ipcMain.handle("captureRegion", async () => {
                 preload: path.join(__dirname, "../renderer/common/preload.js"),
                 contextIsolation: true,
             },
-            backgroundColor: '#80000000',
+            backgroundColor: "#80000000",
         });
 
         regionWindow.loadFile(path.join(__dirname, "../renderer/gallery/region-selection.html"));
@@ -1264,7 +1289,6 @@ ipcMain.handle("saveImageMetadata", async (event, metadata) => {
     return { success: true };
 });
 
-
 ipcMain.handle("discard-screenshot", async (_, screenshotPath) => {
     try {
         const jsonPath = screenshotPath.replace(".png", ".json");
@@ -1275,7 +1299,7 @@ ipcMain.handle("discard-screenshot", async (_, screenshotPath) => {
         // Update gallery-meta.json
         if (fs.existsSync(metaPath)) {
             const list = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
-            const updated = list.filter(entry => entry.screenshotPath !== screenshotPath);
+            const updated = list.filter((entry) => entry.screenshotPath !== screenshotPath);
             fs.writeFileSync(metaPath, JSON.stringify(updated, null, 2));
             console.log("🗑️ Removed entry from gallery-meta.json");
         }
@@ -1287,13 +1311,13 @@ ipcMain.handle("discard-screenshot", async (_, screenshotPath) => {
     }
 });
 
-ipcMain.handle('galleryAPI.getGalleryMeta', async () => {
+ipcMain.handle("galleryAPI.getGalleryMeta", async () => {
     try {
         if (!fs.existsSync(metaPath)) return [];
-        const raw = fs.readFileSync(metaPath, 'utf-8');
+        const raw = fs.readFileSync(metaPath, "utf-8");
         return JSON.parse(raw);
     } catch (e) {
-        console.error('Failed to load gallery-meta.json:', e);
+        console.error("Failed to load gallery-meta.json:", e);
         return [];
     }
 });

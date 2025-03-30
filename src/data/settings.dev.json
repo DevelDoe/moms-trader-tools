@@ -134,5 +134,13 @@
       "end": 60
     }
   ],
-  "enableTickSound": true
+  "enableTickSound": true,
+  "windows": {
+    "Gallery": false,
+    "Checklist": false,
+    "Notes": true,
+    "Clock": true,
+    "Resumption": false,
+    "Countdown": false
+  }
 }

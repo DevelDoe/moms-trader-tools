@@ -7,10 +7,10 @@ function createCountdownWindow(taskbarWindow) {
     const countdownWindow = new BrowserWindow({
         width: 20,
         height: 15,
+        show: false,
         transparent: true,
         frame: false,
         resizable: true,
-        show: false,
         alwaysOnTop: true,
         webPreferences: {
             preload: path.join(__dirname, "../../../renderer/common/preload.js"),

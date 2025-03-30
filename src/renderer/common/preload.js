@@ -24,9 +24,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     toggleGallery: () => ipcRenderer.send("toggle-gallery"),
 
     // 📌 Notes
-    sendReminderReady: () => ipcRenderer.send("notes-ready"),
-    onUpdateReminderItems: (callback) => ipcRenderer.on("update-notes-items", (_, items) => callback(items)),
-    refreshReminderWindow: () => ipcRenderer.send("refresh-notes-window"),
+    sendNotesReady: () => ipcRenderer.send("notes-ready"),
+    onUpdateNotesItems: (callback) => ipcRenderer.on("update-notes-items", (_, items) => callback(items)),
+    refreshNotesWindow: () => ipcRenderer.send("refresh-notes-window"),
 
     // ✅ Checklist
     loadChecklistState: () => ipcRenderer.invoke("load-checklist-state"),

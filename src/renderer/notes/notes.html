@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Reminder</title>
+        <title>Notes</title>
         <link rel="stylesheet" href="../../styles/styles.css" />
         <style>
             body {
@@ -16,7 +16,7 @@
                 max-width: 600px; /* Prevent extreme resizing */
             }
 
-            #reminder {
+            #notes {
                 padding: 10px;
                 word-wrap: break-word;
                 white-space: normal;
@@ -24,7 +24,7 @@
                 opacity: 0;
             }
 
-            .reminder-item {
+            .notes-item {
                 margin: 5px 0;
                 font-weight: 100;
                 line-height: 1.4;
@@ -36,11 +36,11 @@
             }
 
             /* ✅ Alternate Row Colors */
-            .reminder-item:nth-child(odd) {
+            .notes-item:nth-child(odd) {
                 background-color: rgba(28, 29, 35, 1); /* Slightly transparent */
             }
 
-            .reminder-item:nth-child(even) {
+            .notes-item:nth-child(even) {
                 background-color: rgb(38, 40, 48); /* More solid */
             }
 
@@ -62,25 +62,25 @@
         </style>
     </head>
     <body>
-        <div id="reminder" class="dragable"></div>
+        <div id="notes" class="dragable"></div>
         <script>
             document.addEventListener("DOMContentLoaded", async () => {
-                const reminderContainer = document.getElementById("reminder");
+                const notesContainer = document.getElementById("notes");
 
                 // ✅ Fetch the transparency setting on load
                 const settings = await window.electronAPI.getSettings();
-                // updateBackground(settings.reminderTransparent);
+                // updateBackground(settings.notesTransparent);
 
                 // ✅ Listen for setting changes
                 window.electronAPI.onSettingsUpdated((updatedSettings) => {
                     console.log("📩 Received updated settings:", updatedSettings);
-                    // if (updatedSettings.reminderTransparent !== undefined) {
-                    //     updateBackground(updatedSettings.reminderTransparent);
+                    // if (updatedSettings.notesTransparent !== undefined) {
+                    //     updateBackground(updatedSettings.notesTransparent);
                     // }
                 });
 
                 // ✅ Listen for direct updates from settings UI
-                // window.electronAPI.on("update-reminder-transparency", (isTransparent) => {
+                // window.electronAPI.on("update-notes-transparency", (isTransparent) => {
                 //     updateBackground(isTransparent);
                 // });
 
@@ -89,45 +89,45 @@
                 //     console.log(`🎨 Updated background color: ${isTransparent ? "Transparent" : "#1c1d23"}`);
                 // }
 
-                window.electronAPI.onUpdateReminderItems((items) => {
-                    console.log("📩 Received reminder items:", items);
+                window.electronAPI.onUpdateNotesItems((items) => {
+                    console.log("📩 Received Notes items:", items);
 
                     if (!items || items.length === 0) {
-                        console.warn("⚠ No reminder items received!");
+                        console.warn("⚠ No Notes items received!");
                         return;
                     }
 
                     // **Start with Opacity 0 Before Updating Content**
-                    reminderContainer.style.opacity = "0";
+                    notesContainer.style.opacity = "0";
 
-                    reminderContainer.innerHTML = ""; // Clear previous items
+                    notesContainer.innerHTML = ""; // Clear previous items
 
                     items.forEach((item, index) => {
                         if (!item.text.trim()) return;
 
                         const itemElement = document.createElement("div");
-                        itemElement.className = `reminder-item ${item.type}`;
+                        itemElement.className = `notes-item ${item.type}`;
 
                         // ✅ Alternate background effect (Handled in CSS via nth-child)
                         itemElement.textContent = item.text;
 
-                        reminderContainer.appendChild(itemElement);
+                        notesContainer.appendChild(itemElement);
                     });
 
                     // **Resize and Fade In**
                     requestAnimationFrame(() => {
                         requestAnimationFrame(() => {
-                            adjustReminderWindowSize();
-                            reminderContainer.style.opacity = "1"; // Fade-in effect
+                            adjustNotesWindowSize();
+                            notesContainer.style.opacity = "1"; // Fade-in effect
                         });
                     });
                 });
 
-                function adjustReminderWindowSize() {
+                function adjustNotesWindowSize() {
                     setTimeout(() => {
-                        const reminderItems = document.querySelectorAll(".reminder-item");
+                        const notesItems = document.querySelectorAll(".notes-item");
 
-                        if (reminderItems.length === 0) {
+                        if (notesItems.length === 0) {
                             console.warn("⚠ No items found for resizing.");
                             return;
                         }
@@ -135,7 +135,7 @@
                         let maxWidth = 0;
                         let totalHeight = 0;
 
-                        reminderItems.forEach((item) => {
+                        notesItems.forEach((item) => {
                             const rect = item.getBoundingClientRect();
                             maxWidth = Math.max(maxWidth, rect.width);
                             totalHeight += rect.height + 7; // Add extra padding for wrapped text
@@ -147,7 +147,7 @@
                         width = Math.floor(width);
                         height = Math.floor(height);
 
-                        console.log(`✔ Resizing Reminder Window: ${width}x${height}`);
+                        console.log(`✔ Resizing notes Window: ${width}x${height}`);
 
                         if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
                             console.error("❌ Invalid window size detected!", { width, height });
@@ -163,9 +163,9 @@
                 }
 
                 // 🛠️ Force a Resize on Load
-                setTimeout(adjustReminderWindowSize, 50);
+                setTimeout(adjustNotesWindowSize, 50);
 
-                window.electronAPI.sendReminderReady();
+                window.electronAPI.sendNotesReady();
             });
         </script>
     </body>

@@ -15,13 +15,13 @@
                 color: #ffffff;
                 background-color: #1c1d23;
                 padding: 0;
-                scrollbar-width: none;        /* Firefox */
-  -ms-overflow-style: none;     /* Internet Explorer 10+ */
+                scrollbar-width: none; /* Firefox */
+                -ms-overflow-style: none; /* Internet Explorer 10+ */
             }
 
             body::-webkit-scrollbar {
-  display: none;                /* Chrome, Safari and Opera */
-}
+                display: none; /* Chrome, Safari and Opera */
+            }
 
             #clock {
                 margin: 0 auto;
@@ -30,8 +30,8 @@
                 font-size: 18px;
                 font-weight: bolder;
                 color: #f23645;
-                scrollbar-width: none;        /* Firefox */
-  -ms-overflow-style: none;     
+                scrollbar-width: none; /* Firefox */
+                -ms-overflow-style: none;
             }
 
             .clock-container {
@@ -70,6 +70,9 @@
             let bellSound = null;
             let warningSound = null;
             let fiveMinuteWarningPlayed = false;
+            const BASE_WIDTH = 340;
+            const BASE_HEIGHT = 40;
+            const BASE_MARGIN_BOTTOM = -13; // exact starting margin
 
             document.addEventListener("DOMContentLoaded", async () => {
                 console.log("🚀 Waiting for session updates before starting...");
@@ -109,7 +112,31 @@
                 } catch (error) {
                     console.error("❌ Error loading warning sound:", error);
                 }
+
+                // Run on load and resize
+                window.addEventListener("resize", updateFontScale);
+                window.addEventListener("load", updateFontScale);
             });
+
+            function updateFontScale() {
+                const currentWidth = window.innerWidth;
+                const currentHeight = window.innerHeight;
+
+                const scaleX = currentWidth / BASE_WIDTH;
+                const scaleY = currentHeight / BASE_HEIGHT;
+                const scale = Math.min(scaleX, scaleY);
+
+                // Scale font sizes
+                document.body.style.fontSize = `${2 * scale}rem`;
+                document.getElementById("clock").style.fontSize = `${18 * scale}px`;
+                document.getElementById("session-countdown-display").style.fontSize = `${24 * scale}px`;
+
+                // Adjust clock margin-bottom relative to base scale
+                const marginChangeFactor = 14; // sensitivity (increase for bigger changes)
+                const scaleDiff = scale - 1; // how much bigger/smaller than base
+                const adjustedMargin = BASE_MARGIN_BOTTOM - scaleDiff * marginChangeFactor;
+                document.getElementById("clock").style.marginBottom = `${adjustedMargin}px`;
+            }
 
             // Get new york time
             function getNYTime() {

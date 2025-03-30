@@ -1,14 +1,9 @@
 const { BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 
-let reminderWindow = null; // Store reference to the reminder window
-
 function createNotesWindow(taskbarWindow, transparent = true) {
-    if (reminderWindow) {
-        reminderWindow.close(); // Close the existing window if open
-    }
 
-    reminderWindow = new BrowserWindow({
+    window = new BrowserWindow({
         width: 10,
         height: 10,
         transparent, // ✅ Set based on user settings
@@ -24,13 +19,13 @@ function createNotesWindow(taskbarWindow, transparent = true) {
         },
     });
 
-    reminderWindow.loadFile(path.join(__dirname, "../../../renderer/notes/notes.html"));
+    window.loadFile(path.join(__dirname, "../../../renderer/notes/notes.html"));
 
-    // reminderWindow.webContents.openDevTools({ mode: "detach" });
+    // window.webContents.openDevTools({ mode: "detach" });
 
     if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {
         const taskbarBounds = taskbarWindow.getBounds();
-        reminderWindow.setBounds({
+        window.setBounds({
             x: taskbarBounds.x,
             y: taskbarBounds.y + taskbarBounds.height + 10,
             width: 10,
@@ -40,7 +35,7 @@ function createNotesWindow(taskbarWindow, transparent = true) {
         console.warn("Taskbar window is undefined or does not support getBounds. Positioning skipped.");
     }
 
-    return reminderWindow;
+    return window;
 }
 
 module.exports = { createNotesWindow };

@@ -18,7 +18,7 @@
             <div class="tab">
                 <button class="tablinks" onclick="openTab(event, 'general')">General</button>
                 <button class="tablinks" onclick="openTab(event, 'windows-settings')">Windows</button>
-                <button class="tablinks" onclick="openTab(event, 'reminder-settings')">Notes</button>
+                <button class="tablinks" onclick="openTab(event, 'notes-settings')">Notes</button>
                 <button class="tablinks" onclick="openTab(event, 'checklist-settings')">Checklist</button>
                 <button class="tablinks" onclick="openTab(event, 'countdown-settings')">Countdown</button>
                 <button class="tablinks" onclick="openTab(event, 'session-countdowns')">Clock</button>
@@ -59,23 +59,23 @@
                 <div id="gallery-container"></div>
             </div>
 
-            <!-- Reminder Settings -->
-            <div id="reminder-settings" class="tabcontent active">
+            <!-- notes Settings -->
+            <div id="notes-settings" class="tabcontent active">
                 <div class="form-group">
-                    <textarea id="new-reminder-text" placeholder="Reminder text" class="form-input" rows="4"></textarea>
+                    <textarea id="new-notes-text" placeholder="notes text" class="form-input" rows="4"></textarea>
                     <div class="form-row">
-                        <button id="add-reminder-btn" class="form-button">Add Item</button>
-                        <select id="new-reminder-type" class="form-select">
+                        <button id="add-notes-btn" class="form-button">Add Item</button>
+                        <select id="new-notes-type" class="form-select">
                             <option value="critical">Critical</option>
                             <option value="optional">Optional</option>
                             <option value="reminder">Reminder</option>
                         </select>
                     </div>
                 </div>
-                <ul id="reminder-items" class="scrollable-list" style="height: 257px"></ul>
+                <ul id="notes-items" class="scrollable-list" style="height: 257px"></ul>
                 <div class="controls">
                     <!-- <label>
-                        <input type="checkbox" id="reminder-transparent-toggle" />
+                        <input type="checkbox" id="notes-transparent-toggle" />
                         Enable Transparent Background
                     </label> -->
                 </div>

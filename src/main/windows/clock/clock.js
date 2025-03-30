@@ -4,7 +4,7 @@ const { BrowserWindow } = require("electron");
 const path = require("path");
 
 function createClockWindow(taskbarWindow, transparent = true) {
-    const clockWindow = new BrowserWindow({
+    const window = new BrowserWindow({
         width: 405,
         height: 43,
         show: false,
@@ -20,9 +20,9 @@ function createClockWindow(taskbarWindow, transparent = true) {
         },
     });
 
-    clockWindow.loadFile(path.join(__dirname, "../../../renderer/clock/clock.html"));
+    window.loadFile(path.join(__dirname, "../../../renderer/clock/clock.html"));
 
-    // clockWindow.webContents.openDevTools({ mode: "detach" });
+    // window.webContents.openDevTools({ mode: "detach" });
 
     // Dynamically position the clock window relative to the taskbar
     if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {
@@ -30,7 +30,7 @@ function createClockWindow(taskbarWindow, transparent = true) {
         const clockX = taskbarBounds.x + taskbarBounds.width - 220; // Adjust to the right of the taskbar
         const clockY = taskbarBounds.y + taskbarBounds.height + 10; // Position below the taskbar
 
-        clockWindow.setBounds({
+        window.setBounds({
             x: clockX,
             y: clockY,
             width: 340,
@@ -38,7 +38,15 @@ function createClockWindow(taskbarWindow, transparent = true) {
         });
     }
 
-    return clockWindow;
+    // Add listener for Ctrl+R to reload window
+    window.webContents.on("before-input-event", (event, input) => {
+        if (input.key === "r" && input.control) {
+            event.preventDefault(); // Prevent default behavior
+            window.reload(); // Reload the window content
+        }
+    });
+
+    return window;
 }
 
 module.exports = { createClockWindow };

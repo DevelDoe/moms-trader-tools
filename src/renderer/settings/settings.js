@@ -28,17 +28,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         const snippers = await window.electronAPI.getActiveSnippers();
         console.log("✅ Retrieved snippers:", snippers);
 
-        initializeReminderSection(settings.reminderItems || []);
+        initializeNotesSection(settings.notesItems || []);
         initializeChecklistSection(settings.checklist || []);
         initializeCountdownSection(settings || []);
         initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
         initializeCountdownDuration();
         updateSnipperList(snippers);
         initializeGallerySection(settings.galleryImages || []);
-        initializeWindowSection();
+        initializeWindowSection(settings.windows || {});
 
         // Event listeners
-        document.getElementById("add-reminder-btn").addEventListener("click", addReminderItem);
+        document.getElementById("add-notes-btn").addEventListener("click", addNotesItem);
         document.getElementById("add-item-btn").addEventListener("click", addChecklistItem);
         document.getElementById("reset-legacy-checklist-btn").addEventListener("click", function (event) {
             var userConfirmed = confirm("Are you sure you want to reset to the legacy checklist? This action cannot be undone.");
@@ -68,27 +68,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Listen for global settings updates
         window.electronAPI.onSettingsUpdated((updatedSettings) => {
             console.log("Settings updated globally:", updatedSettings);
-            initializeReminderSection(updatedSettings.reminderItems || []);
+            initializeNotesSection(updatedSettings.notesItems || []);
             initializeChecklistSection(updatedSettings.checklist || []);
             initializeSessionCountdowns(updatedSettings.sessionCountdowns || [], updatedSettings.sessionVolume);
         });
 
-        // Reminder Transparency
+        // notes Transparency
 
         // // ✅ Load the saved setting (default to true)
-        // const transparentToggle = document.getElementById("reminder-transparent-toggle");
-        // transparentToggle.checked = settings.reminderTransparent ?? true;
+        // const transparentToggle = document.getElementById("notes-transparent-toggle");
+        // transparentToggle.checked = settings.notesTransparent ?? true;
 
         // // ✅ Listen for changes and save setting
         // transparentToggle.addEventListener("change", () => {
         //     const isTransparent = transparentToggle.checked;
-        //     window.electronAPI.updateSettings({ reminderTransparent: isTransparent });
+        //     window.electronAPI.updateSettings({ notesTransparent: isTransparent });
 
-        //     // ✅ Notify Electron to update the Reminder window
-        //     window.electronAPI.refreshReminderWindow();
+        //     // ✅ Notify Electron to update the notes window
+        //     window.electronAPI.refreshNotesWindow();
 
-        //     // ✅ Send an event to `reminder.html` to update the CSS dynamically
-        //     // window.electronAPI.send("update-reminder-transparency", isTransparent);
+        //     // ✅ Send an event to `notes.html` to update the CSS dynamically
+        //     // window.electronAPI.send("update-notes-transparency", isTransparent);
         // });
 
         // Countdown Transparency
@@ -100,10 +100,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             const countdownIsTransparent = countdownTransparentToggle.checked;
             window.electronAPI.updateSettings({ countdownTransparent: countdownIsTransparent });
 
-            // ✅ Notify Electron to update the Reminder window
+            // ✅ Notify Electron to update the notes window
             window.electronAPI.refreshCountdownWindow();
 
-            // ✅ Send an event to `reminder.html` to update the CSS dynamically
+            // ✅ Send an event to `notes.html` to update the CSS dynamically
             // window.electronAPI.send("update-countdown-transparency", countdownIsTransparent);
         });
 
@@ -121,38 +121,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
-function initializeWindowSection() {
-    // Toggle window state (add/remove the 'active' class to the button)
-    document.getElementById("toggleNotes").addEventListener("click", function () {
-        toggleWindow("Notes");
-    });
-    document.getElementById("toggleGallery").addEventListener("click", function () {
-        toggleWindow("Gallery");
-    });
-    document.getElementById("toggleChecklist").addEventListener("click", function () {
-        toggleWindow("Checklist");
-    });
-    document.getElementById("toggleCountdown").addEventListener("click", function () {
-        toggleWindow("Countdown");
-    });
-    document.getElementById("toggleClock").addEventListener("click", function () {
-        toggleWindow("Clock");
-    });
-    document.getElementById("toggleResumption").addEventListener("click", function () {
-        toggleWindow("Resumption");
-    });
-}
+function initializeWindowSection(savedStates = {}) {
+    const windows = ["Notes", "Gallery", "Checklist", "Countdown", "Clock", "Resumption"];
 
-// Function to toggle window on or off
-function toggleWindow(windowName) {
-    const windowButton = document.getElementById(`toggle${windowName}`);
-    if (windowButton.classList.contains("active")) {
-        windowButton.classList.remove("active"); // Turn off the window
-        window.electronAPI[`toggle${windowName}`](); // Call the corresponding toggle function
-    } else {
-        windowButton.classList.add("active"); // Turn on the window
-        window.electronAPI[`toggle${windowName}`](); // Call the corresponding toggle function
-    }
+    windows.forEach((winName) => {
+        const btn = document.getElementById("toggle" + winName);
+
+        // ✅ Initialize toggle state from saved settings
+        if (savedStates[winName]) {
+            btn.classList.add("active");
+            window.electronAPI.send("toggle-" + winName.toLowerCase()); // 🔄 Open the window
+        }
+
+        btn.addEventListener("click", () => {
+            const isActive = btn.classList.toggle("active");
+
+            // ✅ Actually toggle the window visibility
+            window.electronAPI.send("toggle-" + winName.toLowerCase());
+
+            // ✅ Update settings.windows without replacing it
+            window.electronAPI.updateSettings({
+                windows: {
+                    ...savedStates,
+                    [winName]: isActive,
+                },
+            });
+
+            // ✅ Keep savedStates in sync (so next click doesn't reset others)
+            savedStates[winName] = isActive;
+        });
+    });
 }
 
 let images = []; // Define the images array globally
@@ -358,10 +356,10 @@ function captureScreenRegion(source) {
         .catch((err) => console.error(err));
 }
 
-// Reminder Section
-function initializeReminderSection(items) {
-    const reminderList = document.getElementById("reminder-items");
-    reminderList.innerHTML = "";
+// notes Section
+function initializeNotesSection(items) {
+    const notesList = document.getElementById("notes-items");
+    notesList.innerHTML = "";
 
     items.forEach((item, index) => {
         const listItem = document.createElement("li");
@@ -387,34 +385,35 @@ function initializeReminderSection(items) {
 
         removeButton.addEventListener("click", () => {
             items.splice(index, 1);
-            saveSettings({ reminderItems: items });
+            saveSettings({ notesItems: items });
         });
 
         listItem.appendChild(removeButton);
-        reminderList.appendChild(listItem);
+        notesList.appendChild(listItem);
         initializeCountdownSection;
     });
 }
 
-function addReminderItem() {
-    const textArea = document.getElementById("new-reminder-text");
-    const typeSelect = document.getElementById("new-reminder-type");
+function addNotesItem() {
+    const textArea = document.getElementById("new-notes-text");
+    const typeSelect = document.getElementById("new-notes-type");
     const text = textArea.value.trim();
     const type = typeSelect.value;
 
     if (!text) {
-        alert("Enter reminder text.");
+        alert("Enter notes text.");
         return;
     }
 
     window.electronAPI.getSettings().then((settings) => {
-        const updatedItems = [...(settings.reminderItems || []), { text, type }];
-        saveSettings({ reminderItems: updatedItems });
+        const updatedItems = [...(settings.notesItems || []), { text, type }];
+        saveSettings({ notesItems: updatedItems });
 
         // Clear textarea after adding
         textArea.value = "";
     });
 }
+
 // Checklist Section
 function initializeChecklistSection(items) {
     const checklistContainer = document.getElementById("checklist-items");
