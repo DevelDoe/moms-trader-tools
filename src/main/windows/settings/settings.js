@@ -8,8 +8,8 @@ let settingsWindow;
 function createSettingsWindow(taskbarWindow) {
     if (!settingsWindow) {
         settingsWindow = new BrowserWindow({
-            width: 1280,
-            height: 720,
+            width: 960,
+            height: 540,
             frame: false,
             show: false,
             alwaysOnTop: true,
@@ -33,7 +33,7 @@ function createSettingsWindow(taskbarWindow) {
             }
         });
 
-        // settingsWindow.webContents.openDevTools({ mode: "detach" });
+        settingsWindow.webContents.openDevTools({ mode: "detach" });
 
         // Dynamically position the settings window relative to the taskbar
         if (taskbarWindow && typeof taskbarWindow.getBounds === "function") {

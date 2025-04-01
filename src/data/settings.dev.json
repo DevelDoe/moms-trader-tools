@@ -84,28 +84,8 @@
   ],
   "notesItems": [
     {
-      "text": "MTM: notifications(windows toast), alerts(carddeck sound for updates)",
-      "type": "reminder"
-    },
-    {
-      "text": "MTT: Settings font sieze",
-      "type": "critical"
-    },
-    {
-      "text": "MTT: High Volume in relation to Float?",
-      "type": "critical"
-    },
-    {
       "text": "MTM: Former Runner State",
       "type": "reminder"
-    },
-    {
-      "text": "MTT: add get meta btn for mtp",
-      "type": "optional"
-    },
-    {
-      "text": "MTM: settings for acanner, filter ....",
-      "type": "optional"
     },
     {
       "text": "MTM: open charts by using traderview",
@@ -122,9 +102,25 @@
     {
       "text": "MTT: Notes shoud create new notes every time. not one bid",
       "type": "critical"
+    },
+    {
+      "text": "MTT: Edit notes",
+      "type": "optional"
+    },
+    {
+      "text": "MTT: gallery slideshow draggable and window sizing.",
+      "type": "critical"
+    },
+    {
+      "text": "MTM: remember window positions and size",
+      "type": "critical"
+    },
+    {
+      "text": "MTT: debounce bell",
+      "type": "optional"
     }
   ],
-  "sessionVolume": 0.82,
+  "sessionVolume": 0.93,
   "snippers": [],
   "notesTransparent": false,
   "countdownTransparent": true,
@@ -138,8 +134,8 @@
   "windows": {
     "Gallery": false,
     "Checklist": false,
-    "Notes": true,
-    "Clock": true,
+    "Notes": false,
+    "Clock": false,
     "Resumption": false,
     "Countdown": false
   }

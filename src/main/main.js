@@ -169,6 +169,7 @@ let selectedScreenId = null;
 
 app.on("ready", () => {
     log.log("App is starting...");
+    app.commandLine.appendSwitch("disable-logging");
 
     // Show Splash Screen first, then load the main app
     windows.splash = createSplashWindow(() => {
@@ -1233,7 +1234,7 @@ ipcMain.on("region-selected", async (event, regionBounds) => {
 ipcMain.on("open-metadata-dialog", (event, screenshotPath) => {
     const metadataDialog = new BrowserWindow({
         width: 600,
-        height: 650,
+        height: 770,
         modal: true,
         show: true,
         frame: false,
@@ -1253,10 +1254,17 @@ ipcMain.on("open-metadata-dialog", (event, screenshotPath) => {
 });
 
 ipcMain.handle("saveImageMetadata", async (event, metadata) => {
-    const { name, symbol, tags, screenshotPath } = metadata;
+    const { name, symbol, tags, description, screenshotPath } = metadata; // ⬅ Add description here
 
     // ✅ Write only to central gallery-meta.json
-    const data = { name, symbol, tags, screenshotPath, date: new Date() };
+    const data = {
+        name,
+        symbol,
+        tags,
+        description, // ⬅ And here
+        screenshotPath,
+        date: new Date()
+    };
 
     // Ensure gallery-meta.json exists
     const metaDir = path.dirname(metaPath);
@@ -1286,8 +1294,14 @@ ipcMain.handle("saveImageMetadata", async (event, metadata) => {
         console.error("❌ Failed to write gallery-meta.json:", err);
     }
 
+    // 🔔 Notify all renderers
+    BrowserWindow.getAllWindows().forEach(win => {
+        win.webContents.send("gallery-updated");
+    });
+
     return { success: true };
 });
+
 
 ipcMain.handle("discard-screenshot", async (_, screenshotPath) => {
     try {

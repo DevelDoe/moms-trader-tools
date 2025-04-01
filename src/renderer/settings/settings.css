@@ -308,7 +308,7 @@ body::-webkit-scrollbar {
     color: white;
     text-align: center;
     width: 120px;
-    width: 100%;
+    width: 25%;
 }
 
 .gallery-item img {
@@ -386,4 +386,12 @@ body::-webkit-scrollbar {
 
 .window-toggle.active {
     background-color: rgb(255, 0, 179); /* Light up when active */
+}
+
+/* Gallery  */
+.image-description {
+    font-size: 0.85em;
+    color: #ccc;
+    margin-top: 6px;
+    padding: 0 5px;
 }

@@ -157,14 +157,25 @@ let images = []; // Define the images array globally
 
 // Function to initialize the gallery section
 function initializeGallerySection() {
+    console.log("🚀 initializeGallerySection triggered");
+
+    if (!window._galleryListenerRegistered) {
+        window._galleryListenerRegistered = true;
+
+        window.electronAPI.on("gallery-updated", () => {
+            console.log("🔁 Gallery updated signal received");
+            initializeGallerySection();
+        });
+    }
+
     const galleryContainer = document.getElementById("gallery-container");
     galleryContainer.innerHTML = ""; // Clear any existing images
 
     console.log("Fetching gallery images...");
 
     // Fetch the list of images from the gallery folder
-    window.galleryAPI
-        .getGalleryImages()
+    window.electronAPI
+        .getGalleryMeta()
         .then((galleryImages) => {
             console.log("Gallery images fetched:", galleryImages);
 
@@ -172,21 +183,27 @@ function initializeGallerySection() {
             images = galleryImages;
 
             // Display each image with a delete button
-            galleryImages.forEach((imageSrc, index) => {
+            galleryImages.forEach((meta, index) => {
                 const imageContainer = document.createElement("div");
                 imageContainer.classList.add("gallery-item");
 
                 const imgElement = document.createElement("img");
-                imgElement.src = imageSrc;
+                imgElement.src = `file://${meta.screenshotPath}`; 
                 imgElement.classList.add("gallery-image");
 
-                // Create a delete button for each image
+                const descElement = document.createElement("div");
+                descElement.textContent = meta.description || "(No description)";
+                descElement.classList.add("image-description");
+                imageContainer.appendChild(descElement);
+
                 const deleteButton = document.createElement("button");
                 deleteButton.textContent = "Delete";
                 deleteButton.classList.add("delete-btn");
 
                 deleteButton.addEventListener("click", () => {
-                    deleteImage(index); // Call the delete function with the image index
+                    window.electronAPI.discardScreenshot(meta.screenshotPath).then(() => {
+                        initializeGallerySection();
+                    });
                 });
 
                 imageContainer.appendChild(imgElement);
@@ -197,163 +214,6 @@ function initializeGallerySection() {
         .catch((err) => {
             console.error("Failed to load gallery images:", err);
         });
-
-    // Event listener for image upload input
-    const imageUploadInput = document.getElementById("imageUploadInput");
-    imageUploadInput.addEventListener("change", (event) => {
-        const file = event.target.files[0];
-        console.log("File selected for upload:", file);
-
-        if (file) {
-            uploadImage(file);
-        }
-    });
-
-    // Event listener for region capture button
-    const captureRegionBtn = document.getElementById("captureRegionBtn");
-    captureRegionBtn.addEventListener("click", captureRegion);
-}
-
-// Function to upload image and display it in the gallery
-function uploadImage(file) {
-    console.log("Uploading image...");
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        console.log("Image uploaded:", e.target.result);
-
-        // Upload the image to the gallery
-        window.galleryAPI
-            .uploadImage(file.path)
-            .then((imagePath) => {
-                console.log("Image uploaded and saved to gallery at:", imagePath);
-
-                // After the image is uploaded, fetch all gallery images again
-                fetchGalleryImages();
-            })
-            .catch((err) => {
-                console.error("Error uploading image:", err);
-            });
-    };
-
-    reader.readAsDataURL(file); // Convert image to base64
-
-    // Reset the input field after upload
-    const imageUploadInput = document.getElementById("imageUploadInput");
-    imageUploadInput.value = ""; // Reset the input field after upload
-}
-
-// Function to fetch and display gallery images
-function fetchGalleryImages() {
-    console.log("Fetching gallery images...");
-
-    // Fetch the list of images from the gallery folder
-    window.galleryAPI
-        .getGalleryImages()
-        .then((galleryImages) => {
-            console.log("Gallery images fetched:", galleryImages);
-
-            const galleryContainer = document.getElementById("gallery-container");
-            galleryContainer.innerHTML = ""; // Clear any existing images
-
-            galleryImages.forEach((imageSrc, index) => {
-                const imageContainer = document.createElement("div");
-                imageContainer.classList.add("gallery-item");
-
-                const imgElement = document.createElement("img");
-                imgElement.src = imageSrc;
-                imgElement.classList.add("gallery-image");
-
-                // Create a delete button for each image
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Delete";
-                deleteButton.classList.add("delete-btn");
-
-                deleteButton.addEventListener("click", () => {
-                    deleteImage(index); // Call the delete function with the image index
-                });
-
-                imageContainer.appendChild(imgElement);
-                imageContainer.appendChild(deleteButton);
-                galleryContainer.appendChild(imageContainer);
-            });
-        })
-        .catch((err) => {
-            console.error("Failed to load gallery images:", err);
-        });
-}
-
-// Call the function to fetch and display images when the page loads
-fetchGalleryImages();
-
-// Function to delete image from the gallery
-function deleteImage(index) {
-    console.log(`Deleting image at index: ${index}`);
-
-    const imagePath = images[index];
-
-    // Remove the image from the images array
-    images.splice(index, 1);
-
-    // Remove the image from the gallery folder using galleryAPI
-    window.galleryAPI
-        .deleteImage(imagePath)
-        .then(() => {
-            console.log("Image deleted successfully");
-
-            // Re-render the gallery with the updated images
-            initializeGallerySection();
-        })
-        .catch((err) => {
-            console.error("Failed to delete image:", err);
-        });
-}
-
-// Function to capture a screen region
-async function captureRegion() {
-    const { desktopCapturer, remote } = require("electron");
-    const { screen } = remote;
-
-    // Capture screen as per the user's selected region (you can implement this part for dragging region)
-    desktopCapturer.getSources({ types: ["screen"] }, (error, sources) => {
-        if (error) return console.log(error);
-
-        // Assuming you pick a specific source
-        const screenSource = sources[0]; // Use the first screen source
-
-        // Create the screenshot capture for the selected region (adjust size/region)
-        captureScreenRegion(screenSource);
-    });
-}
-
-// Function to capture the region (just an example, needs adjustments for region selection)
-function captureScreenRegion(source) {
-    const { desktopCapturer, nativeImage } = require("electron");
-
-    // Capturing the region (this is a simplified version, ideally you'd need a way to define the region interactively)
-    desktopCapturer
-        .getUserMedia({ video: { mandatory: { chromeMediaSource: "screen", chromeMediaSourceId: source.id } } })
-        .then((stream) => {
-            const videoElement = document.createElement("video");
-            videoElement.srcObject = stream;
-            videoElement.onloadedmetadata = () => {
-                videoElement.play();
-                const canvas = document.createElement("canvas");
-                const ctx = canvas.getContext("2d");
-
-                // Draw the current frame into the canvas
-                ctx.drawImage(videoElement, 0, 0, videoElement.videoWidth, videoElement.videoHeight);
-
-                // Get the image data from the canvas and store/display it
-                const capturedImage = canvas.toDataURL("image/png");
-                images.push(capturedImage);
-                initializeGallerySection(images); // Refresh the gallery with the new captured image
-
-                // Stop the stream after capturing
-                stream.getTracks().forEach((track) => track.stop());
-            };
-        })
-        .catch((err) => console.error(err));
 }
 
 // notes Section
