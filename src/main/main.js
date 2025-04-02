@@ -1184,7 +1184,7 @@ ipcMain.handle("captureRegion", async () => {
                 preload: path.join(__dirname, "../renderer/common/preload.js"),
                 contextIsolation: true,
             },
-            backgroundColor: "#80000000",
+            backgroundColor: "#00000000",
         });
 
         regionWindow.loadFile(path.join(__dirname, "../renderer/gallery/region-selection.html"));
