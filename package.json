@@ -15,6 +15,7 @@
     "author": "Morgan A Ray",
     "license": "MIT",
     "dependencies": {
+        "@yaireo/tagify": "^4.33.2",
         "chokidar": "^4.0.3",
         "electron-updater": "^6.3.9",
         "ignore": "^7.0.3",

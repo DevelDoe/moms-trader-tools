@@ -133,6 +133,13 @@ function loadSettings() {
     }
 }
 
+// ------------------------------
+// LOCAL SOCKET BRIDGE TO MTM (Pro Feature Layer)
+// ----------------------------
+const { initBridge } = require("../bridge"); // if calling from ./src/main
+log.log("Bridge initialized");
+
+
 function saveSettings() {
     if (!Array.isArray(appSettings.checklist)) appSettings.checklist = [];
     if (!Array.isArray(appSettings.sessionCountdowns)) appSettings.sessionCountdowns = [];
@@ -267,6 +274,9 @@ app.on("ready", () => {
 
         log.log("Snippers restored from settings");
 
+        initBridge({ windows });
+        log.log("Bridge windows loaded");
+
         // ✅ Then show the windows saved as active
         const savedWindowStates = appSettings.windows || {};
 
@@ -288,6 +298,8 @@ app.on("ready", () => {
                 });
             }
         }
+
+        
     });
 });
 
@@ -1120,56 +1132,6 @@ ipcMain.on("toggle-gallery", () => {
     }
 });
 
-// Handle gallery operations
-ipcMain.handle("galleryAPI.getGalleryImages", () => {
-    try {
-        const files = fs.readdirSync(galleryFolderPath);
-        // Filter to only include image files (e.g., .png, .jpg, .jpeg)
-        const imageFiles = files.filter((file) => /\.(png|jpe?g)$/i.test(file));
-        // Return full paths to the images
-        return imageFiles.map((file) => path.join(galleryFolderPath, file));
-    } catch (error) {
-        console.error("Failed to load gallery images:", error);
-        return [];
-    }
-});
-
-ipcMain.handle("galleryAPI.uploadImage", (event, filePath) => {
-    try {
-        const fileName = `image-${Date.now()}.png`; // Create a unique filename based on timestamp
-        const destinationPath = path.join(galleryFolderPath, fileName);
-
-        // Copy the uploaded file to the gallery folder
-        fs.copyFileSync(filePath, destinationPath);
-
-        // Return the path of the saved image
-        return destinationPath;
-    } catch (error) {
-        console.error("Error uploading image:", error);
-        throw new Error("Failed to upload image");
-    }
-});
-
-ipcMain.handle("galleryAPI.deleteImage", (event, filePath) => {
-    try {
-        if (!filePath) {
-            throw new Error("No file path provided");
-        }
-
-        // Log the file path for debugging
-        console.log("Deleting image at path:", filePath);
-
-        // Delete the image file
-        fs.unlinkSync(filePath);
-        console.log(`Image deleted successfully: ${filePath}`);
-
-        return { success: true };
-    } catch (error) {
-        console.error("Failed to delete image:", error);
-        return { success: false, error: error.message };
-    }
-});
-
 ipcMain.handle("captureRegion", async () => {
     return new Promise((resolve) => {
         regionCaptureCallback = resolve;
@@ -1201,7 +1163,7 @@ ipcMain.handle("captureRegion", async () => {
 });
 
 // Handle region-selected
-ipcMain.on("region-selected", async (event, regionBounds) => {
+ipcMain.on("gallery-region-selected", async (event, regionBounds) => {
     const regionWindow = global._regionWindow;
     if (regionWindow) regionWindow.close();
 
@@ -1233,8 +1195,8 @@ ipcMain.on("region-selected", async (event, regionBounds) => {
 
 ipcMain.on("open-metadata-dialog", (event, screenshotPath) => {
     const metadataDialog = new BrowserWindow({
-        width: 600,
-        height: 770,
+        width: 406,
+        height: 728,
         modal: true,
         show: true,
         frame: false,
@@ -1302,7 +1264,6 @@ ipcMain.handle("saveImageMetadata", async (event, metadata) => {
     return { success: true };
 });
 
-
 ipcMain.handle("discard-screenshot", async (_, screenshotPath) => {
     try {
         const jsonPath = screenshotPath.replace(".png", ".json");
@@ -1325,7 +1286,7 @@ ipcMain.handle("discard-screenshot", async (_, screenshotPath) => {
     }
 });
 
-ipcMain.handle("galleryAPI.getGalleryMeta", async () => {
+ipcMain.handle("getGalleryMeta", async () => {
     try {
         if (!fs.existsSync(metaPath)) return [];
         const raw = fs.readFileSync(metaPath, "utf-8");

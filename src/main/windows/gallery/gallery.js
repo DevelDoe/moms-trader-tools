@@ -26,7 +26,7 @@ function createGalleryWindow(isDevelopment) {
 
     window.loadFile(path.join(__dirname, "../../../renderer/gallery/gallery.html"));
 
-    // if (isDevelopment) window.webContents.openDevTools({ mode: "detach" });
+    if (isDevelopment) window.webContents.openDevTools({ mode: "detach" });
 
     // Add listener for Ctrl+R to reload window
     window.webContents.on("before-input-event", (event, input) => {

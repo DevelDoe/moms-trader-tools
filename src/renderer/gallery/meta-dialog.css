@@ -1,0 +1,179 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #1c1d23;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+}
+::-webkit-scrollbar {
+    display: none;
+  }
+input,
+button {
+    padding: 12px;
+    margin: 10px;
+    font-size: 16px;
+    width: 85%;
+    max-width: 350px;
+    border-radius: 5px;
+    border: none;
+}
+input {
+    background: rgb(30, 35, 45);
+    color: white;
+}
+button {
+    background-color: #089981;
+    color: white;
+    cursor: pointer;
+}
+#preview-image {
+    max-height: 300px;
+}
+textarea {
+    padding: 12px;
+    margin: 10px;
+    font-size: 16px;
+    width: 85%;
+    max-width: 350px;
+    height: 100px;
+    resize: vertical;
+    border-radius: 5px;
+    border: none;
+    background: rgb(30, 35, 45);
+    color: white;
+    font-family: Arial, sans-serif;
+    line-height: 1.4;
+    box-sizing: border-box;
+}
+.tagify {
+    background: rgb(30, 35, 45);
+    border-radius: 5px;
+    border: 1px solid #2c2f36;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    width: 85%;
+    max-width: 350px;
+    margin: 10px;
+    --placeholder-color: rgba(255, 255, 255, 0.4);
+    --placeholder-color-focus: rgba(255, 255, 255, 0.25);
+}
+
+.tagify__input {
+    color: white !important;
+    font-size: 16px;
+}
+
+.tagify__tag {
+    background-color: #089981;
+    color: white;
+    border-radius: 3px;
+    padding: 3px 6px;
+    font-size: 14px;
+}
+
+.tagify__tag__removeBtn {
+    color: white;
+    opacity: 0.6;
+}
+
+.tagify__tag__removeBtn:hover {
+    opacity: 1;
+}
+.tagify__input::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important; /* or use #aaa for a softer gray */
+}
+
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+}
+
+input,
+textarea,
+.tagify {
+    padding: 12px;
+    margin: 0;
+    width: 100%;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    background: rgb(30, 35, 45);
+    color: white;
+    box-sizing: border-box;
+    transition: border 0.2s ease;
+    margin: 5px;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border: 1px solid #089981;
+}
+
+textarea {
+    height: 90px;
+    resize: vertical;
+}
+
+.tagify {
+    border: 1px solid #2c2f36;
+    padding: 8px;
+}
+
+.tagify__tag {
+    background-color: #089981;
+    color: white;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.tagify__input {
+    color: white !important;
+}
+
+.tagify__input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#save-btn {
+    background-color: #089981;
+    color: white;
+}
+
+#cancel-btn {
+    background-color: transparent;
+    border: 1px solid #089981;
+    color: #089981;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+#preview-image {
+    max-width: 100%;
+    border: 1px solid white;
+    margin-bottom: 20px;
+    border-radius: 6px;
+}

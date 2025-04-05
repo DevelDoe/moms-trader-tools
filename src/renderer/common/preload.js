@@ -74,7 +74,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     openMetadataDialog: (screenshotPath) => ipcRenderer.send("open-metadata-dialog", screenshotPath),
     saveImageMetadata: (metadata) => ipcRenderer.invoke("saveImageMetadata", metadata),
     discardScreenshot: (path) => ipcRenderer.invoke("discard-screenshot", path),
-    getGalleryMeta: () => ipcRenderer.invoke('galleryAPI.getGalleryMeta'),
+    getGalleryMeta: () => ipcRenderer.invoke('getGalleryMeta'),
+    sendSelection: (bounds) => ipcRenderer.send("gallery-region-selected", bounds),
 
     // ❌ Exit and Restart
     exitApp: () => ipcRenderer.send("exit-app"),
@@ -101,7 +102,7 @@ contextBridge.exposeInMainWorld("snipperAPI", {
 });
 
 // Gallery  API
-contextBridge.exposeInMainWorld("galleryAPI", {
-    uploadImage: (filePath) => ipcRenderer.invoke("galleryAPI.uploadImage", filePath),
-    deleteImage: (filePath) => ipcRenderer.invoke("galleryAPI.deleteImage", filePath),
-});
+// contextBridge.exposeInMainWorld("galleryAPI", {
+//     uploadImage: (filePath) => ipcRenderer.invoke("galleryAPI.uploadImage", filePath),
+//     deleteImage: (filePath) => ipcRenderer.invoke("galleryAPI.deleteImage", filePath),
+// });

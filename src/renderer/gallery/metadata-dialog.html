@@ -3,64 +3,20 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
         <title>Enter Metadata</title>
+        <link rel="stylesheet" href="./libs/tagify/tagify.css" />
+        <link rel="stylesheet" href="./meta-dialog.css"> 
         <style>
-            body {
-                font-family: Arial, sans-serif;
-                background: #1c1d23;
-                color: white;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                text-align: center;
-            }
-            input,
-            button {
-                padding: 12px;
-                margin: 10px;
-                font-size: 16px;
-                width: 85%;
-                max-width: 350px;
-                border-radius: 5px;
-                border: none;
-            }
-            input {
-                background: rgb(30, 35, 45);
-                color: white;
-            }
-            button {
-                background-color: #089981;
-                color: white;
-                cursor: pointer;
-            }
-            #preview-image {
-                max-height: 300px;
-            }
-            textarea {
-                padding: 12px;
-                margin: 10px;
-                font-size: 16px;
-                width: 85%;
-                max-width: 350px;
-                height: 100px;
-                resize: vertical;
-                border-radius: 5px;
-                border: none;
-                background: rgb(30, 35, 45);
-                color: white;
-                font-family: Arial, sans-serif;
-                line-height: 1.4;
-                box-sizing: border-box;
-            }
+           
+
         </style>
     </head>
         <img id="preview-image" src="" style="max-width: 90%; border: 1px solid white; margin: 10px" />
         <input type="text" id="name" placeholder="Enter Name" />
         <textarea id="description" placeholder="Enter Description (what happened?)"></textarea>
         <input type="text" id="symbol" placeholder="Enter Symbol" />
-        <input type="text" id="tags" placeholder="Enter Tags (comma separated)" />
+        <input type="text" id="tags" placeholder="Tags (comma separated)" />
         <button id="save-btn">Save</button>
         <button id="cancel-btn">Cancel</button>
 
@@ -71,34 +27,49 @@
                 const symbolInput = document.getElementById("symbol");
                 const tagsInput = document.getElementById("tags");
                 const saveBtn = document.getElementById("save-btn");
+                const cancelBtn = document.getElementById("cancel-btn");
                 const preview = document.getElementById("preview-image");
-
+            
                 let screenshotPath = "";
-
+            
+                const tagify = new Tagify(tagsInput, {
+                    enforceWhitelist: false,
+                    dropdown: {
+                        enabled: 1,
+                        fuzzySearch: true,
+                        position: "text",
+                        highlightFirst: true,
+                    },
+                });
+            
+                // ✅ Now it's safe to update the tag list
+                window.electronAPI.getGalleryMeta().then((meta) => {
+                    const allTags = meta.flatMap((entry) =>
+                        entry.tags?.split(",").map((tag) => tag.trim()) || []
+                    );
+            
+                    const uniqueTags = [...new Set(allTags.filter(Boolean))].sort();
+                    tagify.settings.whitelist = uniqueTags;
+                });
+            
                 window.electronAPI.on("screenshotPath", (path) => {
                     screenshotPath = path;
                     preview.src = `file://${screenshotPath}`;
                 });
-
+            
                 saveBtn.addEventListener("click", () => {
                     const name = nameInput.value.trim();
-                    const symbol = symbolInput.value.trim();
-                    const tags = tagsInput.value.trim();
+                    const symbol = symbolInput.value.trim().toUpperCase();
+                    const tags = tagify.value.map(tag => tag.value).join(",");
                     const description = descInput.value.trim();
-
+            
                     if (!name || !symbol || !tags || !description) {
                         alert("Please fill in all fields.");
                         return;
                     }
-
-                    const metadata = {
-                        name,
-                        symbol,
-                        tags,
-                        description,
-                        screenshotPath,
-                    };
-
+            
+                    const metadata = { name, symbol, tags, description, screenshotPath };
+            
                     window.electronAPI.saveImageMetadata(metadata).then((result) => {
                         if (result.success) {
                             window.close();
@@ -107,18 +78,19 @@
                         }
                     });
                 });
-                const cancelBtn = document.getElementById("cancel-btn");
-
+            
                 cancelBtn.addEventListener("click", async () => {
                     if (!screenshotPath) return;
-
+            
                     const confirmCancel = confirm("Discard this screenshot?");
                     if (!confirmCancel) return;
-
+            
                     await window.electronAPI.discardScreenshot(screenshotPath);
                     window.close();
                 });
             });
-        </script>
+            </script>
+            
+            <script src="./libs/tagify/tagify.js"></script>
     </body>
 </html>

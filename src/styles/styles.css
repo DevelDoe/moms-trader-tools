@@ -43,3 +43,8 @@ img {
     outline: none !important;
     box-shadow: none !important;
 }
+
+/* Fix box-sizing everywhere */
+*, *::before, *::after {
+    box-sizing: border-box;
+  }

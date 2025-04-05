@@ -3,22 +3,33 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Gallery</title>
+        <title>The Looking Glass</title>
         <link rel="stylesheet" href="../../styles/styles.css" />
         <link rel="stylesheet" href="./gallery.css" />
     </head>
-    <body class="dragable">
-        <div class="slideshow-container dragable">
-            <div class="image-display dragable">
-                <img id="slideshowImage" src="" alt="Slideshow Image"  class="dragable"/>
+    <body>
+        <div id="galleryContainer">
+            <div class="drag-area"></div>
+
+            <div id="filterDrawer" class="filter-drawer">
+                <label>
+                    Vision Search:
+                    <input type="text" id="filterSmartSearch" placeholder="Search name, tags, description..." />
+                </label>
+
+                <div class="filter-actions">
+                    <span id="resultCount"></span>
+                    <div id="activeFilters" class="active-filters"></div>
+                </div>
             </div>
-        
-            <div class="slideshow-nav nodrag">
-                <button id="prevBtn" class="nodrag">Prev</button>
-                <button id="nextBtn" class="nodrag">Next</button>
+
+            <div class="image-wrapper">
+                <img id="slideshowImage" />
+                <button id="prevBtn" class="nav-btn left-btn">←</button>
+                <button id="nextBtn" class="nav-btn right-btn">→</button>
+                <button id="filterToggleBtn" class="filter-toggle">☰</button>
             </div>
         </div>
-        
 
         <script src="./gallery.js"></script>
     </body>
