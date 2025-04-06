@@ -70,6 +70,7 @@
             let bellSound = null;
             let warningSound = null;
             let fiveMinuteWarningPlayed = false;
+            let bellCooldown = false;
             const BASE_WIDTH = 340;
             const BASE_HEIGHT = 40;
             const BASE_MARGIN_BOTTOM = -13; // exact starting margin
@@ -244,9 +245,13 @@
 
                 document.getElementById("session-title").textContent = session.title.toUpperCase();
 
-                if (bellSound) {
+                if (bellSound && !bellCooldown) {
+                    bellCooldown = true;
                     bellSound.currentTime = 0;
                     bellSound.play().catch((error) => console.warn("🔔 Bell sound playback failed:", error));
+                    setTimeout(() => {
+                        bellCooldown = false;
+                    }, 1000); // 1 second debounce window
                 }
 
                 const [endH, endM] = session.end.split(":").map(Number);
