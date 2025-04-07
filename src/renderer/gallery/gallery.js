@@ -147,8 +147,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function updateImage() {
     const slideshowImage = document.getElementById("slideshowImage");
+    const metaTitle = document.getElementById("metaTitle");
+    const metaSymbol = document.getElementById("metaSymbol");
+    const metaDescription = document.getElementById("metaDescription");
+
     if (!filteredGallery.length) return;
-    slideshowImage.src = filteredGallery[currentIndex].screenshotPath;
+
+    const current = filteredGallery[currentIndex];
+    slideshowImage.src = current.screenshotPath;
+
+    metaTitle.textContent = current.name || "(No title)";
+    metaSymbol.textContent = current.symbol ? `[${current.symbol}]` : "";
+    metaDescription.textContent = current.description || "";
 }
 
 function applyFilters(meta, filters) {
