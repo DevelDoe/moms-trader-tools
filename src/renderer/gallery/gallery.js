@@ -149,18 +149,26 @@ function updateImage() {
     const slideshowImage = document.getElementById("slideshowImage");
     const metaTitle = document.getElementById("metaTitle");
     const metaSymbol = document.getElementById("metaSymbol");
-    // const metaDescription = document.getElementById("metaDescription");
 
     if (!filteredGallery.length) return;
 
     const current = filteredGallery[currentIndex];
-    slideshowImage.src = current.screenshotPath;
 
-    metaTitle.textContent = current.name || "(No title)";
-    metaSymbol.textContent = current.symbol ? `[${current.symbol}]` : "";
-    // metaDescription.textContent = current.description || "";
+    // Fade out
+    slideshowImage.style.opacity = 0;
+
+    // After fade-out, change the image source and fade in
+    setTimeout(() => {
+        slideshowImage.src = current.screenshotPath;
+        metaTitle.textContent = current.name || "(No title)";
+        metaSymbol.textContent = current.symbol ? `[${current.symbol}]` : "";
+
+        // Fade in
+        slideshowImage.onload = () => {
+            slideshowImage.style.opacity = 1;
+        };
+    }, 200); // Match half of the fade transition time
 }
-
 function applyFilters(meta, filters) {
     const query = filters.smartSearch?.toLowerCase().trim();
 
