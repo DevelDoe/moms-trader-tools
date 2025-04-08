@@ -46,7 +46,7 @@ body {
     object-fit: contain;
     pointer-events: none;
     opacity: 1;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.6s ease;
 }
 
 /* === Hidden Controls Show on Hover === */

@@ -167,7 +167,7 @@ function updateImage() {
         slideshowImage.onload = () => {
             slideshowImage.style.opacity = 1;
         };
-    }, 200); // Match half of the fade transition time
+    }, 300); // Match half of the fade transition time
 }
 function applyFilters(meta, filters) {
     const query = filters.smartSearch?.toLowerCase().trim();
