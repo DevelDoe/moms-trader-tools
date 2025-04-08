@@ -207,7 +207,7 @@ app.on("ready", () => {
         windows.countdown = createCountdownWindow(windows.taskbar);
         windows.clock = createClockWindow(windows.taskbar);
         windows.resumption = createResumptionWindow(windows.taskbar);
-        windows.gallery = createGalleryWindow(windows.taskbar);
+        windows.gallery = createGalleryWindow(isDevelopment);
 
         // windows.notes.webContents.once("dom-ready", () => {
         //     windows.notes.webContents.send("update-notes-text", appSettings.text);

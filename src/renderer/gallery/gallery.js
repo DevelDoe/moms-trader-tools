@@ -149,7 +149,7 @@ function updateImage() {
     const slideshowImage = document.getElementById("slideshowImage");
     const metaTitle = document.getElementById("metaTitle");
     const metaSymbol = document.getElementById("metaSymbol");
-    const metaDescription = document.getElementById("metaDescription");
+    // const metaDescription = document.getElementById("metaDescription");
 
     if (!filteredGallery.length) return;
 
@@ -158,7 +158,7 @@ function updateImage() {
 
     metaTitle.textContent = current.name || "(No title)";
     metaSymbol.textContent = current.symbol ? `[${current.symbol}]` : "";
-    metaDescription.textContent = current.description || "";
+    // metaDescription.textContent = current.description || "";
 }
 
 function applyFilters(meta, filters) {

@@ -130,13 +130,13 @@
       "end": 60
     }
   ],
-  "enableTickSound": true,
+  "enableTickSound": false,
   "windows": {
     "Gallery": false,
     "Checklist": false,
     "Notes": false,
-    "Clock": false,
+    "Clock": true,
     "Resumption": false,
-    "Countdown": false
+    "Countdown": true
   }
 }
