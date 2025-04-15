@@ -159,7 +159,7 @@ function updateImage() {
     setTimeout(() => {
         slideshowImage.src = current.screenshotPath;
         metaTitle.textContent = current.name || "(No title)";
-        metaSymbol.textContent = current.symbol ? `${current.symbol} ` : "";
+        metaSymbol.textContent = current.symbol ? `${current.symbol}, ` : "";
 
         // Fade in
         slideshowImage.onload = () => {
