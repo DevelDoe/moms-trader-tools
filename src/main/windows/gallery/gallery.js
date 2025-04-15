@@ -3,7 +3,7 @@
 const { BrowserWindow } = require("electron");
 const path = require("path");
 
-function createGalleryWindow(isDevelopment) {
+function createGalleryWindow(isDevelopment = true) {
     const window = new BrowserWindow({
         width: 1920,
         height: 1080,
@@ -26,7 +26,7 @@ function createGalleryWindow(isDevelopment) {
 
     window.loadFile(path.join(__dirname, "../../../renderer/gallery/gallery.html"));
 
-    window.webContents.openDevTools({ mode: "detach" });
+    if (isDevelopment) window.webContents.openDevTools();
 
     // Add listener for Ctrl+R to reload window
     window.webContents.on("before-input-event", (event, input) => {
@@ -35,7 +35,6 @@ function createGalleryWindow(isDevelopment) {
             window.reload(); // Reload the window content
         }
     });
-
 
     return window; // ✅ Return the window instance
 }

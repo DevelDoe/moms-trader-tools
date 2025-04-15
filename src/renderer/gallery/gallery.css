@@ -7,7 +7,6 @@ body {
     background-color: #1c1d23; /* Dark mode background */
     overflow: hidden;
     font-family: sans-serif;
-    padding-bottom: 20px;
 }
 
 *,
@@ -22,6 +21,25 @@ body {
     position: relative;
 }
 
+#header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+#header {
+    background-color: rgba(0, 0, 0, 0);
+    padding: 20px;
+    font-size: 1rem;
+    color: antiquewhite;
+    font-family: "Press Start 2P", monospace;
+    opacity: 0.9;
+}
 .drag-area {
     height: 30px;
     -webkit-app-region: drag;
