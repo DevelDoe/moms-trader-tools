@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function updateImage() {
     const slideshowImage = document.getElementById("slideshowImage");
-    const metaTitle = document.getElementById("metaTitle");
+    // const metaTitle = document.getElementById("metaTitle");
     const metaSymbol = document.getElementById("metaSymbol");
 
     if (!filteredGallery.length) return;
@@ -158,8 +158,8 @@ function updateImage() {
     // After fade-out, change the image source and fade in
     setTimeout(() => {
         slideshowImage.src = current.screenshotPath;
-        metaTitle.textContent = current.name || "(No title)";
-        metaSymbol.textContent = current.symbol ? `${current.symbol}, ` : "";
+        // metaTitle.textContent = current.name || "(No title)";
+        metaSymbol.textContent = current.symbol ? `(${current.symbol})` : "";
 
         // Fade in
         slideshowImage.onload = () => {
