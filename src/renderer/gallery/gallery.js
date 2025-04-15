@@ -173,9 +173,10 @@ function applyFilters(meta, filters) {
     return meta.filter((item) => {
         // If smart search is active, override everything else
         if (query) {
-            return (
-                item.name?.toLowerCase().includes(query) || item.description?.toLowerCase().includes(query) || item.tags?.toLowerCase().includes(query) || item.symbol?.toLowerCase().includes(query)
-            );
+            return (() => {
+                const regex = new RegExp(`\\b${query}\\b`, "i");
+                return regex.test(item.name || "") || regex.test(item.description || "") || regex.test(item.tags || "") || regex.test(item.symbol || "");
+            })();
         }
 
         // Otherwise, use regular filters

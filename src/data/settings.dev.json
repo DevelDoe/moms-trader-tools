@@ -132,7 +132,7 @@
   ],
   "enableTickSound": false,
   "windows": {
-    "Gallery": true,
+    "Gallery": false,
     "Checklist": false,
     "Notes": false,
     "Clock": true,
