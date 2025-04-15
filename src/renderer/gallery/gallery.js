@@ -12,11 +12,9 @@ let filterKeywordsValue = "";
 
 let isHovered = false;
 
-
 document.addEventListener("DOMContentLoaded", async () => {
     let autoAdvanceInterval;
     const AUTO_ADVANCE_DELAY = 5000; // 5 seconds per slide
-
 
     document.addEventListener("mouseenter", () => {
         isHovered = true;
@@ -183,8 +181,12 @@ function applyFilters(meta, filters) {
         // Otherwise, use regular filters
         const matchSymbol = !filters.symbol || item.symbol?.toUpperCase() === filters.symbol.toUpperCase();
         const matchTags = !filters.tags.length || filters.tags.some((tag) => item.tags?.toLowerCase().includes(tag.toLowerCase()));
-        const matchDesc = !filters.keywords.length || filters.keywords.some((keyword) => item.description?.toLowerCase().includes(keyword.toLowerCase()));
-
+        const matchDesc =
+            !filters.keywords.length ||
+            filters.keywords.some((keyword) => {
+                const regex = new RegExp(`\\b${keyword}\\b`, "i");
+                return regex.test(item.description || "");
+            });
         return matchSymbol && matchTags && matchDesc;
     });
 }
