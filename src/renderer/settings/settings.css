@@ -1,6 +1,4 @@
-body {
-    background-color: rgba(28, 29, 35, 1);
-}
+
 body::-webkit-scrollbar {
     display: none;
 }
@@ -126,7 +124,6 @@ body::-webkit-scrollbar {
     max-width: 600px;
     margin: 0 auto;
     padding: 1rem;
-    background-color: #1c1d23;
     border-radius: 8px;
     color: #fff;
 }
@@ -246,7 +243,6 @@ body::-webkit-scrollbar {
     max-width: 600px;
     margin: 0 auto;
     padding: 1.5rem;
-    background-color: #1c1d23;
     border-radius: 8px;
     color: #fff;
 }

@@ -40,12 +40,25 @@
             <!-- General Settings -->
             <div id="general" class="tabcontent">
                 <section id="audio">
-                    <h2>Adudio</h2>
+                    <h2>Audio</h2>
                     <!-- <label for="volume-slider">🔊 Countdown Volume:</label>
                     <input id="volume-slider" type="range" min="0" max="1" step="0.01" value="0.5" /> -->
                     <div id="clock-bell-volume">
-                        <label for="session-volume-slider">🔊 Session Bell Volume:</label>
-                        <input id="session-volume-slider" type="range" min="0" max="1" step="0.01" value="0" />
+                        <label for="session-volume-slider">🔔 Session Bell Volume:</label>
+                        <input id="session-volume-slider" type="range" min="0" max="1" step="0.01" value="0.8" />
+                        <label style="margin-left: 10px;">
+                            <input id="mute-session-bell" type="checkbox" />
+                            Mute
+                        </label>
+                    </div>
+                    
+                    <div id="clock-warning-volume" style="margin-top: 10px;">
+                        <label for="warning-volume-slider">⏰ 5-Minute Warning Volume:</label>
+                        <input id="warning-volume-slider" type="range" min="0" max="1" step="0.01" value="0.8" />
+                        <label style="margin-left: 10px;">
+                            <input id="mute-warning" type="checkbox" />
+                            Mute
+                        </label>
                     </div>
                 </section>
             </div>

@@ -4,7 +4,6 @@ body {
     padding: 0;
     height: 100%;
     width: 100%;
-    background-color: #1c1d23; /* Dark mode background */
     overflow: hidden;
     font-family: sans-serif;
 }

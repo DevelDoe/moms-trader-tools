@@ -13,7 +13,6 @@
                 margin: 0 auto;
                 font-size: 2rem;
                 color: #ffffff;
-                background-color: #1c1d23;
                 padding: 0;
                 scrollbar-width: none; /* Firefox */
                 -ms-overflow-style: none; /* Internet Explorer 10+ */
@@ -75,6 +74,9 @@
             const BASE_HEIGHT = 40;
             const BASE_MARGIN_BOTTOM = -13; // exact starting margin
 
+            let muteSessionBell = false;
+            let muteSessionWarning = false;
+
             document.addEventListener("DOMContentLoaded", async () => {
                 console.log("🚀 Waiting for session updates before starting...");
 
@@ -93,26 +95,45 @@
                     checkActiveSession(getNYTime());
                 });
 
-                // ✅ Load sounds only once on page load
                 try {
                     const bellSoundPath = await window.electronAPI.getBellSoundPath();
                     bellSound = new Audio(bellSoundPath);
                     bellSound.volume = 0;
+
                     window.electronAPI.onSessionVolumeUpdate((volume) => {
-                        bellSound.volume = volume;
+                        if (!muteSessionBell) {
+                            bellSound.volume = volume;
+                        }
                     });
                 } catch (error) {
                     console.error("❌ Error loading bell sound:", error);
                 }
 
                 try {
-                    // TODO update this with a volume bar
                     const warningSoundPath = await window.electronAPI.get5minSoundPath();
                     warningSound = new Audio(warningSoundPath);
                     warningSound.volume = 0.8;
+
+                    window.electronAPI.on("session-warning-volume-updated", (vol) => {
+                        if (!muteSessionWarning) {
+                            warningSound.volume = vol;
+                        }
+                    });
                 } catch (error) {
                     console.error("❌ Error loading warning sound:", error);
                 }
+
+                // Mute support
+                window.electronAPI.on("session-mute-updated", ({ bell, warning }) => {
+                    if (typeof bell === "boolean") {
+                        muteSessionBell = bell;
+                        bellSound.volume = bell ? 0 : bellSound.volume;
+                    }
+                    if (typeof warning === "boolean") {
+                        muteSessionWarning = warning;
+                        warningSound.volume = warning ? 0 : warningSound.volume;
+                    }
+                });
 
                 // Run on load and resize
                 window.addEventListener("resize", updateFontScale);
@@ -222,9 +243,53 @@
                     console.log(`🔥 checkActiveSession: New priority session: "${prioritySession.title}"`);
                     activateSession(prioritySession);
                 } else {
-                    console.log("🚫 checkActiveSession: No active session found, clearing...");
-                    clearActiveSession();
+                    console.log("🚫 checkActiveSession: No active session found, checking next upcoming session...");
+
+                    // 🕰️ Find next upcoming session
+                    const upcoming = sessionCountdowns
+                        .map((session) => {
+                            const [startH, startM] = session.start.split(":").map(Number);
+                            const start = new Date(now);
+                            start.setHours(startH, startM, 0, 0);
+                            return { ...session, start };
+                        })
+                        .filter(({ start }) => start > now)
+                        .sort((a, b) => a.start - b.start)[0]; // get soonest
+
+                    if (upcoming) {
+                        updateNextSessionCountdown(upcoming);
+                    } else {
+                        clearActiveSession(); // nothing active or upcoming
+                    }
                 }
+            }
+
+            let nextSessionInterval = null;
+
+            function updateNextSessionCountdown(upcoming) {
+                console.log(`🕰️ Next session found: "${upcoming.title}" at ${upcoming.start.toLocaleTimeString()}`);
+
+                if (activeInterval) clearInterval(activeInterval);
+                if (nextSessionInterval) clearInterval(nextSessionInterval);
+
+                document.getElementById("session-title").textContent = `Next Session`;
+
+                nextSessionInterval = setInterval(() => {
+                    const now = getNYTime();
+                    const diff = upcoming.start - now;
+
+                    if (diff <= 0) {
+                        clearInterval(nextSessionInterval);
+                        nextSessionInterval = null;
+                        checkActiveSession(now); // trigger re-check to activate session
+                        return;
+                    }
+
+                    const h = Math.floor(diff / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    document.getElementById("session-timer").textContent = `${h ? h + "h " : ""}${m ? m + "m " : ""}${s}s`;
+                }, 1000);
             }
 
             // Activate a new session
@@ -245,13 +310,13 @@
 
                 document.getElementById("session-title").textContent = session.title.toUpperCase();
 
-                if (bellSound && !bellCooldown) {
+                if (bellSound && !bellCooldown && !muteSessionBell) {
                     bellCooldown = true;
                     bellSound.currentTime = 0;
                     bellSound.play().catch((error) => console.warn("🔔 Bell sound playback failed:", error));
                     setTimeout(() => {
                         bellCooldown = false;
-                    }, 1000); // 1 second debounce window
+                    }, 1000);
                 }
 
                 const [endH, endM] = session.end.split(":").map(Number);
@@ -288,7 +353,7 @@
 
                 if (h === 0 && m === 5 && s === 0 && !fiveMinuteWarningPlayed) {
                     fiveMinuteWarningPlayed = true;
-                    if (warningSound) {
+                    if (warningSound && !muteSessionWarning) {
                         warningSound.currentTime = 0;
                         warningSound.play().catch((error) => console.warn("⚠️ 5-minute warning sound playback failed:", error));
                     }
@@ -319,6 +384,11 @@
                 if (activeInterval) {
                     clearInterval(activeInterval);
                     activeInterval = null;
+                }
+
+                if (nextSessionInterval) {
+                    clearInterval(nextSessionInterval);
+                    nextSessionInterval = null;
                 }
 
                 if (activeSessionStack.length > 0) {

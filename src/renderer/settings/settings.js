@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         initializeChecklistSection(settings.checklist || []);
         initializeCountdownSection(settings || []);
         initializeSessionCountdowns(settings.sessionCountdowns || [], settings.sessionVolume);
+        initializeSessionAudio(settings);
         initializeCountdownDuration();
         updateSnipperList(snippers);
         initializeGallerySection(settings.galleryImages || []);
@@ -466,6 +467,55 @@ function initializeSessionCountdowns(sessions, sessionVolume) {
         }
     });
 }
+
+function initializeSessionAudio(settings) {
+    // 🔊 Session Bell Volume
+    const bellSlider = document.getElementById("session-volume-slider");
+    const bellMute = document.getElementById("mute-session-bell");
+
+    bellSlider.value = settings.sessionVolume ?? 0.8;
+    bellMute.checked = settings.muteSessionBell ?? false;
+
+    let bellTimeout;
+    bellSlider.addEventListener("input", () => {
+        clearTimeout(bellTimeout);
+        bellTimeout = setTimeout(() => {
+            const vol = parseFloat(bellSlider.value);
+            window.electronAPI.setSessionVolume(vol);
+            saveSettings({ sessionVolume: vol });
+        }, 300);
+    });
+
+    bellMute.addEventListener("change", () => {
+        const muted = bellMute.checked;
+        saveSettings({ muteSessionBell: muted });
+        window.electronAPI.send("session-mute-updated", { bell: muted });
+    });
+
+    // ⏰ 5-Minute Warning Volume
+    const warningSlider = document.getElementById("warning-volume-slider");
+    const warningMute = document.getElementById("mute-warning");
+
+    warningSlider.value = settings.sessionWarningVolume ?? 0.8;
+    warningMute.checked = settings.muteSessionWarning ?? false;
+
+    let warnTimeout;
+    warningSlider.addEventListener("input", () => {
+        clearTimeout(warnTimeout);
+        warnTimeout = setTimeout(() => {
+            const vol = parseFloat(warningSlider.value);
+            saveSettings({ sessionWarningVolume: vol });
+            window.electronAPI.send("session-warning-volume-updated", vol);
+        }, 300);
+    });
+
+    warningMute.addEventListener("change", () => {
+        const muted = warningMute.checked;
+        saveSettings({ muteSessionWarning: muted });
+        window.electronAPI.send("session-mute-updated", { warning: muted });
+    });
+}
+
 
 function resetDefaultSessions() {
     window.electronAPI.resetToDefaultSessions();

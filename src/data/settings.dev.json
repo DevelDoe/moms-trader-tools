@@ -120,7 +120,7 @@
       "type": "optional"
     }
   ],
-  "sessionVolume": 0.93,
+  "sessionVolume": 0.58,
   "snippers": [],
   "notesTransparent": false,
   "countdownTransparent": true,
@@ -133,10 +133,13 @@
   "enableTickSound": false,
   "windows": {
     "Gallery": true,
-    "Checklist": false,
-    "Notes": false,
+    "Checklist": true,
+    "Notes": true,
     "Clock": true,
-    "Resumption": false,
-    "Countdown": true
-  }
+    "Resumption": true,
+    "Countdown": false
+  },
+  "sessionWarningVolume": 0.51,
+  "muteSessionBell": false,
+  "muteSessionWarning": false
 }
