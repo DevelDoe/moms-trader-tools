@@ -10,13 +10,7 @@ function initBridge({ windows }) {
 
                 console.log("[bridge] Received symbol from MTM:", symbol);
 
-                if (symbol && windows.gallery) {
-                    // Show gallery if it's not visible
-                    if (!windows.gallery.isVisible()) {
-                        windows.gallery.show();
-                    }
-
-                    // Send filter update to renderer
+                if (symbol && windows.gallery && windows.gallery.isVisible()) {
                     windows.gallery.webContents.send("set-filter-symbol", symbol);
                 }
             }
