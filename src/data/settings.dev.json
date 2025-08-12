@@ -132,11 +132,11 @@
   ],
   "enableTickSound": false,
   "windows": {
-    "Gallery": true,
-    "Checklist": true,
-    "Notes": true,
+    "Gallery": false,
+    "Checklist": false,
+    "Notes": false,
     "Clock": true,
-    "Resumption": true,
+    "Resumption": false,
     "Countdown": false
   },
   "sessionWarningVolume": 0.51,
