@@ -1,6 +1,6 @@
 {
-    "name": "Arcane Tools",
-    "version": "0.23.12",
+    "name": "Arcane_Tools",
+    "version": "0.23.11",
     "description": "Arcane Tools is a comprehensive suite designed to enhance the trading experience for both novice and experienced day traders. With a focus on efficiency and user-friendliness, this toolset aims to streamline your trading process and provide a competitive edge.",
     "main": "src/main/main.js",
     "scripts": {
@@ -55,7 +55,7 @@
         "nsis": {
             "oneClick": false,
             "allowToChangeInstallationDirectory": true,
-            "shortcutName": "Arcane Tools"
+            "shortcutName": "AT"
         },
         "publish": [
             {
