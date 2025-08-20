@@ -66,7 +66,8 @@
         <script>
             let sessionCountdowns = []; // stores all defined sessions (start/end times).
             let activeSessionStack = []; // tracks currently active sessions.
-            let activeInterval = null;
+            let activeCancel = null;
+            let nextSessionCancel = null;
             let bellSound = null;
             let warningSound = null;
             let fiveMinuteWarningPlayed = false;
@@ -140,6 +141,27 @@
                 window.addEventListener("resize", updateFontScale);
                 window.addEventListener("load", updateFontScale);
             });
+
+            // Schedules fn exactly at each wall-clock second boundary.
+            // Returns a cancel function.
+            function schedulePerSecond(fn) {
+                let canceled = false;
+
+                function run() {
+                    if (canceled) return;
+                    const now = getNYTime();
+                    fn(now);
+                    const ms = 1000 - now.getMilliseconds();
+                    setTimeout(run, ms);
+                }
+                // start aligned to the next boundary
+                const firstNow = getNYTime();
+                setTimeout(run, 1000 - firstNow.getMilliseconds());
+
+                return () => {
+                    canceled = true;
+                };
+            }
 
             function updateFontScale() {
                 const currentWidth = window.innerWidth;
@@ -265,32 +287,39 @@
                 }
             }
 
-            let nextSessionInterval = null;
-
             function updateNextSessionCountdown(upcoming) {
                 console.log(`🕰️ Next session found: "${upcoming.title}" at ${upcoming.start.toLocaleTimeString()}`);
 
-                if (activeInterval) clearInterval(activeInterval);
-                if (nextSessionInterval) clearInterval(nextSessionInterval);
+                // Stop any running schedulers
+                if (activeCancel) {
+                    activeCancel();
+                    activeCancel = null;
+                }
+                if (nextSessionCancel) {
+                    nextSessionCancel();
+                    nextSessionCancel = null;
+                }
 
                 document.getElementById("session-title").textContent = `Next Session`;
 
-                nextSessionInterval = setInterval(() => {
-                    const now = getNYTime();
+                nextSessionCancel = schedulePerSecond((now) => {
                     const diff = upcoming.start - now;
 
                     if (diff <= 0) {
-                        clearInterval(nextSessionInterval);
-                        nextSessionInterval = null;
-                        checkActiveSession(now); // trigger re-check to activate session
+                        // start session check immediately on boundary
+                        nextSessionCancel();
+                        nextSessionCancel = null;
+                        checkActiveSession(now);
                         return;
                     }
 
-                    const h = Math.floor(diff / 3600000);
-                    const m = Math.floor((diff % 3600000) / 60000);
-                    const s = Math.floor((diff % 60000) / 1000);
+                    const totalSeconds = Math.ceil(diff / 1000); // <- round UP to avoid 1s undercount
+                    const h = Math.floor(totalSeconds / 3600);
+                    const m = Math.floor((totalSeconds % 3600) / 60);
+                    const s = totalSeconds % 60;
+
                     document.getElementById("session-timer").textContent = `${h ? h + "h " : ""}${m ? m + "m " : ""}${s}s`;
-                }, 1000);
+                });
             }
 
             // Activate a new session
@@ -326,10 +355,17 @@
 
                 fiveMinuteWarningPlayed = false;
 
-                if (activeInterval) clearInterval(activeInterval);
-                activeInterval = setInterval(() => {
+                // Stop previous active scheduler if any
+                if (activeCancel) {
+                    activeCancel();
+                    activeCancel = null;
+                }
+
+                fiveMinuteWarningPlayed = false;
+
+                activeCancel = schedulePerSecond(() => {
                     updateSessionCountdown(sessionEnd, session.title);
-                }, 1000);
+                });
             }
 
             // Update countdown timer
@@ -339,20 +375,23 @@
             // * If time runs out, calls endSession(sessionTitle).
             function updateSessionCountdown(sessionEnd, sessionTitle) {
                 const now = getNYTime();
-                let timeLeft = sessionEnd - now;
+                const diff = sessionEnd - now;
 
-                if (timeLeft <= 0) {
+                if (diff <= 0) {
                     console.log(`⏳ Session "${sessionTitle}" ended.`);
                     endSession(sessionTitle);
                     return;
                 }
 
-                const h = Math.floor(timeLeft / 3600000);
-                const m = Math.floor((timeLeft % 3600000) / 60000);
-                const s = Math.floor((timeLeft % 60000) / 1000);
+                const totalSeconds = Math.ceil(diff / 1000); // <- key change
+                const h = Math.floor(totalSeconds / 3600);
+                const m = Math.floor((totalSeconds % 3600) / 60);
+                const s = totalSeconds % 60;
+
                 document.getElementById("session-timer").textContent = `${h ? h + "h " : ""}${m ? m + "m " : ""}${s}s`;
 
-                if (h === 0 && m === 5 && s === 0 && !fiveMinuteWarningPlayed) {
+                // fire exactly at 300s remaining
+                if (totalSeconds === 300 && !fiveMinuteWarningPlayed) {
                     fiveMinuteWarningPlayed = true;
                     if (warningSound && !muteSessionWarning) {
                         warningSound.currentTime = 0;
@@ -382,21 +421,20 @@
             // Updates the UI to display "No Active Sessions".
             // Logs the event for debugging.
             function clearActiveSession() {
-                if (activeInterval) {
-                    clearInterval(activeInterval);
-                    activeInterval = null;
+                if (activeCancel) {
+                    activeCancel();
+                    activeCancel = null;
                 }
-
-                if (nextSessionInterval) {
-                    clearInterval(nextSessionInterval);
-                    nextSessionInterval = null;
+                if (nextSessionCancel) {
+                    nextSessionCancel();
+                    nextSessionCancel = null;
                 }
 
                 if (activeSessionStack.length > 0) {
                     console.log(`🛑 Clearing session: "${activeSessionStack[activeSessionStack.length - 1].title}"`);
                 }
 
-                activeSessionStack = []; // ✅ Reset session stack
+                activeSessionStack = [];
                 document.getElementById("session-title").textContent = "No Active Sessions";
                 document.getElementById("session-timer").textContent = "";
                 console.log("🚫 No active sessions.");
