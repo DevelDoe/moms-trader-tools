@@ -137,7 +137,7 @@
     "Notes": false,
     "Clock": true,
     "Resumption": false,
-    "Countdown": false
+    "Countdown": true
   },
   "sessionWarningVolume": 0.51,
   "muteSessionBell": false,
